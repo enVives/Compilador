@@ -1,0 +1,12 @@
+Aquí hi posarem les característiques del nostre llenguatge per poder fer el compilador
+
+Instalació eines:
+
+instalar JFlex per al anàlisi sintàctic: https://www.jflex.de/download.html
+compilar un archiu jflex: jflex nom_archiu.jflex
+
+instalar CUP per al sintàctic : http://www2.cs.tum.edu/projects/cup/install.php
+compilar un archiu cup: cup nom_archiu.cup
+
+Per a que funcioni tot s'ha d'afegir les llibreries de jflex i cup al projecte una vegada instalades.
+
