@@ -10,3 +10,48 @@ compilar un archiu cup: cup nom_archiu.cup
 
 Per a que funcioni tot s'ha d'afegir les llibreries de jflex i cup al projecte una vegada instalades.
 
+Estructura del Programa:
+
+
+1) Tipus
+    Enter: senc -> 32 bits
+    Cadena de caràcters: cad
+    Lògic: bool -> veritat/mentida
+    Real: real // inclou racionals i irracionals
+    Caràcter: car
+    Long: llarg -> 64 bits
+
+    A l'hora de declarar variables:
+
+    senc numero;
+
+    numero = 22;
+
+    utilitzam el ';' millor?
+
+    se podria fer numero = NUL? fora necessitar
+    un altre tipus com Integer a Java
+
+2) Tipus definits per l'usuari
+
+    Tuples: tupla nom ()
+
+    tupla t () = nou tupla(numero_de_components);
+    tupla t () = (1234,"Vives",veritat);
+
+    Taules: Tipus nom []
+
+    Tipus t [] = nou Tipus[numero_de_components];
+    senc t[] = nou senc[5];
+    senc t[] = {1,2,3,4,5,6};
+
+    Tipus t [][] = nou Tipus[numero_de_components][numero_de_components];
+
+    es podrán afegir més dimensions
+
+3) Variables i Constants
+
+
+
+
+
