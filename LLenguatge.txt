@@ -12,18 +12,37 @@ Per a que funcioni tot s'ha d'afegir les llibreries de jflex i cup al projecte u
 
 Estructura del Programa:
 
+Hi haurà una classe main de l'estil de C/C++
+
+metode main(ent arguments, cad arguments []){
+
+}
+
+el mètode main no farà falta que estigui dins una classe
+com a java, l'estil serà el mateix que C/C++/Python
+
+es podran declarar mètodes:
+
+els mètodes tendran un estil semblant a java
+
+metode/tipus_de_dada nom_metode (arguments){
+
+    return tipus_de_dada
+}
+
 
 1) Tipus
-    Enter: senc -> 32 bits
+    Enter: ent -> 32 bits
+    float: decimals -> 32 bits
+    double: doble -> 64 bits
     Cadena de caràcters: cad
     Lògic: bool -> veritat/mentida
-    Real: real // inclou racionals i irracionals
     Caràcter: car
     Long: llarg -> 64 bits
 
     A l'hora de declarar variables:
 
-    senc numero;
+    ent numero;
 
     numero = 22;
 
@@ -31,6 +50,10 @@ Estructura del Programa:
 
     se podria fer numero = NUL? fora necessitar
     un altre tipus com Integer a Java
+
+    Resum:
+
+    ent, decimals, doble, cad, bool, car, llarg.
 
 2) Tipus definits per l'usuari
 
@@ -42,8 +65,8 @@ Estructura del Programa:
     Taules: Tipus nom []
 
     Tipus t [] = nou Tipus[numero_de_components];
-    senc t[] = nou senc[5];
-    senc t[] = {1,2,3,4,5,6};
+    ent t[] = nou ent[5];
+    ent t[] = {1,2,3,4,5,6};
 
     Tipus t [][] = nou Tipus[numero_de_components][numero_de_components];
 
@@ -51,7 +74,107 @@ Estructura del Programa:
 
 3) Variables i Constants
 
+    S'hauran de declarar les variables
+    antes de ser empleades.
+
+    Constants:
+
+    constant tipus_de_dada nom;
+
+    Una constant sempre s'haurà de declarar
+    amb algun valor.
+
+4) Operacions
+
+    Assignació : '='
+    Condicional:
+
+        si(condicions){
+
+        }sino si(condicions){
+
+        }sino{
+
+        }
 
 
+        //Alomillor això es complicar-se
+        //però seria un bon extra
+
+        ent x = {condicio} ? valor1: valor2;
+
+        //exemple:
+
+        ent x = {1 == 1} ? 5: 7;
+        llavors x = 5
 
 
+    Selecció Multiple:
+
+        seleccio(variable){
+            cas valor:
+                acaba;
+            pdefecte:
+                acaba;
+        }
+    Bucles:
+
+        mentres(condicio){
+
+        }
+
+        fer{
+
+        }mentres(condicio);
+
+        per(valor;condicio;operacio){
+
+        }
+
+    Crida a procediments:
+
+        nom_procediment(arguments);
+
+        nom_variable = nom_procediment(arguments);
+
+5) Expressions aritmètiques i lògiques
+    ==
+    <=
+    >=
+    <
+    >
+    <>
+    
+    == : servirà per tots els tipus
+
+6) Operacions de entrada i sortida:
+
+    entradaS(%tipus_entrada,variable); -> de entrada sistema
+
+    tipus_entrada:
+        %e : enter
+        %el :enter llarg (llarg)
+        %fd : double i float (decimals i doble) (en realitat double ja que float hi estarà inclos)
+        %c : caracter 
+        %cad : Cadena
+
+
+    sortidaS(variable) -> ho imprimeix tot com a string
+    sortidaS("text "+variable+" text");
+
+
+7) Operadors
+
+    +
+    -
+    *
+    /
+    mod
+    || & '':not 
+    
+    ++
+    --
+    +=
+    -=
+    operacio condicional comentada a la part
+    4.
