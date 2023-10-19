@@ -101,7 +101,7 @@ metode/tipus_de_dada nom_metode (arguments){
         //Alomillor això es complicar-se
         //però seria un bon extra
 
-        ent x = {condicio} ? valor1: valor2;
+        ent x = {(condicio)||(condicio)} ? valor1: valor2;
 
         //exemple:
 
