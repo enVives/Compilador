@@ -18,6 +18,13 @@ metode main(ent arguments, cad arguments []){
 
 }
 
+//Si no retorna res possam void
+
+metode TIPUS_RETORN? NOM_METODE () {
+
+    RETORNA TIPUS_RETORN
+}
+
 el mètode main no farà falta que estigui dins una classe
 com a java, l'estil serà el mateix que C/C++/Python
 
@@ -33,21 +40,17 @@ metode/tipus_de_dada nom_metode (arguments){
 
 1) Tipus
     Enter: ent -> 32 bits
-    float: decimals -> 32 bits
+    float: decimal -> 32 bits
     double: doble -> 64 bits
     Cadena de caràcters: cad
-    Lògic: bool -> veritat/mentida
+    Lògic: bool -> VERI / FALS
     Caràcter: car
-    Long: llarg -> 64 bits
 
     A l'hora de declarar variables:
 
     ent numero;
 
     numero = 22;
-
-    se podria fer numero = NUL? fora necessitar
-    un altre tipus com Integer a Java
 
     Resum:
 
@@ -57,13 +60,12 @@ metode/tipus_de_dada nom_metode (arguments){
 
     Tuples: tupla nom ()
 
-    tupla t () = nou tupla(numero_de_components);
-    tupla t () = (1234,"Vives",veritat);
+    tupla t() = (1234,"Vives",VERI);
 
     Taules: Tipus nom []
 
     Tipus t [] = nou Tipus[numero_de_components];
-    ent t[] = nou ent[5];
+    ent t[] = nou ent[5]; 0--4
     ent t[] = {1,2,3,4,5,6};
 
     Tipus t [][] = nou Tipus[numero_de_components][numero_de_components];
@@ -75,9 +77,12 @@ metode/tipus_de_dada nom_metode (arguments){
     S'hauran de declarar les variables
     antes de ser empleades.
 
+    ent vives;
+    vives = 10;
+
     Constants:
 
-    constant tipus_de_dada nom;
+    CONSTANT tipus_de_dada nom;
 
     Una constant sempre s'haurà de declarar
     amb algun valor.
@@ -96,14 +101,6 @@ metode/tipus_de_dada nom_metode (arguments){
         }
 
 
-        //Extra
-
-        ent x = {condicio} ? valor1: valor2;
-
-        //exemple:
-
-        ent x = {1 == 1} ? 5: 7;
-        llavors x = 5
 
 
     Selecció Multiple (Switch):
@@ -140,12 +137,12 @@ metode/tipus_de_dada nom_metode (arguments){
     >=
     <
     >
-    <>
     
     == : servirà per tots els tipus
 
 6) Operacions de entrada i sortida:
 
+    %tipus_entrada: Tipus de la variable que esperam rebre
     entradaS(%tipus_entrada,variable); -> de entrada sistema
 
     tipus_entrada:
@@ -167,11 +164,18 @@ metode/tipus_de_dada nom_metode (arguments){
     *
     /
     mod
-    || & '':not 
-    
+    || 
+    ! : not
     ++
     --
     +=
     -=
-    operacio condicional comentada a la part
-    4.
+
+    //Extra
+
+        ent x = {condicio} ? valor1: valor2;
+
+        //exemple:
+
+        ent x = {(1 == 1)||(condicio)} ? 5: 7;
+        llavors x = 5
