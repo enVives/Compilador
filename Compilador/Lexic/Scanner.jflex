@@ -78,6 +78,8 @@ menor        = \<
 major        = \>
 
 punt = \.
+coma = \,
+
 enter = {signe}{digit19}{digit10}*
 decimal = {signe}{digit10}{punt}{digit10}+
 
@@ -89,7 +91,7 @@ cadena = {comess}{digit}*{comess}
 
 veritat = [V][E][R]
 mentida = [F][A][L][S]
-logic = {veritat}|{mentida}
+vlogic = {veritat}|{mentida}
 
 tupla = [t][u][p][l][a]
 
@@ -106,6 +108,9 @@ fer = [f][e][r]
 per = [p][e][r]
 metode = [m][e][t][o][d][e]
 return = [R][E][T][O][R][N][A]
+entradaS = [e][n][t][r][a][d][a][S]
+sortidaS = [s][o][r][t][i][d][a][S]
+main = [m][a][i][n]
 
 ws           = [' '|'\t']+
 endline      = ['\r'|'\n'|"\r\n"]+
@@ -156,6 +161,7 @@ cmdLineEnd   = ['\r'|'\n'|"\r\n"]*;
 {rcorch}                  { System.out.println("CORCHETE TANCAT: "+yytext());}
 {lclaudat}                { System.out.println("CLAU OBERT: "+yytext());}
 {rclaudat}                { System.out.println("CLAU TANCAT: "+yytext());}
+{coma}                { System.out.println("COMA: "+yytext());}
 
 {diferent}                { System.out.println("DIFERENT: "+yytext());}
 {comp}                    { System.out.println("COMPARACIO: "+yytext());}
@@ -190,7 +196,11 @@ cmdLineEnd   = ['\r'|'\n'|"\r\n"]*;
 
 {enter}                   { System.out.println("ENTER: "+yytext());}
 {decimal}                 { System.out.println("DECIMAL: "+yytext());}
-{logic}                   { System.out.println("BOOLEAN: "+yytext());}
+{vlogic}                   { System.out.println("BOOLEAN: "+yytext());}
+
+{entradaS}    { System.out.println("SORTIDA_TECLAT: "+yytext());}
+{sortidaS}    { System.out.println("ENTRADA_TECLAT: "+yytext());}
+{main}        { System.out.println("METODE_MAIN: "+yytext());}
 
 
 {id}                      { System.out.println("ID: "+yytext());}
