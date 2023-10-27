@@ -13,6 +13,11 @@ import java.io.*;
 
 import java_cup.runtime.*;
 
+import java_cup.runtime.ComplexSymbolFactory.ComplexSymbol;
+import java_cup.runtime.ComplexSymbolFactory.Location;
+
+import Compilador.Sintactic.ParserSym;
+
 
 %%
 /** **
@@ -45,7 +50,7 @@ logic = [b][o][o][l]
 id		= [A-Za-z_][A-Za-z0-9_]*
 constant = [C][O][N][S][T][A][N][T]
 
-signe		= [+|-]?
+//signe		= [+|-]?
 digit19		= [1-9]
 digit10		= [0-9]
 
@@ -70,6 +75,7 @@ rcorch       = \]
 lclaudat     = \{
 rclaudat     = \}
 comess       = \"
+comes        = '
 diferent     = \!=
 comp         = \==
 menori       = \<=
@@ -80,13 +86,13 @@ major        = \>
 punt = \.
 coma = \,
 
-enter = {signe}{digit19}{digit10}*
-decimal = {signe}{digit10}{punt}{digit10}+
+enter = {digit19}{digit10}*
+decimal = {digit10}{punt}{digit10}+
 
 zerodigit = 0
 digit = [A-Za-z0-9_]
 
-car = {comess}{digit}{comess}
+car = {comes}{digit}{comes}
 cadena = {comess}{digit}*{comess}
 
 veritat = [V][E][R]
@@ -123,6 +129,7 @@ cmdLineEnd   = ['\r'|'\n'|"\r\n"]*;
 // El següent codi es copiarà també, dins de la classe. És a dir, si es posa res
 // ha de ser en el format adient: mètodes, atributs, etc. 
 %{
+    /*
     public static void main(String[] args) {
       try{
         FileReader fitxer = new FileReader("/home/perejoan/Documentos/GitHub/Compilador/Compilador/Lexic/prova.txt");
@@ -132,7 +139,29 @@ cmdLineEnd   = ['\r'|'\n'|"\r\n"]*;
             System.err.println("error: "+e);
             e.printStackTrace(System.err);
       }
+    }*/
+
+
+    private ComplexSymbol symbol(int type) {
+        // Sumar 1 per a que la primera línia i columna no sigui 0.
+        Location esquerra = new Location(yyline+1, yycolumn+1);
+        Location dreta = new Location(yyline+1, yycolumn+yytext().length()+1);
+
+        return new ComplexSymbol(ParserSym.terminalNames[type], type, esquerra, dreta);
     }
+    
+    /**
+     Construcció d'un symbol amb un atribut associat.
+     **/
+    private Symbol symbol(int type, Object value) {
+        // Sumar 1 per a que la primera línia i columna no sigui 0.
+        Location esquerra = new Location(yyline+1, yycolumn+1);
+        Location dreta = new Location(yyline+1, yycolumn+yytext().length()+1);
+
+        return new ComplexSymbol(ParserSym.terminalNames[type], type, esquerra, dreta, value);
+    }
+
+
 %}
 
 
@@ -142,68 +171,68 @@ cmdLineEnd   = ['\r'|'\n'|"\r\n"]*;
 // Regles/accions
 // És molt important l'ordre de les regles!!!
 
-{suma}                    { System.out.println("SUMA: " + yytext());  }
-{resta}                   { System.out.println("RESTA: " + yytext());    }
-{mul}                     { System.out.println("MULTIPLICA: " + yytext());}
-{div}                     { System.out.println("DIVIDIR: " + yytext());}
-{mod}                     { System.out.println("MODUL: " + yytext());}
-{autosuma}                { System.out.println("AUTOSUMA: " + yytext());}
-{autoresta}               { System.out.println("AUTORESTA: " + yytext());}
-{sumahi}                  { System.out.println("SUMAHI: " + yytext());}
-{restahi}                 { System.out.println("RESTAHI: " + yytext());}
-{dospunts}                { System.out.println("DOS PUNTS: " + yytext());}
-{interrogant}             { System.out.println("INTERROGANT: " + yytext());}
-{lparen}                  { System.out.println("PARENTESIS OBERT: " + yytext());}
-{rparen}                  { System.out.println("PARENTESIS TANCAT: " + yytext());}
-{punticoma}               { System.out.println("PUNTO I COMA: " + yytext());}
-{assign}                  { System.out.println("ASIGNACION: " + yytext());}
-{lcorch}                  { System.out.println("CORCHETE OBERT: "+yytext());}
-{rcorch}                  { System.out.println("CORCHETE TANCAT: "+yytext());}
-{lclaudat}                { System.out.println("CLAU OBERT: "+yytext());}
-{rclaudat}                { System.out.println("CLAU TANCAT: "+yytext());}
-{coma}                { System.out.println("COMA: "+yytext());}
+{suma}                    { return symbol(ParserSym.ADD);  }
+{resta}                   { return symbol(ParserSym.SUB);    }
+{mul}                     { return symbol(ParserSym.MULT);}
+{div}                     { return symbol(ParserSym.DIV);}
+{mod}                     { return symbol(ParserSym.MOD);}
+{autosuma}                { return symbol(ParserSym.AUTOSUM);}
+{autoresta}               { return symbol(ParserSym.AUTOSUB);}
+{sumahi}                  { return symbol(ParserSym.SUMAHI);}
+{restahi}                 { return symbol(ParserSym.RESTAHI);}
+{dospunts}                { return symbol(ParserSym.DOSPUNTS);}
+{interrogant}             { return symbol(ParserSym.INTERROG);}
+{lparen}                  { return symbol(ParserSym.LPAREN);}
+{rparen}                  { return symbol(ParserSym.RPAREN);}
+{punticoma}               { return symbol(ParserSym.PUNTICOMA);}
+{assign}                  { return symbol(ParserSym.ASSIGN);}
+{lcorch}                  { return symbol(ParserSym.LCORCH);}
+{rcorch}                  { return symbol(ParserSym.RCORCH);}
+{lclaudat}                { return symbol(ParserSym.LCLAUDAT);}
+{rclaudat}                { return symbol(ParserSym.RCLAUDAT);}
+{coma}                    { return symbol(ParserSym.COMA);}
 
-{diferent}                { System.out.println("DIFERENT: "+yytext());}
-{comp}                    { System.out.println("COMPARACIO: "+yytext());}
-{menori}                  { System.out.println("MENORI: "+yytext());}
-{majori}                  { System.out.println("MAJORI: "+yytext());}
-{menor}                   { System.out.println("MENOR: "+yytext());}
-{major}                   { System.out.println("MAJOR: "+yytext());}
+{diferent}                { return symbol(ParserSym.DIF);}
+{comp}                    { return symbol(ParserSym.IGIG);}
+{menori}                  { return symbol(ParserSym.MENORI);}
+{majori}                  { return symbol(ParserSym.MAJORI);}
+{menor}                   { return symbol(ParserSym.MENOR);}
+{major}                   { return symbol(ParserSym.MAJOR);}
 
-{ent}                     { System.out.println("ENTER: "+yytext());}
-{decimals}                { System.out.println("DECIMALS: "+yytext());}       
-{caracter}                { System.out.println("CARACTER: "+yytext());}
-{cad}                     { System.out.println("CADENA: "+yytext());}
-{logic}                   { System.out.println("BOOLEAN: "+yytext());}
-{zerodigit}               { System.out.println("ENTER 0: "+yytext());}
+{ent}                     { return symbol(ParserSym.enter);}
+{decimals}                { return symbol(ParserSym.decimal);}       
+{caracter}                { return symbol(ParserSym.caracter);}
+{cad}                     { return symbol(ParserSym.cadena);}
+{logic}                   { return symbol(ParserSym.logic);}
+{zerodigit}               { return symbol(ParserSym.enter,0);}
 
-{tupla}                   { System.out.println("TUPLA: "+yytext());}
-{si}                      { System.out.println("SI: "+yytext());}
-{sino}                    { System.out.println("SINO: "+yytext());}
-{seleccio}                { System.out.println("SELECCIO: "+yytext());}
-{cas}                     { System.out.println("CAS: "+yytext());}
-{pdefecte}                { System.out.println("PDEFECTE: "+yytext());}
-{acaba}                   { System.out.println("ACABA: "+yytext());}
-{mentres}                  { System.out.println("MENTRE: "+yytext());}
-{fer}                     { System.out.println("FER: "+yytext());}
-{per}                     { System.out.println("PER: "+yytext());}
-{metode}                  { System.out.println("METODO: "+yytext());}
-{return}                  { System.out.println("RETURN: "+yytext());}
-{constant}                { System.out.println("CONSTANT: "+yytext());}
+{tupla}                   { return symbol(ParserSym.tupla);}
+{si}                      { return symbol(ParserSym.si);}
+{sino}                    { return symbol(ParserSym.sino);}
+{seleccio}                { return symbol(ParserSym.seleccio);}
+{cas}                     { return symbol(ParserSym.cas);}
+{pdefecte}                { return symbol(ParserSym.pdefecte);}
+{acaba}                   { return symbol(ParserSym.acaba);}
+{mentres}                  { return symbol(ParserSym.mentres);}
+{fer}                     { return symbol(ParserSym.fer);}
+{per}                     { return symbol(ParserSym.per);}
+{metode}                  { return symbol(ParserSym.metode);}
+{return}                  { return symbol(ParserSym.retur);}
+{constant}                { return symbol(ParserSym.constant,0);}
 
-{car}                     { System.out.println("CARACTER: "+yytext());}
-{cadena}                  { System.out.println("CADENA: "+yytext());}
+{car}                     { return symbol(ParserSym.vcaracter,this.yytext());}
+{cadena}                  { return symbol(ParserSym.vcadena,this.yytext());}
 
-{enter}                   { System.out.println("ENTER: "+yytext());}
-{decimal}                 { System.out.println("DECIMAL: "+yytext());}
-{vlogic}                   { System.out.println("BOOLEAN: "+yytext());}
+{enter}                   { return symbol(ParserSym.venter,Integer.parseInt(this.yytext()));}
+{decimal}                 { return symbol(ParserSym.vdecimal,Double.parseDouble(this.yytext()));}
+{vlogic}                   { return symbol(ParserSym.vlogic,Boolean.parseBoolean(this.yytext()));}
 
-{entradaS}    { System.out.println("SORTIDA_TECLAT: "+yytext());}
-{sortidaS}    { System.out.println("ENTRADA_TECLAT: "+yytext());}
-{main}        { System.out.println("METODE_MAIN: "+yytext());}
+{entradaS}    {return symbol(ParserSym.entradaS);}
+{sortidaS}    { return symbol(ParserSym.sortidaS);}
+{main}        { return symbol(ParserSym.main);}
 
 
-{id}                      { System.out.println("ID: "+yytext());}
+{id}                      { return symbol(ParserSym.ID,this.yytext());}
 
 
 {cmdLineEnd}             {  }

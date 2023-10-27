@@ -1,0 +1,57 @@
+package Compilador.Sintactic;
+
+import java_cup.runtime.*;
+import java_cup.runtime.ComplexSymbolFactory.ComplexSymbol;
+import java_cup.runtime.ComplexSymbolFactory.Location;
+
+import java.io.PrintStream;
+import java.util.HashMap;
+
+class Parser;
+
+
+parser code {:
+/***
+    private Scanner scanner;
+    public Parser(Scanner scanner) { 
+        this.scanner = scanner;
+    }
+***/
+    /**********************************************************************
+     *             Creació i Gestió de la Taula de Simbols                *
+     **********************************************************************/
+
+
+    /**********************************************************************
+     * sobrecàrrega de mètodes per gestionar els errors que es localitzin *
+     **********************************************************************/
+:}
+
+
+/**
+ ** També aquí es poden afegir accions a realitzar quan es requereix un token.
+scan with {:     next_token(); :}
+**/
+
+
+terminal String ID;
+terminal double vdecimal;
+terminal int venter;
+terminal boolean vlogic;
+terminal String vcadena;
+terminal char vcaracter;
+
+terminal    ADD,SUB,MULT,DIV,MOD,LPAREN,RPAREN,ASSIGN,AUTOSUM,AUTOSUB,SUMAHI,RESTAHI,DOSPUNTS,PUNTICOMA,INTERROG,LCORCH
+    ,RCORCH,LCLAUDAT, RCLAUDAT, COMA;
+
+terminal DIF, IGIG, MENORI, MAJORI, MENOR, MAJOR;
+
+terminal decimal,enter,logic,cadena,caracter,tupla,si,sino,seleccio,cas,pdefecte,acaba
+    ,mentres,fer,per,metode,retur,constant,entradaS,sortidaS,main;
+
+non terminal COMENC;    
+
+start with COMENC;
+
+COMENC ::= venter : v {: System.out.println(v);  :} ;
+
