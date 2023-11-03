@@ -42,16 +42,190 @@ terminal String vcadena;
 terminal char vcaracter;
 
 terminal    ADD,SUB,MULT,DIV,MOD,LPAREN,RPAREN,ASSIGN,AUTOSUM,AUTOSUB,SUMAHI,RESTAHI,DOSPUNTS,PUNTICOMA,INTERROG,LCORCH
-    ,RCORCH,LCLAUDAT, RCLAUDAT, COMA;
+    ,RCORCH,LCLAUDAT, RCLAUDAT,PUNT, COMA;
 
-terminal DIF, IGIG, MENORI, MAJORI, MENOR, MAJOR;
+terminal DIF, IGIG, MENORI, MAJORI, MENOR, MAJOR, OR, AND , NOT;
 
 terminal decimal,enter,logic,cadena,caracter,tupla,si,sino,seleccio,cas,pdefecte,acaba
-    ,mentres,fer,per,metode,retur,constant,entradaS,sortidaS,main;
+    ,mentres,fer,per,metode,retorna,nou,constant,entradaS,sortidaS,main,borra,afegeix;
 
-non terminal COMENC;    
+non terminal PROGRAMA,DECL,PROCEDIMENT,MAIN,DECL_TUPLA,DECL_TAULA,DECL_TIPUS,MODIF,
+    MODIF_TUPLA, REM_TUPLA, AFG_TUPLA, MODIF_TAULA, REDEF_TAULA, REDEF_TUPLA, MODIF_TIPUS,
+    SENTENCIES, MENTRE, IF, SWITCH, FMENTRE, ARGS, TIPUS, RETURN, VALOR, CRIDA_PROC, M_1, ARGS_1,
+    ARG,L,IF_1,SWITCH_1, I, I_1, A, A_1, E, NOVA_TAULA, NOVA_TUPLA, F, OP, EXPRESIO, COMP_LOG,
+    EXPRESIO_1, VAL_BOOLEA, COMP_NUM, COMP_BOOLEA, VALORS;    
 
-start with COMENC;
+start with PROGRAMA;
 
-COMENC ::= venter : v {: System.out.println(v);  :} ;
+PROGRAMA ::= DECL PROGRAMA {::}
+            | PROCEDIMENT PROGRAMA {::}
+            | MAIN {::}
+            ;
 
+DECL ::= DECL_TUPLA PUNTICOMA {::} 
+        | DECL_TAULA PUNTICOMA {::}
+        |DECL_TIPUS PUNTICOMA {::}
+        ;
+MODIF ::= MODIF_TUPLA PUNTICOMA {::}
+        | REM_TUPLA PUNTICOMA {::}
+        | AFG_TUPLA PUNTICOMA {::}
+        | MODIF_TAULA PUNTICOMA{::}
+        | REDEF_TAULA PUNTICOMA {::}
+        | REDEF_TUPLA PUNTICOMA {::}
+        | MODIF_TIPUS {::}
+        ;
+
+SENTENCIES ::= DECL {::}
+            |MODIF {::}
+            |MENTRE {::}
+            |FMENTRE {::}
+            |IF {::}
+            |SWITCH {::}
+            ;
+
+PROCEDIMENT ::= metode ID LPAREN ARGS RPAREN LCLAUDAT SENTENCIES RCLAUDAT {::}
+                | metode TIPUS ID LPAREN ARGS RPAREN LCLAUDAT SENTENCIES RCLAUDAT RETURN {::}
+                ;
+RETURN ::= retorna VALOR {::};
+
+CRIDA_PROC ::= ID LPAREN ARGS RPAREN PUNTICOMA {::};
+
+MAIN ::= metode main LPAREN cadena ID LCORCH RCORCH RPAREN LCLAUDAT M_1 RCLAUDAT {::}
+        ;
+M_1 ::= SENTENCIES M_1 {::}
+    | CRIDA_PROC M_1 {::}
+    | {::}
+    ;
+
+TIPUS ::= decimal {::}
+            |enter {::}
+            |logic {::}
+            |cadena{::}
+            |caracter {::}
+            ;
+
+ARGS ::= ARGS_1 {::}
+            | {::}
+            ;
+ARGS_1 ::= ARG COMA ARGS_1 {::}
+            | ARG {::}
+            ;
+ARG ::= TIPUS ID {::} ;
+
+MENTRE ::= mentres LPAREN L RPAREN fer LCLAUDAT SENTENCIES RCLAUDAT {::} ;
+
+IF ::=  si LPAREN L RPAREN LCLAUDAT SENTENCIES RCLAUDAT IF_1 {::};
+IF_1 ::= sino si LPAREN L RPAREN LCLAUDAT SENTENCIES RCLAUDAT IF_1 {::}
+            | sino LCLAUDAT SENTENCIES RCLAUDAT {::}
+            | {::}
+            ;
+FMENTRE ::= fer LPAREN SENTENCIES RPAREN  mentres LPAREN L RPAREN PUNTICOMA {::} ;
+
+SWITCH ::= seleccio LPAREN VALOR RPAREN LCLAUDAT SWITCH_1 RCLAUDAT {::}
+        ;
+SWITCH_1 ::= cas VALOR DOSPUNTS SENTENCIES acaba PUNTICOMA SWITCH_1 {::}
+        | pdefecte DOSPUNTS SENTENCIES acaba PUNTICOMA {::}
+        |
+        ;
+
+DECL_TIPUS ::= TIPUS A {::}
+        | TIPUS A_1 {::}
+        ;
+MODIF_TIPUS ::= ID I_1 {::};
+
+A ::= A_1 I {::};
+A_1 ::= ID COMA A_1 {::}
+    | ID {::}
+    ;
+
+I ::= ASSIGN E {::}
+    | ASSIGN L {::}
+    | ASSIGN MODIF_TIPUS {::}
+    | ASSIGN MODIF_TUPLA {::}
+    | ASSIGN MODIF_TAULA {::}
+    ;
+
+I_1 ::= AUTOSUM {::}
+    | AUTOSUB {::}
+    | SUMAHI E {::}
+    | RESTAHI E {::}
+    | I  {::}
+    ;
+
+DECL_TAULA ::=  TIPUS ID LCORCH RCORCH ASSIGN NOVA_TAULA {::}
+            | TIPUS ID LCORCH RCORCH {::}
+            ;
+NOVA_TAULA ::= nou ID LCORCH venter RCORCH {::}
+            | LCLAUDAT VALORS RCLAUDAT
+            ;
+VALORS ::= VALOR {::}
+        | VALOR COMA VALORS {::}
+        ;
+VALOR ::= E {::}
+        | L {::}
+        ;
+
+MODIF_TAULA ::= ID LCORCH venter RCORCH I_1 {::};
+REDEF_TAULA ::= ID ASSIGN NOVA_TAULA {::};
+DECL_TUPLA ::= tupla ID LPAREN RPAREN NOVA_TUPLA {::}
+            | tupla ID LPAREN RPAREN {::}
+            ;
+NOVA_TUPLA ::= ASSIGN LPAREN VALORS RPAREN {::};
+
+MODIF_TUPLA ::= ID LPAREN venter RPAREN I_1 {::};
+
+REM_TUPLA ::= ID PUNT borra LPAREN VALOR RPAREN {::};
+
+AFG_TUPLA ::= ID PUNT afegeix LPAREN VALOR RPAREN {::};
+
+REDEF_TUPLA ::= ID ASSIGN NOVA_TUPLA {::};
+
+E ::= F OP {::};
+OP ::= ADD F OP {::}
+        | SUB F OP {::}
+        | MULT F OP {::}
+        | DIV F OP {::}
+        | MOD F OP {::}
+        | {::}
+        ;
+
+F ::= LPAREN E RPAREN {::}
+    | venter {::}
+    | SUB venter {::}
+    | ADD venter {::}
+    | vdecimal {::}
+    | ADD vdecimal {::}
+    | SUB vdecimal {::}
+    | vcaracter {::}
+    | ADD vcaracter {::}
+    | SUB vcaracter {::}
+    | vcadena {::} 
+    ;
+
+L ::= EXPRESIO {::}
+    | EXPRESIO COMP_LOG L {::}
+    ;
+
+COMP_LOG ::= OR {::}
+        | AND {::}
+        ;
+EXPRESIO ::= NOT LPAREN EXPRESIO RPAREN {::}
+        | LPAREN EXPRESIO RPAREN {::}
+        | EXPRESIO_1 {::}
+        ;
+EXPRESIO_1 ::= VAL_BOOLEA COMP_BOOLEA VAL_BOOLEA {::}
+        | E COMP_NUM E {::}
+        | E COMP_BOOLEA E {::}
+        ;
+VAL_BOOLEA ::= vlogic {::}
+        | NOT vlogic {::}
+        | NOT ID {::}
+        ;
+COMP_NUM ::= MENORI {::}
+        | MAJORI {::}
+        |MENOR {::}
+        | MAJOR {::}
+        ;
+COMP_BOOLEA ::= IGIG {::}
+        | DIF {::}
+        ;

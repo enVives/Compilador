@@ -47,7 +47,7 @@ caracter = [c][a][r]
 cad = [c][a][d]
 logic = [b][o][o][l]
 
-id		= [A-Za-z_][A-Za-z0-9_]*
+id		= [A-Za-z][A-Za-z0-9_]*
 constant = [C][O][N][S][T][A][N][T]
 
 //signe		= [+|-]?
@@ -74,26 +74,33 @@ lcorch       = \[
 rcorch       = \]
 lclaudat     = \{
 rclaudat     = \}
-comess       = \"
-comes        = '
 diferent     = \!=
 comp         = \==
 menori       = \<=
 majori       = \>=
 menor        = \<
 major        = \>
+comes1     = \·
+comes2 = \"
+i = \&
+o = \|
+
+and = {i}{i}
+or = {o}{o}
+not = \!
+
 
 punt = \.
 coma = \,
 
 enter = {digit19}{digit10}*
-decimal = {digit10}{punt}{digit10}+
+decimal = {digit10}*{punt}{digit10}+
 
 zerodigit = 0
-digit = [A-Za-z0-9_]
+digit = [A-Za-z0-9]
 
-car = {comes}{digit}{comes}
-cadena = {comess}{digit}*{comess}
+car = {comes1}{digit}{comes1}
+cadena = {comes2}{digit}*{comes2}
 
 veritat = [V][E][R]
 mentida = [F][A][L][S]
@@ -108,20 +115,20 @@ seleccio = [s][e][l][e][c][c][i][o]
 cas = [c][a][s]
 pdefecte = [p][d][e][f][e][c][t][e]
 acaba = [a][c][a][b][a]
-
+nou = [n][o][u]
 mentres = [m][e][n][t][r][e][s]
 fer = [f][e][r]
 per = [p][e][r]
 metode = [m][e][t][o][d][e]
-return = [R][E][T][O][R][N][A]
+retorn = [R][E][T][O][R][N][A]
 entradaS = [e][n][t][r][a][d][a][S]
 sortidaS = [s][o][r][t][i][d][a][S]
 main = [m][a][i][n]
+borra = [b][o][r][r][a]
+afegeix = [a][f][e][g][e][i][x]
 
 ws           = [' '|'\t']+
 endline      = ['\r'|'\n'|"\r\n"]+
-
-cmdLineEnd   = ['\r'|'\n'|"\r\n"]*;
 
 
 //Funcions i Variables Pròpies
@@ -129,6 +136,7 @@ cmdLineEnd   = ['\r'|'\n'|"\r\n"]*;
 // El següent codi es copiarà també, dins de la classe. És a dir, si es posa res
 // ha de ser en el format adient: mètodes, atributs, etc. 
 %{
+    
     /*
     public static void main(String[] args) {
       try{
@@ -161,6 +169,18 @@ cmdLineEnd   = ['\r'|'\n'|"\r\n"]*;
         return new ComplexSymbol(ParserSym.terminalNames[type], type, esquerra, dreta, value);
     }
 
+    private String tractar(String entrada){
+      String str = "";
+      char [] caracters = entrada.toCharArray();
+      int i = 1;
+
+      while(i<caracters.length -1){
+        str += caracters[i];
+        i++;
+      }
+
+      return str;
+    }
 
 %}
 
@@ -191,6 +211,7 @@ cmdLineEnd   = ['\r'|'\n'|"\r\n"]*;
 {lclaudat}                { return symbol(ParserSym.LCLAUDAT);}
 {rclaudat}                { return symbol(ParserSym.RCLAUDAT);}
 {coma}                    { return symbol(ParserSym.COMA);}
+{punt}                    { return symbol(ParserSym.PUNT);}
 
 {diferent}                { return symbol(ParserSym.DIF);}
 {comp}                    { return symbol(ParserSym.IGIG);}
@@ -198,6 +219,10 @@ cmdLineEnd   = ['\r'|'\n'|"\r\n"]*;
 {majori}                  { return symbol(ParserSym.MAJORI);}
 {menor}                   { return symbol(ParserSym.MENOR);}
 {major}                   { return symbol(ParserSym.MAJOR);}
+ 
+{or}  { return symbol(ParserSym.OR);}
+{and}  { return symbol(ParserSym.AND);}
+{not}  { return symbol(ParserSym.NOT);}
 
 {ent}                     { return symbol(ParserSym.enter);}
 {decimals}                { return symbol(ParserSym.decimal);}       
@@ -217,27 +242,33 @@ cmdLineEnd   = ['\r'|'\n'|"\r\n"]*;
 {fer}                     { return symbol(ParserSym.fer);}
 {per}                     { return symbol(ParserSym.per);}
 {metode}                  { return symbol(ParserSym.metode);}
-{return}                  { return symbol(ParserSym.retur);}
-{constant}                { return symbol(ParserSym.constant,0);}
+{retorn}                  { return symbol(ParserSym.retorna);}
+{constant}                { return symbol(ParserSym.constant);}
+{afegeix}                { return symbol(ParserSym.afegeix);}
+{borra}                { return symbol(ParserSym.borra);}
+{nou}                { return symbol(ParserSym.nou);}
 
-{car}                     { return symbol(ParserSym.vcaracter,this.yytext());}
-{cadena}                  { return symbol(ParserSym.vcadena,this.yytext());}
 
 {enter}                   { return symbol(ParserSym.venter,Integer.parseInt(this.yytext()));}
 {decimal}                 { return symbol(ParserSym.vdecimal,Double.parseDouble(this.yytext()));}
 {vlogic}                   { return symbol(ParserSym.vlogic,Boolean.parseBoolean(this.yytext()));}
+
+{cadena}         {return symbol(ParserSym.vcadena,tractar(this.yytext()));} //return symbol(ParserSym.vcadena,this.yytext());
+{car}         {return symbol(ParserSym.vcaracter,tractar(this.yytext()));} //return symbol(ParserSym.vcaracter,this.yytext());
+
+//{cadena}    {System.out.println(tractar(this.yytext()));}
+//{car}     {System.out.println("Caracter " +tractar(this.yytext()));}
+
 
 {entradaS}    {return symbol(ParserSym.entradaS);}
 {sortidaS}    { return symbol(ParserSym.sortidaS);}
 {main}        { return symbol(ParserSym.main);}
 
 
-{id}                      { return symbol(ParserSym.ID,this.yytext());}
+{id}                      {return symbol(ParserSym.ID,this.yytext());} //return symbol(ParserSym.ID,this.yytext());
+//{id}  {System.out.println("Id :" +yytext());}
 
+{ws}                     {}
+{endline}                {}
 
-{cmdLineEnd}             {  }
-
-{ws}                     { /* No fer res amb els espais */  }
-{endline}                {  }
-
-[^]                      { System.out.println("ERROR");  }
+[^]                      { System.out.println("Error Lèxic a la Línia "+(this.yyline+1)+" Columna "+(this.yycolumn+1));  }

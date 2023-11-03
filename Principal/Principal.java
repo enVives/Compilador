@@ -15,14 +15,16 @@ import Compilador.Lexic.Scanner;
 import Compilador.Sintactic.Parser;
 
 public class Principal {
-
     /**
      * @param args arguments de línia de comanda
      */
     public static void main(String[] args) {
         Reader fitxer;
-        
+        int a = 4;
+        int b [] = {1,2,3,a};
+        b[1]++;
         try {
+
             fitxer = new FileReader("/home/perejoan/Documentos/GitHub/Compilador/Principal/prova.txt");
             Scanner scanner = new Scanner(fitxer);
         

@@ -10,59 +10,66 @@ public class ParserSym {
   /* terminals */
   public static final int INTERROG = 22;
   public static final int DOSPUNTS = 20;
-  public static final int fer = 47;
-  public static final int tupla = 39;
+  public static final int fer = 51;
+  public static final int tupla = 43;
   public static final int MULT = 10;
-  public static final int main = 54;
-  public static final int seleccio = 42;
-  public static final int IGIG = 29;
+  public static final int main = 59;
+  public static final int seleccio = 46;
+  public static final int retorna = 54;
+  public static final int IGIG = 30;
   public static final int LPAREN = 13;
   public static final int LCORCH = 23;
-  public static final int MENORI = 30;
+  public static final int MENORI = 31;
   public static final int vdecimal = 3;
   public static final int RPAREN = 14;
   public static final int vcadena = 6;
-  public static final int pdefecte = 44;
+  public static final int afegeix = 61;
+  public static final int pdefecte = 48;
+  public static final int NOT = 37;
+  public static final int AND = 36;
   public static final int RCORCH = 24;
-  public static final int caracter = 38;
+  public static final int caracter = 42;
+  public static final int borra = 60;
   public static final int AUTOSUM = 16;
-  public static final int sortidaS = 53;
-  public static final int si = 40;
+  public static final int sortidaS = 58;
+  public static final int OR = 35;
+  public static final int si = 44;
   public static final int SUMAHI = 18;
   public static final int DIV = 11;
-  public static final int MAJOR = 33;
+  public static final int MAJOR = 34;
   public static final int ASSIGN = 15;
   public static final int AUTOSUB = 17;
-  public static final int retur = 50;
   public static final int ID = 2;
   public static final int LCLAUDAT = 25;
   public static final int EOF = 0;
   public static final int error = 1;
-  public static final int mentres = 46;
-  public static final int COMA = 27;
-  public static final int DIF = 28;
+  public static final int mentres = 50;
+  public static final int COMA = 28;
+  public static final int DIF = 29;
   public static final int ADD = 8;
-  public static final int entradaS = 52;
-  public static final int MENOR = 32;
-  public static final int constant = 51;
+  public static final int entradaS = 57;
+  public static final int MENOR = 33;
+  public static final int constant = 56;
   public static final int MOD = 12;
   public static final int vcaracter = 7;
-  public static final int MAJORI = 31;
-  public static final int cas = 43;
+  public static final int PUNT = 27;
+  public static final int MAJORI = 32;
+  public static final int cas = 47;
   public static final int vlogic = 5;
-  public static final int metode = 49;
-  public static final int logic = 36;
+  public static final int metode = 53;
+  public static final int logic = 40;
   public static final int RESTAHI = 19;
+  public static final int nou = 55;
   public static final int venter = 4;
-  public static final int acaba = 45;
+  public static final int acaba = 49;
   public static final int PUNTICOMA = 21;
-  public static final int per = 48;
-  public static final int enter = 35;
+  public static final int per = 52;
+  public static final int enter = 39;
   public static final int RCLAUDAT = 26;
   public static final int SUB = 9;
-  public static final int decimal = 34;
-  public static final int sino = 41;
-  public static final int cadena = 37;
+  public static final int decimal = 38;
+  public static final int sino = 45;
+  public static final int cadena = 41;
   public static final String[] terminalNames = new String[] {
   "EOF",
   "error",
@@ -91,6 +98,7 @@ public class ParserSym {
   "RCORCH",
   "LCLAUDAT",
   "RCLAUDAT",
+  "PUNT",
   "COMA",
   "DIF",
   "IGIG",
@@ -98,6 +106,9 @@ public class ParserSym {
   "MAJORI",
   "MENOR",
   "MAJOR",
+  "OR",
+  "AND",
+  "NOT",
   "decimal",
   "enter",
   "logic",
@@ -114,11 +125,14 @@ public class ParserSym {
   "fer",
   "per",
   "metode",
-  "retur",
+  "retorna",
+  "nou",
   "constant",
   "entradaS",
   "sortidaS",
-  "main"
+  "main",
+  "borra",
+  "afegeix"
   };
 }
 
