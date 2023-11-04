@@ -1002,7 +1002,7 @@ public class Scanner implements java_cup.runtime.Scanner {
             // fall through
           case 107: break;
           case 45: 
-            { return symbol(ParserSym.vlogic,Boolean.parseBoolean(this.yytext()));
+            { return symbol(ParserSym.vlogic,this.yytext());
             } 
             // fall through
           case 108: break;

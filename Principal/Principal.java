@@ -20,9 +20,6 @@ public class Principal {
      */
     public static void main(String[] args) {
         Reader fitxer;
-        int a = 4;
-        int b [] = {1,2,3,a};
-        b[1]++;
         try {
 
             fitxer = new FileReader("/home/perejoan/Documentos/GitHub/Compilador/Principal/prova.txt");

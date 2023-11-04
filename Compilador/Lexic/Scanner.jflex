@@ -251,7 +251,7 @@ endline      = ['\r'|'\n'|"\r\n"]+
 
 {enter}                   { return symbol(ParserSym.venter,Integer.parseInt(this.yytext()));}
 {decimal}                 { return symbol(ParserSym.vdecimal,Double.parseDouble(this.yytext()));}
-{vlogic}                   { return symbol(ParserSym.vlogic,Boolean.parseBoolean(this.yytext()));}
+{vlogic}                   { return symbol(ParserSym.vlogic,this.yytext());}
 
 {cadena}         {return symbol(ParserSym.vcadena,tractar(this.yytext()));} //return symbol(ParserSym.vcadena,this.yytext());
 {car}         {return symbol(ParserSym.vcaracter,tractar(this.yytext()));} //return symbol(ParserSym.vcaracter,this.yytext());

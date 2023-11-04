@@ -1,14 +1,10 @@
-ent e = 45;
-
-metode a (){
-    ent e = 13;
-}
-
-metode b(){
-    ent e = 13;
-}
-
-
 metode main (cad arguments []) {
 
+    si(FALS){
+
+    } sino si (VERITAT){
+
+    } sino {
+        
+    }
 }

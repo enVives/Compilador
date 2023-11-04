@@ -51,9 +51,9 @@ terminal decimal,enter,logic,cadena,caracter,tupla,si,sino,seleccio,cas,pdefecte
 
 non terminal PROGRAMA,DECL,PROCEDIMENT,MAIN,DECL_TUPLA,DECL_TAULA,DECL_TIPUS,MODIF,
     MODIF_TUPLA, REM_TUPLA, AFG_TUPLA, MODIF_TAULA, REDEF_TAULA, REDEF_TUPLA, MODIF_TIPUS,
-    SENTENCIES, MENTRE, IF, SWITCH, FMENTRE, ARGS, TIPUS, RETURN, VALOR, CRIDA_PROC, M_1, ARGS_1,
+    SENTENCIES, MENTRE, IF, SWITCH, FMENTRE, ARGS, TIPUS, RETURN, VALOR, CRIDA_PROC, ARGS_1, SENT,
     ARG,L,IF_1,SWITCH_1, I, I_1, A, A_1, E, NOVA_TAULA, NOVA_TUPLA, F, OP, EXPRESIO, COMP_LOG,
-    EXPRESIO_1, VAL_BOOLEA, COMP_NUM, COMP_BOOLEA, VALORS;    
+    EXPRESIO_1, COMP, VALORS;    
 
 start with PROGRAMA;
 
@@ -75,12 +75,17 @@ MODIF ::= MODIF_TUPLA PUNTICOMA {::}
         | MODIF_TIPUS {::}
         ;
 
-SENTENCIES ::= DECL {::}
+SENTENCIES ::= SENT SENTENCIES {::}
+                | {::}
+                ;
+
+SENT ::= DECL {::}
             |MODIF {::}
             |MENTRE {::}
             |FMENTRE {::}
             |IF {::}
             |SWITCH {::}
+            |CRIDA_PROC{::}
             ;
 
 PROCEDIMENT ::= metode ID LPAREN ARGS RPAREN LCLAUDAT SENTENCIES RCLAUDAT {::}
@@ -90,12 +95,8 @@ RETURN ::= retorna VALOR {::};
 
 CRIDA_PROC ::= ID LPAREN ARGS RPAREN PUNTICOMA {::};
 
-MAIN ::= metode main LPAREN cadena ID LCORCH RCORCH RPAREN LCLAUDAT M_1 RCLAUDAT {::}
+MAIN ::= metode main LPAREN cadena ID LCORCH RCORCH RPAREN LCLAUDAT SENTENCIES RCLAUDAT {::}
         ;
-M_1 ::= SENTENCIES M_1 {::}
-    | CRIDA_PROC M_1 {::}
-    | {::}
-    ;
 
 TIPUS ::= decimal {::}
             |enter {::}
@@ -112,10 +113,10 @@ ARGS_1 ::= ARG COMA ARGS_1 {::}
             ;
 ARG ::= TIPUS ID {::} ;
 
-MENTRE ::= mentres LPAREN L RPAREN fer LCLAUDAT SENTENCIES RCLAUDAT {::} ;
+MENTRE ::= mentres LPAREN VALOR RPAREN fer LCLAUDAT SENTENCIES RCLAUDAT {::} ;
 
-IF ::=  si LPAREN L RPAREN LCLAUDAT SENTENCIES RCLAUDAT IF_1 {::};
-IF_1 ::= sino si LPAREN L RPAREN LCLAUDAT SENTENCIES RCLAUDAT IF_1 {::}
+IF ::=  si LPAREN VALOR RPAREN LCLAUDAT SENTENCIES RCLAUDAT IF_1 {::};
+IF_1 ::= sino si LPAREN VALOR RPAREN LCLAUDAT SENTENCIES RCLAUDAT IF_1 {::}
             | sino LCLAUDAT SENTENCIES RCLAUDAT {::}
             | {::}
             ;
@@ -138,8 +139,7 @@ A_1 ::= ID COMA A_1 {::}
     | ID {::}
     ;
 
-I ::= ASSIGN E {::}
-    | ASSIGN L {::}
+I ::= ASSIGN VALOR {::}
     | ASSIGN MODIF_TIPUS {::}
     | ASSIGN MODIF_TUPLA {::}
     | ASSIGN MODIF_TAULA {::}
@@ -147,8 +147,8 @@ I ::= ASSIGN E {::}
 
 I_1 ::= AUTOSUM {::}
     | AUTOSUB {::}
-    | SUMAHI E {::}
-    | RESTAHI E {::}
+    | SUMAHI VALOR {::}
+    | RESTAHI VALOR {::}
     | I  {::}
     ;
 
@@ -161,8 +161,7 @@ NOVA_TAULA ::= nou ID LCORCH venter RCORCH {::}
 VALORS ::= VALOR {::}
         | VALOR COMA VALORS {::}
         ;
-VALOR ::= E {::}
-        | L {::}
+VALOR ::= L {::}
         ;
 
 MODIF_TAULA ::= ID LCORCH venter RCORCH I_1 {::};
@@ -199,11 +198,15 @@ F ::= LPAREN E RPAREN {::}
     | vcaracter {::}
     | ADD vcaracter {::}
     | SUB vcaracter {::}
-    | vcadena {::} 
+    | vcadena {::}
+    | ID {::}
+    | vlogic {::} 
     ;
 
 L ::= EXPRESIO {::}
     | EXPRESIO COMP_LOG L {::}
+    | E COMP_LOG L {::}
+    | E
     ;
 
 COMP_LOG ::= OR {::}
@@ -213,19 +216,16 @@ EXPRESIO ::= NOT LPAREN EXPRESIO RPAREN {::}
         | LPAREN EXPRESIO RPAREN {::}
         | EXPRESIO_1 {::}
         ;
-EXPRESIO_1 ::= VAL_BOOLEA COMP_BOOLEA VAL_BOOLEA {::}
-        | E COMP_NUM E {::}
-        | E COMP_BOOLEA E {::}
+EXPRESIO_1 ::= E COMP E {::}
+        | NOT E COMP E {::}
+        | E COMP NOT E {::}
+        | NOT E COMP NOT E {::}
         ;
-VAL_BOOLEA ::= vlogic {::}
-        | NOT vlogic {::}
-        | NOT ID {::}
-        ;
-COMP_NUM ::= MENORI {::}
+
+COMP ::= MENORI {::}
         | MAJORI {::}
         |MENOR {::}
         | MAJOR {::}
-        ;
-COMP_BOOLEA ::= IGIG {::}
-        | DIF {::}
+        |IGIG {::}
+        |DIF {::}
         ;
