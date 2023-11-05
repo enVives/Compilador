@@ -1,10 +1,5 @@
 metode main (cad arguments []) {
 
-    si(FALS){
-
-    } sino si (VERITAT){
-
-    } sino {
-        
-    }
+    bool e = 1==1 o FALS;
 }
+

@@ -53,7 +53,7 @@ non terminal PROGRAMA,DECL,PROCEDIMENT,MAIN,DECL_TUPLA,DECL_TAULA,DECL_TIPUS,MOD
     MODIF_TUPLA, REM_TUPLA, AFG_TUPLA, MODIF_TAULA, REDEF_TAULA, REDEF_TUPLA, MODIF_TIPUS,
     SENTENCIES, MENTRE, IF, SWITCH, FMENTRE, ARGS, TIPUS, RETURN, VALOR, CRIDA_PROC, ARGS_1, SENT,
     ARG,L,IF_1,SWITCH_1, I, I_1, A, A_1, E, NOVA_TAULA, NOVA_TUPLA, F, OP, EXPRESIO, COMP_LOG,
-    EXPRESIO_1, COMP, VALORS;    
+    EXPRESIO_1, COMP, VALORS, F_1, OPP;    
 
 start with PROGRAMA;
 
@@ -72,7 +72,7 @@ MODIF ::= MODIF_TUPLA PUNTICOMA {::}
         | MODIF_TAULA PUNTICOMA{::}
         | REDEF_TAULA PUNTICOMA {::}
         | REDEF_TUPLA PUNTICOMA {::}
-        | MODIF_TIPUS {::}
+        | MODIF_TIPUS PUNTICOMA {::}
         ;
 
 SENTENCIES ::= SENT SENTENCIES {::}
@@ -161,7 +161,10 @@ NOVA_TAULA ::= nou ID LCORCH venter RCORCH {::}
 VALORS ::= VALOR {::}
         | VALOR COMA VALORS {::}
         ;
-VALOR ::= L {::}
+VALOR ::= L  {::}
+        | E {::}
+        | EXPRESIO {::}
+        | LPAREN L RPAREN {::}
         ;
 
 MODIF_TAULA ::= ID LCORCH venter RCORCH I_1 {::};
@@ -203,11 +206,18 @@ F ::= LPAREN E RPAREN {::}
     | vlogic {::} 
     ;
 
-L ::= EXPRESIO {::}
-    | EXPRESIO COMP_LOG L {::}
-    | E COMP_LOG L {::}
-    | E
-    ;
+L ::= F_1 OPP {::} 
+;
+
+
+OPP ::= COMP_LOG F_1 OPP {::}
+        | COMP_LOG F_1 {::}
+        ;
+
+F_1 ::= LPAREN L RPAREN {::}
+        | E {::}
+        | EXPRESIO {::}
+        ;
 
 COMP_LOG ::= OR {::}
         | AND {::}

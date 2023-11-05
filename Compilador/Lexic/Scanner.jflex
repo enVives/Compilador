@@ -82,11 +82,9 @@ menor        = \<
 major        = \>
 comes1     = \·
 comes2 = \"
-i = \&
-o = \|
 
-and = {i}{i}
-or = {o}{o}
+and = [i]
+or = [o]
 not = \!
 
 
@@ -220,7 +218,7 @@ endline      = ['\r'|'\n'|"\r\n"]+
 {menor}                   { return symbol(ParserSym.MENOR);}
 {major}                   { return symbol(ParserSym.MAJOR);}
  
-{or}  { return symbol(ParserSym.OR);}
+{or} { return symbol(ParserSym.OR);}
 {and}  { return symbol(ParserSym.AND);}
 {not}  { return symbol(ParserSym.NOT);}
 
