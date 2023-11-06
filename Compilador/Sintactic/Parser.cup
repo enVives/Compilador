@@ -57,185 +57,186 @@ non terminal PROGRAMA,DECL,PROCEDIMENT,MAIN,DECL_TUPLA,DECL_TAULA,DECL_TIPUS,MOD
 
 start with PROGRAMA;
 
-PROGRAMA ::= DECL PROGRAMA {::}
-            | PROCEDIMENT PROGRAMA {::}
-            | MAIN {::}
+PROGRAMA ::= DECL PROGRAMA {:System.out.println("PROGRAMA -> DECL PROGRAMA");:}
+            | PROCEDIMENT PROGRAMA {:System.out.println("PROGRAMA -> PROCEDIMENT PROGRAMA");:}
+            | MAIN {:System.out.println("PROGRAMA -> MAIN");:}
             ;
 
-DECL ::= DECL_TUPLA PUNTICOMA {::} 
-        | DECL_TAULA PUNTICOMA {::}
-        |DECL_TIPUS PUNTICOMA {::}
+DECL ::= DECL_TUPLA PUNTICOMA {:System.out.println("DECL -> DECL TUPLA");:} 
+        | DECL_TAULA PUNTICOMA {:System.out.println("DECL -> DECL_TAULA");:}
+        |DECL_TIPUS PUNTICOMA {:System.out.println("DECL -> DECL_TIPUS");:}
         ;
-MODIF ::= MODIF_TUPLA PUNTICOMA {::}
-        | REM_TUPLA PUNTICOMA {::}
-        | AFG_TUPLA PUNTICOMA {::}
-        | MODIF_TAULA PUNTICOMA{::}
-        | REDEF_TAULA PUNTICOMA {::}
-        | REDEF_TUPLA PUNTICOMA {::}
-        | MODIF_TIPUS PUNTICOMA {::}
+MODIF ::= MODIF_TUPLA PUNTICOMA {:System.out.println("MODIF -> TUPLA PUNITCOMA");:}
+        | REM_TUPLA PUNTICOMA {:System.out.println("MODIF -> REM_TUPLA PUNTICOMA");:}
+        | AFG_TUPLA PUNTICOMA {:System.out.println("MODIF -> AFG_TUPLA PUNTICOMA");:}
+        | MODIF_TAULA PUNTICOMA{:System.out.println("MODIF -> MODIF_TAULA PUNTICOMA");:}
+        | REDEF_TAULA PUNTICOMA {:System.out.println("MODIF -> REDEF_TAULA PUNTICOMA");:}
+        | REDEF_TUPLA PUNTICOMA {:System.out.println("MODIF -> REDEF_TUPLA PUNTICOMA");:}
+        | MODIF_TIPUS PUNTICOMA {:System.out.println("MODIF -> MODIF_TIPUS PUNTICOMA");:}
         ;
 
-SENTENCIES ::= SENT SENTENCIES {::}
-                | {::}
+SENTENCIES ::= SENT SENTENCIES {:System.out.println("SENTENCIES -> SENT SENTENCIES");:}
+                | {:System.out.println("SENTENCIES -> @");:}
                 ;
 
-SENT ::= DECL {::}
-            |MODIF {::}
-            |MENTRE {::}
-            |FMENTRE {::}
-            |IF {::}
-            |SWITCH {::}
-            |CRIDA_PROC{::}
+SENT ::= DECL {:System.out.println("SENT -> DECL");:}
+            |MODIF {:System.out.println("SENT -> MODIF");:}
+            |MENTRE {:System.out.println("SENT -> MENTRE");:}
+            |FMENTRE {:System.out.println("SENT -> FMENTRE");:}
+            |IF {:System.out.println("SENT -> IF");:}
+            |SWITCH {:System.out.println("SENT -> SWITCH");:}
+            |CRIDA_PROC{:System.out.println("SENT -> CRIDA_PROC");:}
             ;
 
-PROCEDIMENT ::= metode ID LPAREN ARGS RPAREN LCLAUDAT SENTENCIES RCLAUDAT {::}
-                | metode TIPUS ID LPAREN ARGS RPAREN LCLAUDAT SENTENCIES RCLAUDAT RETURN {::}
+PROCEDIMENT ::= metode ID LPAREN ARGS RPAREN LCLAUDAT SENTENCIES RCLAUDAT {:System.out.println("PROC");:}
+                | metode TIPUS ID LPAREN ARGS RPAREN LCLAUDAT SENTENCIES RCLAUDAT RETURN {:System.out.println("PROC");:}
                 ;
-RETURN ::= retorna VALOR {::};
+RETURN ::= retorna VALOR {:System.out.println("RETURN -> retorna VALOR");:};
 
-CRIDA_PROC ::= ID LPAREN ARGS RPAREN PUNTICOMA {::};
+CRIDA_PROC ::= ID LPAREN ARGS RPAREN PUNTICOMA {:System.out.println("CRIDA_PROC");:};
 
-MAIN ::= metode main LPAREN cadena ID LCORCH RCORCH RPAREN LCLAUDAT SENTENCIES RCLAUDAT {::}
+MAIN ::= metode main LPAREN cadena ID LCORCH RCORCH RPAREN LCLAUDAT SENTENCIES RCLAUDAT {:System.out.println("MAIN");:}
         ;
 
-TIPUS ::= decimal {::}
-            |enter {::}
-            |logic {::}
-            |cadena{::}
-            |caracter {::}
+TIPUS ::= decimal {:System.out.println("TIPUS -> decimal");:}
+            |enter {:System.out.println("TIPUS -> enter");:}
+            |logic {:System.out.println("TIPUS -> logic");:}
+            |cadena{:System.out.println("TIPUS -> cadena");:}
+            |caracter {:System.out.println("TIPUS -> caracter");:}
             ;
 
-ARGS ::= ARGS_1 {::}
-            | {::}
+ARGS ::= ARGS_1 {:System.out.println("ARGS -> ARGS_1");:}
+            | {:System.out.println("@");:}
             ;
-ARGS_1 ::= ARG COMA ARGS_1 {::}
-            | ARG {::}
+ARGS_1 ::= ARG COMA ARGS_1 {:System.out.println("ARGS_1 -> ARG COMA ARGS_1");:}
+            | ARG {:System.out.println("ARGS_1 -> ARG");:}
             ;
-ARG ::= TIPUS ID {::} ;
+ARG ::= TIPUS ID {:System.out.println("ARG -> TIPUS ID");:};
 
-MENTRE ::= mentres LPAREN VALOR RPAREN fer LCLAUDAT SENTENCIES RCLAUDAT {::} ;
+MENTRE ::= mentres LPAREN VALOR RPAREN fer LCLAUDAT SENTENCIES RCLAUDAT {:System.out.println("MENTRE");:} ;
 
-IF ::=  si LPAREN VALOR RPAREN LCLAUDAT SENTENCIES RCLAUDAT IF_1 {::};
-IF_1 ::= sino si LPAREN VALOR RPAREN LCLAUDAT SENTENCIES RCLAUDAT IF_1 {::}
-            | sino LCLAUDAT SENTENCIES RCLAUDAT {::}
-            | {::}
+IF ::=  si LPAREN VALOR RPAREN LCLAUDAT SENTENCIES RCLAUDAT IF_1 {:System.out.println("IF");:};
+IF_1 ::= sino si LPAREN VALOR RPAREN LCLAUDAT SENTENCIES RCLAUDAT IF_1 {:System.out.println("IF_1");:}
+            | sino LCLAUDAT SENTENCIES RCLAUDAT {:System.out.println("IF_1");:}
+            | {:System.out.println("@");:}
             ;
-FMENTRE ::= fer LPAREN SENTENCIES RPAREN  mentres LPAREN L RPAREN PUNTICOMA {::} ;
+FMENTRE ::= fer LPAREN SENTENCIES RPAREN  mentres LPAREN L RPAREN PUNTICOMA {:System.out.println("FMENTRE");:} ;
 
-SWITCH ::= seleccio LPAREN VALOR RPAREN LCLAUDAT SWITCH_1 RCLAUDAT {::}
+SWITCH ::= seleccio LPAREN VALOR RPAREN LCLAUDAT SWITCH_1 RCLAUDAT {:System.out.println("SWITCH");:}
         ;
-SWITCH_1 ::= cas VALOR DOSPUNTS SENTENCIES acaba PUNTICOMA SWITCH_1 {::}
-        | pdefecte DOSPUNTS SENTENCIES acaba PUNTICOMA {::}
-        |
+SWITCH_1 ::= cas VALOR DOSPUNTS SENTENCIES acaba PUNTICOMA SWITCH_1 {:System.out.println("SWITCH_1");:}
+        | pdefecte DOSPUNTS SENTENCIES acaba PUNTICOMA {:System.out.println("SWITCH_1");:}
+        | {:System.out.println("@");:}
         ;
 
-DECL_TIPUS ::= TIPUS A {::}
-        | TIPUS A_1 {::}
+DECL_TIPUS ::= TIPUS A {:System.out.println("DECL_TIPUS -> TIPUS A ");:}
+        | TIPUS A_1 {:System.out.println("DECL_TIPUS -> TIPUS A_1");:}
         ;
-MODIF_TIPUS ::= ID I_1 {::};
+MODIF_TIPUS ::= ID I_1 {:System.out.println("MODIF_TIPUS -> ID I_1");:};
 
-A ::= A_1 I {::};
-A_1 ::= ID COMA A_1 {::}
-    | ID {::}
+A ::= A_1 I {:System.out.println("A");:};
+A_1 ::= ID COMA A_1 {:System.out.println("A_1 -> ID COMA A_1");:}
+    | ID {:System.out.println("A_1 -> ID");:}
     ;
 
-I ::= ASSIGN VALOR {::}
-    | ASSIGN MODIF_TIPUS {::}
-    | ASSIGN MODIF_TUPLA {::}
-    | ASSIGN MODIF_TAULA {::}
+I ::= ASSIGN VALOR {:System.out.println("I -> ASSIGN VALOR");:}
+    | ASSIGN MODIF_TIPUS {:System.out.println("ASSIGN MODIF_TIPUS");:}
+    | ASSIGN MODIF_TUPLA {:System.out.println("ASSIGN MODIF_TUPLA");:}
+    | ASSIGN MODIF_TAULA {:System.out.println("ASSIGN MODIF_TAULA");:}
     ;
 
-I_1 ::= AUTOSUM {::}
-    | AUTOSUB {::}
-    | SUMAHI VALOR {::}
-    | RESTAHI VALOR {::}
-    | I  {::}
+I_1 ::= AUTOSUM {:System.out.println("I_1 -> AUTOSUM");:}
+    | AUTOSUB {:System.out.println("I_1 -> AUTOSUB");:}
+    | SUMAHI VALOR {:System.out.println("I_1 -> SUMAHI VALOR");:}
+    | RESTAHI VALOR {:System.out.println("I_1 -> RESTAHI VALOR");:}
+    | I  {:System.out.println("I_1 -> I");:}
     ;
 
-DECL_TAULA ::=  TIPUS ID LCORCH RCORCH ASSIGN NOVA_TAULA {::}
-            | TIPUS ID LCORCH RCORCH {::}
+DECL_TAULA ::=  TIPUS ID LCORCH RCORCH ASSIGN NOVA_TAULA {:System.out.println("DECL_TAULA 1");:}
+            | TIPUS ID LCORCH RCORCH {:System.out.println("DECL_TAULA 2");:}
             ;
-NOVA_TAULA ::= nou ID LCORCH venter RCORCH {::}
-            | LCLAUDAT VALORS RCLAUDAT
+NOVA_TAULA ::= nou ID LCORCH venter RCORCH {:System.out.println("NOVA_TAULA 1");:}
+            | LCLAUDAT VALORS RCLAUDAT {:System.out.println("NOVA_TAULA 2");:}
             ;
-VALORS ::= VALOR {::}
-        | VALOR COMA VALORS {::}
+VALORS ::= VALOR {:System.out.println("VALORS -> VALOR");:}
+        | VALOR COMA VALORS {:System.out.println("VALORS -> VALOR COMA VALORS");:}
         ;
-VALOR ::= L  {::}
-        | E {::}
-        | EXPRESIO {::}
-        | LPAREN L RPAREN {::}
-        ;
-
-MODIF_TAULA ::= ID LCORCH venter RCORCH I_1 {::};
-REDEF_TAULA ::= ID ASSIGN NOVA_TAULA {::};
-DECL_TUPLA ::= tupla ID LPAREN RPAREN NOVA_TUPLA {::}
-            | tupla ID LPAREN RPAREN {::}
-            ;
-NOVA_TUPLA ::= ASSIGN LPAREN VALORS RPAREN {::};
-
-MODIF_TUPLA ::= ID LPAREN venter RPAREN I_1 {::};
-
-REM_TUPLA ::= ID PUNT borra LPAREN VALOR RPAREN {::};
-
-AFG_TUPLA ::= ID PUNT afegeix LPAREN VALOR RPAREN {::};
-
-REDEF_TUPLA ::= ID ASSIGN NOVA_TUPLA {::};
-
-E ::= F OP {::};
-OP ::= ADD F OP {::}
-        | SUB F OP {::}
-        | MULT F OP {::}
-        | DIV F OP {::}
-        | MOD F OP {::}
-        | {::}
+VALOR ::= L  {:System.out.println("VALOR -> L");:}
+        | E {:System.out.println("VALOR -> E");:}
+        | EXPRESIO {:System.out.println("VALOR -> EXPRESSIO");:}
+        | LPAREN L RPAREN {:System.out.println("VALOR -> LPAREN L RPAREN");:}
         ;
 
-F ::= LPAREN E RPAREN {::}
-    | venter {::}
-    | SUB venter {::}
-    | ADD venter {::}
-    | vdecimal {::}
-    | ADD vdecimal {::}
-    | SUB vdecimal {::}
-    | vcaracter {::}
-    | ADD vcaracter {::}
-    | SUB vcaracter {::}
-    | vcadena {::}
-    | ID {::}
-    | vlogic {::} 
+MODIF_TAULA ::= ID LCORCH venter RCORCH I_1 {:System.out.println("MODIF_TAULA");:};
+REDEF_TAULA ::= ID ASSIGN NOVA_TAULA {:System.out.println("REDEF_TAULA");:};
+DECL_TUPLA ::= tupla ID LPAREN RPAREN NOVA_TUPLA {:System.out.println("DECL_TUPLA");:}
+            | tupla ID LPAREN RPAREN {:System.out.println("DECL_TUPLA");:}
+            ;
+NOVA_TUPLA ::= ASSIGN LPAREN VALORS RPAREN {:System.out.println("NOVA_TUPLA");:};
+
+MODIF_TUPLA ::= ID LPAREN venter RPAREN I_1 {:System.out.println("MODIF_TUPLA");:};
+
+REM_TUPLA ::= ID PUNT borra LPAREN VALOR RPAREN {:System.out.println("REM_TUPLA");:};
+
+AFG_TUPLA ::= ID PUNT afegeix LPAREN VALOR RPAREN {:System.out.println("ARG_TUPLA");:};
+
+REDEF_TUPLA ::= ID ASSIGN NOVA_TUPLA {:System.out.println("REDEF_TUPLA");:};
+
+E ::= F OP {:System.out.println("E -> F OP");:};
+OP ::= ADD F OP {:System.out.println("OP -> ADD F OP");:}
+        | SUB F OP {:System.out.println("OP -> SUB F OP");:}
+        | MULT F OP {:System.out.println("OP -> MULT F OP");:}
+        | DIV F OP {:System.out.println("OP -> DIV F OP");:}
+        | MOD F OP {:System.out.println("OP -> MOD F OP");:}
+        | {:System.out.println("OP -> @");:}
+        ;
+
+F ::= LPAREN E RPAREN {:System.out.println("F -> LPAREN E RPAREN");:}
+    | venter {:System.out.println("F -> venter");:}
+    | SUB venter {:System.out.println("F -> SUB venter");:}
+    | ADD venter {:System.out.println("F -> ADD venter");:}
+    | vdecimal {:System.out.println("F -> vdecimal");:}
+    | ADD vdecimal {:System.out.println("F -> ADD vdecimal");:}
+    | SUB vdecimal {:System.out.println("F -> SUB vdecimal");:}
+    | vcaracter {:System.out.println("F -> vcaracter");:}
+    | ADD vcaracter {:System.out.println("F -> ADD");:}
+    | SUB vcaracter {:System.out.println("F -> SUB");:}
+    | vcadena {:System.out.println("F -> vcadena");:}
+    | ID {:System.out.println("F -> ID");:}
+    | vlogic {:System.out.println("F -> vlogic");:} 
+    | SUB LPAREN E RPAREN {:System.out.println("F -> SUB LPAREN E RPAREN");:}
     ;
 
-L ::= F_1 OPP {::} 
+L ::= F_1 OPP {:System.out.println("L -> F_1 OPP");:} 
 ;
 
 
-OPP ::= COMP_LOG F_1 OPP {::}
-        | COMP_LOG F_1 {::}
+OPP ::= COMP_LOG F_1 OPP {:System.out.println("COMP_LOG F_1 OPP");:}
+        | COMP_LOG F_1 {:System.out.println("COMP_LOG F_1");:}
         ;
 
-F_1 ::= LPAREN L RPAREN {::}
-        | E {::}
-        | EXPRESIO {::}
+F_1 ::= LPAREN L RPAREN {:System.out.println("F_1 -> LPAREN L RPAREN");:}
+        | E {:System.out.println("F_1 -> E");:}
+        | EXPRESIO {:System.out.println("F_1 -> EXPRESSIO");:}
         ;
 
-COMP_LOG ::= OR {::}
-        | AND {::}
+COMP_LOG ::= OR {:System.out.println("COMP_LOG -> OR");:}
+        | AND {:System.out.println("COMP_LOG -> AND");:}
         ;
-EXPRESIO ::= NOT LPAREN EXPRESIO RPAREN {::}
-        | LPAREN EXPRESIO RPAREN {::}
-        | EXPRESIO_1 {::}
+EXPRESIO ::= NOT LPAREN EXPRESIO RPAREN {:System.out.println("EXPRESSIO -> NOT LPAREN EXPRESIO RPAREN");:}
+        | LPAREN EXPRESIO RPAREN {:System.out.println("EXPRESSIO -> LPAREN EXPRESIO RPAREN");:}
+        | EXPRESIO_1 {:System.out.println("EXPRESIO -> EXPRESSIO_1");:}
         ;
-EXPRESIO_1 ::= E COMP E {::}
-        | NOT E COMP E {::}
-        | E COMP NOT E {::}
-        | NOT E COMP NOT E {::}
+EXPRESIO_1 ::= E COMP E {:System.out.println("EXPRESSIO_1 -> E COMP E");:}
+        | NOT E COMP E {:System.out.println("EXPRESSIO_1 -> NOT E COMP E");:}
+        | E COMP NOT E {:System.out.println("EXPRESSIO_1 -> E COMP NOT E");:}
+        | NOT E COMP NOT E {:System.out.println("EXPRESSIO_1 -> NOT E COMP NOT E");:}
         ;
 
-COMP ::= MENORI {::}
-        | MAJORI {::}
-        |MENOR {::}
-        | MAJOR {::}
-        |IGIG {::}
-        |DIF {::}
+COMP ::= MENORI {:System.out.println("COMP -> MENORI");:}
+        | MAJORI {:System.out.println("COMP -> MAJORI");:}
+        |MENOR {:System.out.println("COMP -> MENOR");:}
+        | MAJOR {:System.out.println("COMP -> MAJOR");:}
+        |IGIG {:System.out.println("COMP -> IGIG");:}
+        |DIF {:System.out.println("COMP -> DIF");:}
         ;

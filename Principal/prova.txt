@@ -1,5 +1,6 @@
 metode main (cad arguments []) {
 
-    bool e = 1==1 o FALS;
+    ent e = 1+1;
+    
 }
 
