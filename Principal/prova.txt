@@ -1,6 +1,12 @@
-metode main (cad arguments []) {
 
-    ent e = 1+1;
+i = 3
+ent i = 4;
+cad j = "abc";
+
+metode main (cad arguments []) {
+    if(){
+
     
 }
+    
 

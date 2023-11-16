@@ -48,7 +48,7 @@ cad = [c][a][d]
 logic = [b][o][o][l]
 
 id		= [A-Za-z][A-Za-z0-9_]*
-constant = [C][O][N][S][T][A][N][T]
+constant = [c][o][n][s][t][a][n][t]
 
 //signe		= [+|-]?
 digit19		= [1-9]

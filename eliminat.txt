@@ -1,0 +1,11 @@
+/* No ho empleam per ara.
+DECL_TAULA ::=  TIPUS ID LCORCH RCORCH ASSIGN NOVA_TAULA {:System.out.println("DECL_TAULA 1");:}
+            | TIPUS ID LCORCH RCORCH {:System.out.println("DECL_TAULA 2");:}
+            ;
+NOVA_TAULA ::= nou ID LCORCH venter RCORCH {:System.out.println("NOVA_TAULA 1");:}
+            | LCLAUDAT VALORS RCLAUDAT {:System.out.println("NOVA_TAULA 2");:}
+            ;
+MODIF_TAULA ::= ID LCORCH venter RCORCH I_1 {:System.out.println("MODIF_TAULA");:};
+REDEF_TAULA ::= ID ASSIGN NOVA_TAULA {:System.out.println("REDEF_TAULA");:};
+
+*/

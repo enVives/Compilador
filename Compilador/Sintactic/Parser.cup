@@ -25,6 +25,43 @@ parser code {:
     /**********************************************************************
      * sobrecàrrega de mètodes per gestionar els errors que es localitzin *
      **********************************************************************/
+
+    @Override
+    public void unrecovered_syntax_error(Symbol cur_token) throws Exception {
+        report_error("Error sintàctic catastròfic", cur_token);
+        done_parsing();        
+    }
+
+    @Override
+    public void syntax_error(Symbol cur_token) {
+        report_error("de sintaxis", cur_token);
+    }
+
+    @Override
+    public void report_error(String message, Object info) {
+        StringBuilder msg = new StringBuilder("ERROR");
+        if (info instanceof Symbol) {
+            ComplexSymbol token = (ComplexSymbol)info;
+            Location l = token.getLeft();
+            
+            if (l != null) {
+                msg.append(" (fila: ")
+                   .append(l.getLine())
+                   .append(", columna: ")
+                   .append(l.getColumn())
+                   .append(")");
+            }
+        }
+        msg.append(": ").append(message);
+        
+        System.err.println(msg);
+    }
+
+    @Override
+    public void report_fatal_error(String message, Object info) throws Exception {
+        report_error("Error catastròfic ("+message+")", info);
+        done_parsing();
+    }
 :}
 
 
@@ -51,7 +88,7 @@ terminal decimal,enter,logic,cadena,caracter,tupla,si,sino,seleccio,cas,pdefecte
 
 non terminal PROGRAMA,DECL,PROCEDIMENT,MAIN,DECL_TUPLA,DECL_TAULA,DECL_TIPUS,MODIF,
     MODIF_TUPLA, REM_TUPLA, AFG_TUPLA, MODIF_TAULA, REDEF_TAULA, REDEF_TUPLA, MODIF_TIPUS,
-    SENTENCIES, MENTRE, IF, SWITCH, FMENTRE, ARGS, TIPUS, RETURN, CRIDA_PROC, ARGS_1, SENT,
+    SENTENCIES, MENTRE, IF, SWITCH, FMENTRE, ARGS, TIPUS, RETURN, CRIDA_PROC, ARGS_1, SENT,VAL_TUPLA,
     ARG,L,IF_1,SWITCH_1, I, I_1, A, A_1, E, NOVA_TAULA, NOVA_TUPLA, F, OP,
     VALORS,FOR,FOR_1,OP_CONDICIONAL,OP_CONDICIONAL_1,ENTRADAS,SORTIDAS,DECL_CONST;    
 
@@ -63,17 +100,19 @@ PROGRAMA ::= DECL PROGRAMA {:System.out.println("PROGRAMA -> DECL PROGRAMA");:}
             ;
 
 DECL ::= DECL_TUPLA PUNTICOMA {:System.out.println("DECL -> DECL TUPLA");:} 
-        | DECL_TAULA PUNTICOMA {:System.out.println("DECL -> DECL_TAULA");:}
+        //| DECL_TAULA PUNTICOMA {:System.out.println("DECL -> DECL_TAULA");:}
         |DECL_TIPUS PUNTICOMA {:System.out.println("DECL -> DECL_TIPUS");:}
         |DECL_CONST PUNTICOMA {::}
+        |error PUNTICOMA {::}
         ;
 MODIF ::= MODIF_TUPLA PUNTICOMA {:System.out.println("MODIF -> TUPLA PUNITCOMA");:}
         | REM_TUPLA PUNTICOMA {:System.out.println("MODIF -> REM_TUPLA PUNTICOMA");:}
         | AFG_TUPLA PUNTICOMA {:System.out.println("MODIF -> AFG_TUPLA PUNTICOMA");:}
-        | MODIF_TAULA PUNTICOMA{:System.out.println("MODIF -> MODIF_TAULA PUNTICOMA");:}
-        | REDEF_TAULA PUNTICOMA {:System.out.println("MODIF -> REDEF_TAULA PUNTICOMA");:}
+        //| MODIF_TAULA PUNTICOMA{:System.out.println("MODIF -> MODIF_TAULA PUNTICOMA");:}
+        //| REDEF_TAULA PUNTICOMA {:System.out.println("MODIF -> REDEF_TAULA PUNTICOMA");:}
         | REDEF_TUPLA PUNTICOMA {:System.out.println("MODIF -> REDEF_TUPLA PUNTICOMA");:}
         | MODIF_TIPUS PUNTICOMA {:System.out.println("MODIF -> MODIF_TIPUS PUNTICOMA");:}
+        //| error PUNTICOMA {::}
         ;
 
 SENTENCIES ::= SENT SENTENCIES {:System.out.println("SENTENCIES -> SENT SENTENCIES");:}
@@ -91,6 +130,7 @@ SENT ::= DECL {:System.out.println("SENT -> DECL");:}
             |OP_CONDICIONAL PUNTICOMA{:System.out.println("SENT -> OP_CONDICIONAL");:}
             |ENTRADAS PUNTICOMA {:System.out.println("SENT -> ENTRADAS");:}
             |SORTIDAS PUNTICOMA {:System.out.println("SENT -> SORTIDAS");:}
+            //| error PUNTICOMA {:System.out.println("SENT -> error PUNTICOMA");:}
             ;
 
 PROCEDIMENT ::= metode ID LPAREN ARGS RPAREN LCLAUDAT SENTENCIES RCLAUDAT {:System.out.println("PROC");:}
@@ -166,7 +206,7 @@ A_1 ::= ID COMA A_1 {:System.out.println("A_1 -> ID COMA A_1");:}
 I ::= ASSIGN E {:System.out.println("I -> ASSIGN E");:}
     | ASSIGN MODIF_TIPUS {:System.out.println("ASSIGN MODIF_TIPUS");:}
     | ASSIGN MODIF_TUPLA {:System.out.println("ASSIGN MODIF_TUPLA");:}
-    | ASSIGN MODIF_TAULA {:System.out.println("ASSIGN MODIF_TAULA");:}
+    | ASSIGN VAL_TUPLA {:System.out.println("ASSIGN VAL_TUPLA");:}
     ;
 
 I_1 ::= AUTOSUM {:System.out.println("I_1 -> AUTOSUM");:}
@@ -176,18 +216,11 @@ I_1 ::= AUTOSUM {:System.out.println("I_1 -> AUTOSUM");:}
     | I  {:System.out.println("I_1 -> I");:}
     ;
 
-DECL_TAULA ::=  TIPUS ID LCORCH RCORCH ASSIGN NOVA_TAULA {:System.out.println("DECL_TAULA 1");:}
-            | TIPUS ID LCORCH RCORCH {:System.out.println("DECL_TAULA 2");:}
-            ;
-NOVA_TAULA ::= nou ID LCORCH venter RCORCH {:System.out.println("NOVA_TAULA 1");:}
-            | LCLAUDAT VALORS RCLAUDAT {:System.out.println("NOVA_TAULA 2");:}
-            ;
 VALORS ::= E {:System.out.println("VALORS -> E");:}
         | E COMA VALORS {:System.out.println("VALORS -> E  COMA VALORS");:}
         ;
+VAL_TUPLA ::= ID LPAREN venter RPAREN {:System.out.println("VAL_TUPLA");:};
 
-MODIF_TAULA ::= ID LCORCH venter RCORCH I_1 {:System.out.println("MODIF_TAULA");:};
-REDEF_TAULA ::= ID ASSIGN NOVA_TAULA {:System.out.println("REDEF_TAULA");:};
 DECL_TUPLA ::= tupla ID LPAREN RPAREN NOVA_TUPLA {:System.out.println("DECL_TUPLA");:}
             | tupla ID LPAREN RPAREN {:System.out.println("DECL_TUPLA");:}
             ;
