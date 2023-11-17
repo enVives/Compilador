@@ -1,7 +1,9 @@
-package TD;
+package Compilador.TSimbols.TD;
 public class Dvar extends Descripcio {
     private static int nv =0;
     private String tipus;
+
+    private String val = "";
 
     public Dvar(String t){
         super("dvar");

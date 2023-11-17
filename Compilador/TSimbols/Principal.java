@@ -1,3 +1,6 @@
+package Compilador.TSimbols;
+
+
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -6,13 +9,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import DT.DefinicioTipus;
-import DT.Escalar;
-import DT.Tupla;
-import TD.Dcamp;
-import TD.Dproc;
-import TD.Dtipus;
-import TD.Dvar;
+import Compilador.TSimbols.DT.*;
+import Compilador.TSimbols.TD.*;
 
 public class Principal {
 
@@ -25,13 +23,11 @@ public class Principal {
     Taula taula;
 
     public static void main(String[] args) {
-        new Principal().main();
+        (new Principal()).main();
     }
 
     public void main(){
         carrega_fitxers();
-
-
         //Proves de Taula de Simbols
 
         taula = new Taula();
@@ -67,6 +63,7 @@ public class Principal {
         taula.posar("int", new Dtipus(new Escalar("ts_enter", Integer.MIN_VALUE, Integer.MAX_VALUE)));
         taula.posar("nom", new Dproc());
         taula.posarparam("nom","a",new Dvar("int"));
+        taula.posarparam("nom","b",new Dvar("int"));
         escriu_fitxers();
     }
 
@@ -111,13 +108,13 @@ public class Principal {
 
     public void carrega_fitxers(){
         try{
-            td = new FileWriter("td.txt");
+            td = new FileWriter("Compilador/TSimbols/td.txt");
             td_1 = new BufferedWriter(td);
 
-            te = new FileWriter("te.txt");
+            te = new FileWriter("Compilador/TSimbols/te.txt");
             te_1 = new BufferedWriter(te);
 
-            ta = new FileWriter("ta.txt");
+            ta = new FileWriter("Compilador/TSimbols/ta.txt");
             ta_1 = new BufferedWriter(ta);
         }catch(IOException error){
             System.out.println(error.toString());

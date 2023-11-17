@@ -1,4 +1,6 @@
-import TD.Descripcio;
+package Compilador.TSimbols;
+
+import Compilador.TSimbols.TD.Descripcio;
 
 public class Dada2 {
     

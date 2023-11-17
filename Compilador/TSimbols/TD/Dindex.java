@@ -1,4 +1,4 @@
-package TD;
+package Compilador.TSimbols.TD;
 
 public class Dindex extends Descripcio {
     private String tipus;

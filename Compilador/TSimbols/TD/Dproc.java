@@ -1,7 +1,8 @@
-package TD;
+package Compilador.TSimbols.TD;
 
 public class Dproc extends Descripcio {
     private static Integer np =0;
+
     public Dproc(){
         super("dproc");
         np++;
@@ -10,4 +11,5 @@ public class Dproc extends Descripcio {
     public Integer np(){
         return np;
     }
+
 }

@@ -10,6 +10,10 @@ import java_cup.runtime.ComplexSymbolFactory.ComplexSymbol;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 import java.io.PrintStream;
 import java.util.HashMap;
+import Compilador.TSimbols.Taula;
+import Compilador.TSimbols.DT.*;
+import Compilador.TSimbols.TD.*;
+import Compilador.Sintactic.Simbols.*;
 import java_cup.runtime.XMLElement;
 
 /** CUP v0.11b 20160615 generated parser.
@@ -786,10 +790,13 @@ public class Parser extends java_cup.runtime.lr_parser {
      *             Creació i Gestió de la Taula de Simbols                *
      **********************************************************************/
 
+    Taula taula_simbols = new Taula();
 
     /**********************************************************************
      * sobrecàrrega de mètodes per gestionar els errors que es localitzin *
      **********************************************************************/
+
+    private boolean errorSemantic = false;
 
     @Override
     public void unrecovered_syntax_error(Symbol cur_token) throws Exception {
@@ -1772,6 +1779,8 @@ class CUP$Parser$actions {
             {
               Object RESULT =null;
 		System.out.println("F -> LPAREN E RPAREN");
+                        
+                    
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("F",38, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1781,6 +1790,8 @@ class CUP$Parser$actions {
             {
               Object RESULT =null;
 		System.out.println("F -> venter");
+                RESULT = new SimbolF("ts_enter","id_nula","modeconst");
+                
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("F",38, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1790,6 +1801,8 @@ class CUP$Parser$actions {
             {
               Object RESULT =null;
 		System.out.println("F -> SUB venter");
+                RESULT = new SimbolF("ts_enter","id_nula","modeconst");
+                
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("F",38, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1799,6 +1812,8 @@ class CUP$Parser$actions {
             {
               Object RESULT =null;
 		System.out.println("F -> ADD venter");
+                RESULT = new SimbolF("ts_enter","id_nula","modeconst");
+                
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("F",38, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1808,6 +1823,8 @@ class CUP$Parser$actions {
             {
               Object RESULT =null;
 		System.out.println("F -> vdecimal");
+                RESULT = new SimbolF("ts_decimal","id_nula","modeconst");
+                
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("F",38, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1817,6 +1834,8 @@ class CUP$Parser$actions {
             {
               Object RESULT =null;
 		System.out.println("F -> ADD vdecimal");
+                RESULT = new SimbolF("ts_decimal","id_nula","modeconst");
+                
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("F",38, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1826,6 +1845,8 @@ class CUP$Parser$actions {
             {
               Object RESULT =null;
 		System.out.println("F -> SUB vdecimal");
+                RESULT = new SimbolF("ts_decimal","id_nula","modeconst");
+                
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("F",38, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1835,6 +1856,8 @@ class CUP$Parser$actions {
             {
               Object RESULT =null;
 		System.out.println("F -> vcaracter");
+                RESULT = new SimbolF("ts_caracter","id_nula","modeconst");
+                
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("F",38, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1844,6 +1867,8 @@ class CUP$Parser$actions {
             {
               Object RESULT =null;
 		System.out.println("F -> ADD");
+                RESULT = new SimbolF("ts_caracter","id_nula","modeconst");
+                
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("F",38, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1853,6 +1878,8 @@ class CUP$Parser$actions {
             {
               Object RESULT =null;
 		System.out.println("F -> SUB");
+                RESULT = new SimbolF("ts_caracter","id_nula","modeconst");
+                
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("F",38, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1862,6 +1889,8 @@ class CUP$Parser$actions {
             {
               Object RESULT =null;
 		System.out.println("F -> vcadena");
+                RESULT = new SimbolF("ts_cadena","id_nula","modeconst");
+                
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("F",38, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1870,7 +1899,31 @@ class CUP$Parser$actions {
           case 112: // F ::= ID 
             {
               Object RESULT =null;
+		int idleft = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).left;
+		int idright = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
+		String id = (String)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		System.out.println("F -> ID");
+                Descripcio descripcio = taula_simbols.consulta(id);
+                if(descripcio == null){ //si l'identificador no es troba a la taula de símbols
+                    report_error("Undefined id \""+id+"\"", id);
+                    errorSemantic = true;
+                    RESULT  = new SimbolF();
+                }else{
+                    if(descripcio instanceof Dvar){
+                        Dvar var = (Dvar) descripcio;
+                        Dtipus tipus = (Dtipus) taula_simbols.consulta(var.tipus()); //ALERTA EN NO TROBAR
+                        RESULT = new SimbolF(tipus.dt().tipus_subjacent(),var.tipus(),"modevar");
+                    }else if(descripcio instanceof Dconst){
+                        Dconst cons = (Dconst) descripcio;
+                        Dtipus tipus = (Dtipus) taula_simbols.consulta(cons.tipus()); //ALERTA EN NO TROBAR
+                        RESULT = new SimbolF(tipus.dt().tipus_subjacent(),cons.tipus(),"modeconst");
+                    }else{
+                        report_error("L'identificador: "+id+" té el tipus erroni per a expresions",id);
+                        errorSemantic = true;
+                        RESULT  = new SimbolF();
+                    }
+                }
+                
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("F",38, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1880,6 +1933,8 @@ class CUP$Parser$actions {
             {
               Object RESULT =null;
 		System.out.println("F -> vlogic");
+                RESULT = new SimbolF("ts_boolea","id_nula","modeconst");
+                
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("F",38, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;

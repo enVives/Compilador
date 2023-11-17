@@ -1,4 +1,4 @@
-package DT;
+package Compilador.TSimbols.DT;
 
 public class Escalar extends DefinicioTipus {
     

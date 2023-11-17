@@ -1,2 +1,0 @@
-Identificador: nom, Descripció: np: 0 Descripció -> TD:  dproc
-Identificador: int, Descripció: np: 0 Descripció -> TD:  dtipus

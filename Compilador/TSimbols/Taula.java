@@ -1,12 +1,10 @@
+package Compilador.TSimbols;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import TD.Dconst;
-import TD.Descripcio;
-import TD.Dproc;
-import TD.Dtipus;
-import TD.Dvar;
+import Compilador.TSimbols.TD.*;
 
 public class Taula{
 
@@ -55,7 +53,12 @@ public class Taula{
     }
 
     public Descripcio consulta(String id){
-        return td.get(id).td();
+        if(td.get(id)!=null){
+           return td.get(id).td(); 
+        }else{
+            return null;
+        }
+        
     }
 
     public void posar(String id, Descripcio descripcio){
@@ -201,11 +204,13 @@ public class Taula{
         ta.add(n,idx);
         te.add(idx,new Dada2(null,idparam,-1,d));
 
+
         if(idxe == null){
-            td.get(idpr).set_first(null);
+            td.get(idpr).set_first(te.get(idx));
         }else{
             idxe.set_next(te.get(idx));
         }
+
     }
 
     public void buidar(){

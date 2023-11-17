@@ -1,6 +1,6 @@
-package TD;
+package Compilador.TSimbols.TD;
 
-import DT.DefinicioTipus;
+import Compilador.TSimbols.DT.*;
 
 public class Dtipus extends Descripcio{
 

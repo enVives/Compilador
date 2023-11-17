@@ -1,4 +1,4 @@
-package TD;
+package Compilador.TSimbols.TD;
 
 public class Dargin extends Descripcio {
     private int nv;

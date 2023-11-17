@@ -1,5 +1,4 @@
-package TD;
-
+package Compilador.TSimbols.TD;
 public class Darg extends Descripcio {
     private String tipus;
     private Integer mode;

@@ -13,7 +13,6 @@ import java_cup.runtime.SymbolFactory;
 
 import Compilador.Lexic.Scanner;
 import Compilador.Sintactic.Parser;
-
 public class Principal {
     /**
      * @param args arguments de línia de comanda
