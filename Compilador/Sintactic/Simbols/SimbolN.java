@@ -1,17 +1,21 @@
 package Compilador.Sintactic.Simbols;
 
-public class SimbolOP extends SimbolBase {
+public class SimbolN extends SimbolBase {
     private String ts_heretat; //el tipus que heretam del F esquerre o la operació esquerre
     private String tsb;
     private String tipus;
     private String mode;
 
-    public SimbolOP(String ts_heretat, String tsb, String tipus, String mode) {
+    public SimbolN(String tsb, String tipus, String mode) { //alerta amb no afegir el tsb
         super();
-        this.ts_heretat = ts_heretat;
         this.tsb = tsb;
         this.tipus = tipus;
         this.mode = mode;
+    }
+
+    public SimbolN(){
+        tsb = "ts_nul";
+        tipus = "id_nula";
     }
 
     public String getTs_heretat() {

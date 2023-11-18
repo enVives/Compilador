@@ -19,6 +19,7 @@ public class Principal {
      */
     public static void main(String[] args) {
         Reader fitxer;
+        boolean bol = 1+1<=1+1;
         try {
             fitxer = new FileReader("/home/perejoan/Documentos/GitHub/Compilador/Principal/prova.txt");
             Scanner scanner = new Scanner(fitxer);

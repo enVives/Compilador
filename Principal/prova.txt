@@ -1,11 +1,5 @@
-
-i = 3
-ent i = 4;
-cad j = "abc";
-
+ent id = 1*1*2;
 metode main (cad arguments []) {
-    if(){
-
     
 }
     

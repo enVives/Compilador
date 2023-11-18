@@ -96,8 +96,19 @@ terminal decimal,enter,logic,cadena,caracter,tupla,si,sino,seleccio,cas,pdefecte
 non terminal PROGRAMA,DECL,PROCEDIMENT,MAIN,DECL_TUPLA,DECL_TAULA,DECL_TIPUS,MODIF,
     MODIF_TUPLA, REM_TUPLA, AFG_TUPLA, MODIF_TAULA, REDEF_TAULA, REDEF_TUPLA, MODIF_TIPUS,
     SENTENCIES, MENTRE, IF, SWITCH, FMENTRE, ARGS, TIPUS, RETURN, CRIDA_PROC, ARGS_1, SENT,VAL_TUPLA,
-    ARG,L,IF_1,SWITCH_1, I, I_1, A, A_1, E, NOVA_TAULA, NOVA_TUPLA, F, OP,
+    ARG,L,IF_1,SWITCH_1, I, I_1, A, A_1,NOVA_TAULA, NOVA_TUPLA,
     VALORS,FOR,FOR_1,OP_CONDICIONAL,OP_CONDICIONAL_1,ENTRADAS,SORTIDAS,DECL_CONST;    
+
+non terminal SimbolF F;
+non terminal SimbolE E;
+non terminal SimbolEp E_1;
+//non terminal SimbolOP OP;
+non terminal SimbolT T;
+non terminal SimbolTp T_1;
+non terminal SimbolN N;
+non terminal SimbolNp N_1;
+non terminal SimbolM M;
+non terminal SimbolMp M_1;
 
 start with PROGRAMA;
 
@@ -241,6 +252,8 @@ AFG_TUPLA ::= ID PUNT afegeix LPAREN E RPAREN {:System.out.println("ARG_TUPLA");
 
 REDEF_TUPLA ::= ID ASSIGN NOVA_TUPLA {:System.out.println("REDEF_TUPLA");:};
 
+
+/*
 E ::= F OP {:System.out.println("E -> F OP");:};
 OP ::= ADD F OP {:System.out.println("OP -> ADD F OP");:}
         | SUB F OP {:System.out.println("OP -> SUB F OP");:}
@@ -255,16 +268,106 @@ OP ::= ADD F OP {:System.out.println("OP -> ADD F OP");:}
         | MAJOR F OP {:System.out.println("OP -> MAJOR F OP");:}
         | IGIG F OP {:System.out.println("OP -> IGIG F OP");:}
         | DIF F OP {:System.out.println("OP -> DIF F OP");:}
-        | {:System.out.println("OP -> @");:}
-        ;
+        | {:System.out.println("OP -> @");
+        :}
+        ;*/
 
-F ::= LPAREN E:e RPAREN {:System.out.println("F -> LPAREN E RPAREN");
-                if(e.getTsb() == "ts_nul"){
-                    RESULT = new SimbolF(); // cas -(id)-> -(F) -> -(E) on id es una tupla, E tendrà ts_nula
-                    //considerar si hauriem d'afegir el tipus de E així i tot.
+
+E ::= T E_1 {:System.out.println("E -> T E_1");:};
+
+E_1 ::= AND T E_1 {:System.out.println("E_1 -> AND T E_1");:}
+    | OR T E_1 {:System.out.println("E_1 -> OR T E_1");:}
+    | {:System.out.println("E_1 -> @");:}
+    ;
+
+T ::= N T_1 {::};
+
+T_1 ::= IGIG N T_1 {:System.out.println("T_1 -> IGIG N T_1");:}
+    | DIF N T_1 {:System.out.println("T_1 -> DIF N T_1");:}
+    |MENOR N T_1 {:System.out.println("T_1 -> MENOR N T_1");:}
+    |MAJOR N T_1 {:System.out.println("T_1 -> MAJOR N T_1");:}
+    |MENORI N T_1 {:System.out.println("T_1 -> MENORI N T_1");:}
+    |MAJORI N T_1 {:System.out.println("T_1 -> MAJORI N T_1");:}
+    | {:System.out.println("T_1 -> @");:}
+;
+
+N ::= M N_1 {:System.out.println("N -> M N_1");:};
+
+N_1 ::= ADD M N_1 {:System.out.println("N_1 -> ADD M N_1");:}
+    | SUB M N_1 {:System.out.println("N_1 -> SUB M N_1");:}
+    | {:System.out.println("N_1 -> @");:}
+    ;
+
+M ::= F:f M_1:m {:System.out.println("M -> F M_1");
+        if(errorSemantic){
+            RESULT = new SimbolM();
+        }else{
+            if(m.getTsb()=="ts_nul"){ //vol dir que M_1 -> @
+                RESULT = new SimbolM(f.getTsb(),f.getTipus(),f.getMode());
+            }else{ //M_1 ha fet qualque operació, hem de passar el tsb de f
+                m.setTs_heretat(f.getTsb());
+                
+            }
+        }
+        :};
+
+M_1 ::= MULT F M_1 {:System.out.println("M_1 -> MULT F M_1");:}
+
+    | DIV F M_1 {:System.out.println("M_1 -> DIV F M_1");:}
+
+    | MOD F:f M_1:m {:System.out.println("M_1 -> MOD F M_1");
+
+        if(errorSemantic){
+            RESULT = new SimbolMp();
+        }else{
+            if(m.getTsb() == "ts_nul"){ //la producció M_1 -> @, comprovar el tipus de f
+
+                if((f.getTsb() == "ts_nul")||(f.getTsb() == "ts_cadena")){ //es tracta d'un tsb que no volem per operacions, error
+                    report_error("El terminal no es adequat per una operació de mòdul", f);
+                    errorSemantic = true;
+                    RESULT = new SimbolMp();
                 }else{
-                    RESULT = new SimbolF(e.getTsb(),e.getTipus(),"moderesult"); //no tenc clar es mode
-                }      
+                    RESULT = new SimbolMp(f.getTsb(),f.getTipus(),ParserSym.MOD,"moderesult");
+                }
+            }else{ //M_1 té tipus subjacent i operació
+
+                if((f.getTsb() == "ts_nul")||(f.getTsb() == "ts_cadena")){
+                    report_error("El terminal no es adequat per una operació de mòdul", f);
+                    errorSemantic = true;
+                    RESULT = new SimbolMp();
+                }else{ //assumim que a f.tsb = cadena o decimal o caracter 
+                    m.setTs_heretat(f.getTsb());
+                    String resultat = m.obtenir_sintetitzat();
+
+                    if(resultat == "ts_nul"){
+                        report_error("No es pot fer una operació de mòdul amb decimals", f);
+                        errorSemantic = true;
+                        RESULT = new SimbolMp();
+                    }else{
+                        RESULT = new SimbolMp(resultat,"id_nula",ParserSym.MOD,"moderesult");
+                    }
+
+                }
+            }
+        }
+        :}
+    | {:System.out.println("M_1 -> @");
+        RESULT = new SimbolMp();
+    :}
+    ;
+
+ 
+F ::= LPAREN E:e RPAREN {:System.out.println("F -> LPAREN E RPAREN");
+                if(errorSemantic){
+                    RESULT = new SimbolF();
+                }else{
+                    if(e.getTsb() == "ts_nul"){
+                        RESULT = new SimbolF(); // cas -(id)-> -(F) -> -(E) on id es una tupla, E tendrà ts_nul
+                        //considerar si hauriem d'afegir el tipus de E així i tot.
+                    }else{
+                        RESULT = new SimbolF(e.getTsb(),e.getTipus(),"moderesult"); //no tenc clar es mode
+                    }   
+                } 
                     :}
 
     | venter {:System.out.println("F -> venter");
@@ -303,7 +406,7 @@ F ::= LPAREN E:e RPAREN {:System.out.println("F -> LPAREN E RPAREN");
                     report_error("Undefined id \""+id+"\"", id);
                     errorSemantic = true;
                     RESULT  = new SimbolF();
-                }else{
+                }else{ //mirar si accepta tuples
                     if(descripcio instanceof Dvar){
                         Dvar var = (Dvar) descripcio;
                         Dtipus tipus = (Dtipus) taula_simbols.consulta(var.tipus()); //ALERTA EN NO TROBAR
@@ -323,14 +426,19 @@ F ::= LPAREN E:e RPAREN {:System.out.println("F -> LPAREN E RPAREN");
                 RESULT = new SimbolF("ts_boolea","id_nula","modeconst");
                 :} 
     | SUB LPAREN E:e RPAREN {:System.out.println("F -> SUB LPAREN E RPAREN"); //REVISAR
-                if(e.getTsb() == "ts_nul"){
-                    RESULT = new SimbolF(); // cas -(id)-> -(F) -> -(E) on id es una tupla, E tendrà ts_nula
-                }else if((e.getTsb() != "ts_enter")&&(e.getTsb() != "ts_decimal")&&(e.getTsb() != "ts_caracter")){
-                    report_error("L'expresió E no té un tipus subjacent adequat",e);
-                    errorSemantic = true;
-                    RESULT  = new SimbolF();
+
+                if(errorSemantic){ //si s'ha comés un error Semantic a E
+                   RESULT  = new SimbolF(); 
                 }else{
-                    RESULT = new SimbolF(e.getTsb(),e.getTipus(),"moderesult");
+                    if(e.getTsb() == "ts_nul"){
+                        RESULT = new SimbolF(); // cas -(id)-> -(F) -> -(E) on id es una tupla, E tendrà ts_nul
+                    }else if((e.getTsb() != "ts_enter")&&(e.getTsb() != "ts_decimal")&&(e.getTsb() != "ts_caracter")){
+                        report_error("L'expresió E no té un tipus subjacent adequat",e);
+                        errorSemantic = true;
+                        RESULT  = new SimbolF();
+                    }else{
+                        RESULT = new SimbolF(e.getTsb(),e.getTipus(),"moderesult");
+                    } 
                 }
                 :}
     | NOT vlogic {:System.out.println("F -> NOT vlogic");
@@ -374,15 +482,20 @@ F ::= LPAREN E:e RPAREN {:System.out.println("F -> LPAREN E RPAREN");
                     }
                 }
                 :}
-    | NOT LPAREN E:e RPAREN {:System.out.println("F -> NOT LPAREN E RPAREN");
-                if(e.getTsb() == "ts_nul"){
-                    RESULT = new SimbolF(); // cas -(id)-> -(F) -> -(E) on id es una tupla, E tendrà ts_nula
-                }else if(e.getTsb() != "ts_boolea"){
-                    report_error("L'expresió E no té un tipus subjacent adequat",e);
-                    errorSemantic = true;
+    | NOT LPAREN E:e RPAREN {:System.out.println("F -> NOT LPAREN E RPAREN"); //posar error semantic
+                if(errorSemantic){ //si a E s'ha comés un error semántic
                     RESULT  = new SimbolF();
                 }else{
-                    RESULT = new SimbolF(e.getTsb(),e.getTipus(),"moderesult");
+                    if(e.getTsb() == "ts_nul"){
+                        RESULT = new SimbolF(); // cas -(id)-> -(F) -> -(E) on id es una tupla, E tendrà ts_nul
+                    }else if(e.getTsb() != "ts_boolea"){
+                        report_error("L'expresió E no té un tipus subjacent adequat",e);
+                        errorSemantic = true;
+                        RESULT  = new SimbolF();
+                    }else{
+                        RESULT = new SimbolF(e.getTsb(),e.getTipus(),"moderesult");
+                    }   
                 }
+                
                 :}
     ;

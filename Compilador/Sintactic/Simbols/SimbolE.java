@@ -12,6 +12,11 @@ public class SimbolE extends SimbolBase {
         this.mode = mode;
     }
 
+    public SimbolE(){
+        tsb = "ts_nul";
+        tipus = "id_nula";
+    }
+
     public String getTsb() {
         return tsb;
     }
