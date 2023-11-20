@@ -26,7 +26,8 @@ public class SimbolMp extends SimbolBase {
     public SimbolMp() {
         tsb = "ts_nul";
         tipus = "id_nula";
-        this.ts_heretat = null;
+        ts_heretat = null;
+        mode = null;
     }
 
     public String getTs_heretat() {

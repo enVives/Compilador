@@ -273,56 +273,378 @@ OP ::= ADD F OP {:System.out.println("OP -> ADD F OP");:}
         ;*/
 
 
-E ::= T E_1 {:System.out.println("E -> T E_1");:};
+E ::= T:t E_1:e {:System.out.println("E -> T E_1");
+    if(errorSemantic){
+        RESULT = new SimbolE();
+    }else{
+        if((e==null)||(e.getTsb()=="ts_nul")){
+            RESULT = new SimbolE(t.getTsb(),t.getTipus(),t.getMode());
+        }else{
+           if(t.getTsb()!="ts_boolea"){
+                report_error("L'operand ha de ser de tipus booleà", t);
+                errorSemantic = true;
+                RESULT = new SimbolE();
+            }else{
+                e.setTs_heretat("ts_boolea"); //calcular
+                RESULT = new SimbolE("ts_boolea","id_nula","moderesult");
+            } 
+        }
+    }
+    :};
 
-E_1 ::= AND T E_1 {:System.out.println("E_1 -> AND T E_1");:}
-    | OR T E_1 {:System.out.println("E_1 -> OR T E_1");:}
-    | {:System.out.println("E_1 -> @");:}
+E_1 ::= AND:op T:t E_1:e {:System.out.println("E_1 -> AND T E_1");
+        if(errorSemantic){
+            RESULT = new SimbolEp();
+        }else{
+            if((e==null)||(e.getTsb() == "ts_nul")){ //venim de Ep -> @
+                if(t.getTsb() != "ts_boolea"){ //error, no podem operar amb valors que no son booleans
+                    report_error("L'operand ha de ser de tipus booleà per una operació AND", t);
+                    errorSemantic = true;
+                    RESULT = new SimbolEp();
+                }else{ 
+                    RESULT = new SimbolEp("ts_boolea","id_nula",ParserSym.AND,"moderesult");
+                }
+            }else{
+                if(t.getTsb() != "ts_boolea"){ //error, no podem operar amb valors que no son booleans
+                    report_error("L'operand ha de ser de tipus booleà per una operació AND", t);
+                    errorSemantic = true;
+                    RESULT = new SimbolEp();
+                }else{ 
+                    e.setTs_heretat("ts_boolea");
+                    //operació
+                    RESULT = new SimbolEp("ts_boolea","id_nula",ParserSym.AND,"moderesult");
+                }  
+            }
+        }
+    :}
+    | OR:op T:t E_1:e {:System.out.println("E_1 -> OR T E_1");
+        if(errorSemantic){
+            RESULT = new SimbolEp();
+        }else{
+            if((e==null)||(e.getTsb() == "ts_nul")){ //venim de Ep -> @
+                if(t.getTsb() != "ts_boolea"){ //error, no podem operar amb valors que no son booleans
+                    report_error("L'operand ha de ser de tipus booleà per una operació OR", t);
+                    errorSemantic = true;
+                    RESULT = new SimbolEp();
+                }else{ 
+                    RESULT = new SimbolEp("ts_boolea","id_nula",ParserSym.OR,"moderesult");
+                }
+            }else{
+                if(t.getTsb() != "ts_boolea"){ //error, no podem operar amb valors que no son booleans
+                    report_error("L'operand ha de ser de tipus booleà per una operació OR", t);
+                    errorSemantic = true;
+                    RESULT = new SimbolEp();
+                }else{ 
+                    e.setTs_heretat("ts_boolea");
+                    //operació
+                    RESULT = new SimbolEp("ts_boolea","id_nula",ParserSym.OR,"moderesult");
+                }  
+            }
+        }
+        :}
+    | {:System.out.println("E_1 -> @");
+        RESULT = new SimbolEp();
+        :}
     ;
 
-T ::= N T_1 {::};
+T ::= N:n T_1:t {:System.out.println("T -> N T_1");
+    if(errorSemantic){
+        RESULT = new SimbolT();
+    }else{
+        if((t==null)||(t.getTsb() == "ts_nul")){ //venim de Tp -> @
+            RESULT = new SimbolT(n.getTsb(),n.getTipus(),n.getMode());
+        }else{
+            if((n.getTsb() == "ts_nul")||(n.getTsb() == "ts_cadena")||(n.getTsb()=="ts_boolea")){
+                report_error("El terminal no es adequat per una operació de comparacio", n);
+                errorSemantic = true;
+                RESULT = new SimbolT();
+            }else{
+                t.setTs_heretat(n.getTsb()); //li afegim per si després hem de fer operacions
+                RESULT = new SimbolT("ts_boolea","id_nula","moderesult");
+            }   
+        }
+    }
 
-T_1 ::= IGIG N T_1 {:System.out.println("T_1 -> IGIG N T_1");:}
-    | DIF N T_1 {:System.out.println("T_1 -> DIF N T_1");:}
-    |MENOR N T_1 {:System.out.println("T_1 -> MENOR N T_1");:}
-    |MAJOR N T_1 {:System.out.println("T_1 -> MAJOR N T_1");:}
-    |MENORI N T_1 {:System.out.println("T_1 -> MENORI N T_1");:}
-    |MAJORI N T_1 {:System.out.println("T_1 -> MAJORI N T_1");:}
-    | {:System.out.println("T_1 -> @");:}
+    :};
+
+T_1 ::= IGIG N:n {:System.out.println("T_1 -> IGIG N T_1");
+    if(errorSemantic){
+            RESULT = new SimbolTp();
+        }else{
+            if((n.getTsb() == "ts_nul")||(n.getTsb() == "ts_cadena")||(n.getTsb()=="ts_boolea")){
+                        report_error("El terminal no es adequat per una operació de comparacio", n);
+                        errorSemantic = true;
+                        RESULT = new SimbolTp();
+                    }else{ //assumim que a n.tsb = decimal o caracter 
+                        RESULT = new SimbolTp(n.getTsb(),n.getTipus(),ParserSym.IGIG,"moderesult");
+                    }
+        }
+    :} //hauriem de llevar tp, no volem repetició en aquest cas
+    | DIF N:n {:System.out.println("T_1 -> DIF N ");
+        if(errorSemantic){
+            RESULT = new SimbolTp();
+        }else{
+            if((n.getTsb() == "ts_nul")||(n.getTsb() == "ts_cadena")||(n.getTsb()=="ts_boolea")){
+                        report_error("El terminal no es adequat per una operació de mòdul", n);
+                        errorSemantic = true;
+                        RESULT = new SimbolTp();
+                    }else{ //assumim que a n.tsb = decimal o caracter 
+                        RESULT = new SimbolTp(n.getTsb(),n.getTipus(),ParserSym.DIF,"moderesult");
+                    }
+        }
+        :}
+    |MENOR N:n {:System.out.println("T_1 -> MENOR N ");
+        if(errorSemantic){
+            RESULT = new SimbolTp();
+        }else{
+            if((n.getTsb() == "ts_nul")||(n.getTsb() == "ts_cadena")||(n.getTsb()=="ts_boolea")){
+                        report_error("El terminal no es adequat per una operació de mòdul", n);
+                        errorSemantic = true;
+                        RESULT = new SimbolTp();
+                    }else{ //assumim que a n.tsb = decimal o caracter 
+                        RESULT = new SimbolTp(n.getTsb(),n.getTipus(),ParserSym.MENORI,"moderesult");
+                    }
+        }
+        :}
+    |MAJOR N:n {:System.out.println("T_1 -> MAJOR N ");
+        if(errorSemantic){
+            RESULT = new SimbolTp();
+        }else{
+            if((n.getTsb() == "ts_nul")||(n.getTsb() == "ts_cadena")||(n.getTsb()=="ts_boolea")){
+                        report_error("El terminal no es adequat per una operació de mòdul", n);
+                        errorSemantic = true;
+                        RESULT = new SimbolTp();
+                    }else{ //assumim que a n.tsb = decimal o caracter 
+                        RESULT = new SimbolTp(n.getTsb(),n.getTipus(),ParserSym.MAJOR,"moderesult");
+                    }
+        }
+        :}
+    |MENORI N:n {:System.out.println("T_1 -> MENORI N ");
+        if(errorSemantic){
+            RESULT = new SimbolTp();
+        }else{
+            if((n.getTsb() == "ts_nul")||(n.getTsb() == "ts_cadena")||(n.getTsb()=="ts_boolea")){
+                        report_error("El terminal no es adequat per una operació de mòdul", n);
+                        errorSemantic = true;
+                        RESULT = new SimbolTp();
+                    }else{ //assumim que a n.tsb = decimal o caracter 
+                        RESULT = new SimbolTp(n.getTsb(),n.getTipus(),ParserSym.MENORI,"moderesult");
+                    }
+        }
+        :}
+    |MAJORI N:n {:System.out.println("T_1 -> MAJORI N ");
+        if(errorSemantic){
+            RESULT = new SimbolTp();
+        }else{
+            if((n.getTsb() == "ts_nul")||(n.getTsb() == "ts_cadena")||(n.getTsb()=="ts_boolea")){
+                        report_error("El terminal no es adequat per una operació de mòdul", n);
+                        errorSemantic = true;
+                        RESULT = new SimbolTp();
+                    }else{ //assumim que a n.tsb = decimal o caracter 
+                        RESULT = new SimbolTp(n.getTsb(),n.getTipus(),ParserSym.MAJORI,"moderesult");
+                    }
+        }
+        :}
+    | {:System.out.println("T_1 -> @");
+        RESULT = new SimbolTp();
+        :}
 ;
 
-N ::= M N_1 {:System.out.println("N -> M N_1");:};
+N ::= M:m N_1:n {:System.out.println("N -> M N_1");
+        if(errorSemantic){
+            RESULT = new SimbolN();
+        }else{
+            if((n==null)||(n.getTsb()=="ts_nul")){ //vol dir que M_1 -> @
+                RESULT = new SimbolN(m.getTsb(),m.getTipus(),m.getMode()); //pot ser tupla
+            }else{ //M_1 ha fet qualque operació, hem de passar el tsb de f
+                n.setTs_heretat(m.getTsb());
+                String tsb = n.obtenir_sintetitzat();
 
-N_1 ::= ADD M N_1 {:System.out.println("N_1 -> ADD M N_1");:}
-    | SUB M N_1 {:System.out.println("N_1 -> SUB M N_1");:}
-    | {:System.out.println("N_1 -> @");:}
+                if(tsb == "ts_nul"){ //els cas de que F sigui una cadena o tupla o boolea
+                    report_error("El terminal no es adequat per una operació", m);
+                    errorSemantic = true;
+                    RESULT = new SimbolN();
+                }else{
+                    RESULT = new SimbolN(tsb,"id_nula","moderesult");
+                }
+            }
+        }
+        :};
+
+N_1 ::= ADD M:m N_1:n {:System.out.println("N_1 -> ADD M N_1");
+        if(errorSemantic){
+            RESULT = new SimbolNp();
+        }else{
+            if((n==null)||(n.getTsb()=="ts_nul")){ //vol dir que N_1 -> @
+                if((m.getTsb() == "ts_nul")||(m.getTsb() == "ts_cadena")||(m.getTsb()=="ts_boolea")){
+                    report_error("El terminal no es adequat per una operació de ADD", m);
+                    errorSemantic = true;
+                    RESULT = new SimbolNp();
+                }else{
+                    RESULT = new SimbolNp(m.getTsb(),m.getTipus(),ParserSym.ADD,"moderesult");
+                }
+            }else{ // N_1 té tsb i una operació associada
+                if((m.getTsb() == "ts_nul")||(m.getTsb() == "ts_cadena")||(m.getTsb()=="ts_boolea")){
+                        report_error("El terminal no es adequat per una operació de mòdul", m);
+                        errorSemantic = true;
+                        RESULT = new SimbolNp();
+                    }else{ //assumim que a m.tsb = cadena o decimal o caracter 
+                        n.setTs_heretat(m.getTsb());
+                        String resultat = n.obtenir_sintetitzat();
+
+                        if(resultat == "ts_nul"){
+                            report_error("No es pot fer una operació de mòdul amb decimals", m);
+                            errorSemantic = true;
+                            RESULT = new SimbolNp();
+                        }else{
+                            RESULT = new SimbolNp(resultat,"id_nula",ParserSym.ADD,"moderesult");
+                        }
+
+                    }
+            }
+        }
+        :}
+    | SUB M:m N_1:n {:System.out.println("N_1 -> SUB M N_1");
+        if(errorSemantic){
+            RESULT = new SimbolNp();
+        }else{
+            if((n==null)||(n.getTsb()=="ts_nul")){ //vol dir que N_1 -> @
+                if((m.getTsb() == "ts_nul")||(m.getTsb() == "ts_cadena")||(m.getTsb()=="ts_boolea")){
+                    report_error("El terminal no es adequat per una operació de ADD", m);
+                    errorSemantic = true;
+                    RESULT = new SimbolNp();
+                }else{
+                    RESULT = new SimbolNp(m.getTsb(),m.getTipus(),ParserSym.ADD,"moderesult");
+                }
+            }else{ // N_1 té tsb i una operació associada
+                if((m.getTsb() == "ts_nul")||(m.getTsb() == "ts_cadena")||(m.getTsb()=="ts_boolea")){
+                        report_error("El terminal no es adequat per una operació de mòdul", m);
+                        errorSemantic = true;
+                        RESULT = new SimbolNp();
+                    }else{ //assumim que a m.tsb = cadena o decimal o caracter 
+                        n.setTs_heretat(m.getTsb());
+                        String resultat = n.obtenir_sintetitzat();
+
+                        if(resultat == "ts_nul"){
+                            report_error("No es pot fer una operació de mòdul amb decimals", m);
+                            errorSemantic = true;
+                            RESULT = new SimbolNp();
+                        }else{
+                            RESULT = new SimbolNp(resultat,"id_nula",ParserSym.SUB,"moderesult");
+                        }
+
+                    }
+            }
+        }
+        :}
+    | {:System.out.println("N_1 -> @");
+        RESULT = new SimbolNp();
+        :}
     ;
 
 M ::= F:f M_1:m {:System.out.println("M -> F M_1");
         if(errorSemantic){
             RESULT = new SimbolM();
         }else{
-            if(m.getTsb()=="ts_nul"){ //vol dir que M_1 -> @
-                RESULT = new SimbolM(f.getTsb(),f.getTipus(),f.getMode());
+            if((m==null)||(m.getTsb() == "ts_nul")){ //vol dir que M_1 -> @
+                RESULT = new SimbolM(f.getTsb(),f.getTipus(),f.getMode()); //pot ser tupla
             }else{ //M_1 ha fet qualque operació, hem de passar el tsb de f
                 m.setTs_heretat(f.getTsb());
-                
+                String tsb = m.obtenir_sintetitzat();
+
+                if(tsb == "ts_nul"){ //els cas de que F sigui una cadena o tupla o boolea
+                    report_error("El terminal no es adequat per una operació", f);
+                    errorSemantic = true;
+                    RESULT = new SimbolM();
+                }else{
+                    RESULT = new SimbolM(tsb,"id_nula","moderesult");
+                }
             }
         }
         :};
 
-M_1 ::= MULT F M_1 {:System.out.println("M_1 -> MULT F M_1");:}
+M_1 ::= MULT F:f M_1:m {:System.out.println("M_1 -> MULT F M_1");
+        if(errorSemantic){
+            RESULT = new SimbolMp();
+        }else{
+            if((m==null)||(m.getTsb() == "ts_nul")){ //la producció M_1 -> @, comprovar el tipus de f
 
-    | DIV F M_1 {:System.out.println("M_1 -> DIV F M_1");:}
+                if((f.getTsb() == "ts_nul")||(f.getTsb() == "ts_cadena")||(f.getTsb()=="ts_boolea")){ //es tracta d'un tsb que no volem per operacions, error
+                    report_error("El terminal no es adequat per una operació de mòdul", f);
+                    errorSemantic = true;
+                    RESULT = new SimbolMp();
+                }else{
+                    RESULT = new SimbolMp(f.getTsb(),f.getTipus(),ParserSym.MULT,"moderesult");
+                }
+            }else{ //M_1 té tipus subjacent i operació
+
+                if((f.getTsb() == "ts_nul")||(f.getTsb() == "ts_cadena")||(f.getTsb()=="ts_boolea")){
+                    report_error("El terminal no es adequat per una operació de mòdul", f);
+                    errorSemantic = true;
+                    RESULT = new SimbolMp();
+                }else{ //assumim que a f.tsb = cadena o decimal o caracter 
+                    m.setTs_heretat(f.getTsb());
+                    String resultat = m.obtenir_sintetitzat();
+
+                    if(resultat == "ts_nul"){
+                        report_error("No es pot fer una operació de mòdul amb decimals", f);
+                        errorSemantic = true;
+                        RESULT = new SimbolMp();
+                    }else{
+                        RESULT = new SimbolMp(resultat,"id_nula",ParserSym.MULT,"moderesult");
+                    }
+
+                }
+            }
+        }
+
+        :}
+
+    | DIV F:f M_1:m {:System.out.println("M_1 -> DIV F M_1");
+
+        if(errorSemantic){
+            RESULT = new SimbolMp();
+        }else{
+            if((m==null)||(m.getTsb() == "ts_nul")){ //la producció M_1 -> @, comprovar el tipus de f
+
+                if((f.getTsb() == "ts_nul")||(f.getTsb() == "ts_cadena")||(f.getTsb()=="ts_boolea")){ //es tracta d'un tsb que no volem per operacions, error
+                    report_error("El terminal no es adequat per una operació de mòdul", f);
+                    errorSemantic = true;
+                    RESULT = new SimbolMp();
+                }else{
+                    RESULT = new SimbolMp(f.getTsb(),f.getTipus(),ParserSym.DIV,"moderesult");
+                }
+            }else{ //M_1 té tipus subjacent i operació
+
+                if((f.getTsb() == "ts_nul")||(f.getTsb() == "ts_cadena")||(f.getTsb()=="ts_boolea")){
+                    report_error("El terminal no es adequat per una operació de mòdul", f);
+                    errorSemantic = true;
+                    RESULT = new SimbolMp();
+                }else{ //assumim que a f.tsb = cadena o decimal o caracter 
+                    m.setTs_heretat(f.getTsb());
+                    String resultat = m.obtenir_sintetitzat();
+
+                    if(resultat == "ts_nul"){
+                        report_error("No es pot fer una operació de mòdul amb decimals", f);
+                        errorSemantic = true;
+                        RESULT = new SimbolMp();
+                    }else{
+                        RESULT = new SimbolMp(resultat,"id_nula",ParserSym.DIV,"moderesult");
+                    }
+
+                }
+            }
+        }
+        :}
 
     | MOD F:f M_1:m {:System.out.println("M_1 -> MOD F M_1");
 
         if(errorSemantic){
             RESULT = new SimbolMp();
         }else{
-            if(m.getTsb() == "ts_nul"){ //la producció M_1 -> @, comprovar el tipus de f
+            if((m==null)||(m.getTsb() == "ts_nul")){ //la producció M_1 -> @, comprovar el tipus de f
 
-                if((f.getTsb() == "ts_nul")||(f.getTsb() == "ts_cadena")){ //es tracta d'un tsb que no volem per operacions, error
+                if((f.getTsb() == "ts_nul")||(f.getTsb() == "ts_cadena")||(f.getTsb()=="ts_boolea")){ //es tracta d'un tsb que no volem per operacions, error
                     report_error("El terminal no es adequat per una operació de mòdul", f);
                     errorSemantic = true;
                     RESULT = new SimbolMp();
@@ -331,7 +653,7 @@ M_1 ::= MULT F M_1 {:System.out.println("M_1 -> MULT F M_1");:}
                 }
             }else{ //M_1 té tipus subjacent i operació
 
-                if((f.getTsb() == "ts_nul")||(f.getTsb() == "ts_cadena")){
+                if((f.getTsb() == "ts_nul")||(f.getTsb() == "ts_cadena")||(f.getTsb()=="ts_boolea")){
                     report_error("El terminal no es adequat per una operació de mòdul", f);
                     errorSemantic = true;
                     RESULT = new SimbolMp();
@@ -361,9 +683,10 @@ F ::= LPAREN E:e RPAREN {:System.out.println("F -> LPAREN E RPAREN");
                 if(errorSemantic){
                     RESULT = new SimbolF();
                 }else{
-                    if(e.getTsb() == "ts_nul"){
-                        RESULT = new SimbolF(); // cas -(id)-> -(F) -> -(E) on id es una tupla, E tendrà ts_nul
-                        //considerar si hauriem d'afegir el tipus de E així i tot.
+                    if(e.getTsb() == "ts_nul"){ //ho trob error
+                        report_error("(E) té tsb null", e);
+                        errorSemantic = true;
+                        RESULT  = new SimbolF();
                     }else{
                         RESULT = new SimbolF(e.getTsb(),e.getTipus(),"moderesult"); //no tenc clar es mode
                     }   
@@ -431,9 +754,11 @@ F ::= LPAREN E:e RPAREN {:System.out.println("F -> LPAREN E RPAREN");
                    RESULT  = new SimbolF(); 
                 }else{
                     if(e.getTsb() == "ts_nul"){
-                        RESULT = new SimbolF(); // cas -(id)-> -(F) -> -(E) on id es una tupla, E tendrà ts_nul
+                        report_error("No es pot restar -(E) o el tsb de E és null", e);
+                        errorSemantic = true;
+                        RESULT  = new SimbolF();
                     }else if((e.getTsb() != "ts_enter")&&(e.getTsb() != "ts_decimal")&&(e.getTsb() != "ts_caracter")){
-                        report_error("L'expresió E no té un tipus subjacent adequat",e);
+                        report_error("L'expresió (E) no té un tipus subjacent adequat",e);
                         errorSemantic = true;
                         RESULT  = new SimbolF();
                     }else{
@@ -461,7 +786,7 @@ F ::= LPAREN E:e RPAREN {:System.out.println("F -> LPAREN E RPAREN");
                             errorSemantic = true;
                             RESULT  = new SimbolF();
                         }else{
-                            RESULT = new SimbolF(tipus.dt().tipus_subjacent(),var.tipus(),"modeconst");
+                            RESULT = new SimbolF(tipus.dt().tipus_subjacent(),var.tipus(),"modevar");
                         }
                         
                     }else if(descripcio instanceof Dconst){
@@ -473,7 +798,7 @@ F ::= LPAREN E:e RPAREN {:System.out.println("F -> LPAREN E RPAREN");
                             errorSemantic = true;
                             RESULT  = new SimbolF();
                         }else{
-                          RESULT = new SimbolF(tipus.dt().tipus_subjacent(),cons.tipus(),"moderesult");  
+                          RESULT = new SimbolF(tipus.dt().tipus_subjacent(),cons.tipus(),"modeconst"); //no sé perquè result  
                         }
                     }else{
                         report_error("L'identificador: "+id+" té el tipus erroni per al NOT",id);
@@ -486,16 +811,13 @@ F ::= LPAREN E:e RPAREN {:System.out.println("F -> LPAREN E RPAREN");
                 if(errorSemantic){ //si a E s'ha comés un error semántic
                     RESULT  = new SimbolF();
                 }else{
-                    if(e.getTsb() == "ts_nul"){
-                        RESULT = new SimbolF(); // cas -(id)-> -(F) -> -(E) on id es una tupla, E tendrà ts_nul
-                    }else if(e.getTsb() != "ts_boolea"){
-                        report_error("L'expresió E no té un tipus subjacent adequat",e);
+                    if(e.getTsb() != "ts_boolea"){
+                        report_error("L'expresió entre parèntesis NOT(E) no és booleana ",e);
                         errorSemantic = true;
                         RESULT  = new SimbolF();
                     }else{
                         RESULT = new SimbolF(e.getTsb(),e.getTipus(),"moderesult");
                     }   
                 }
-                
                 :}
     ;

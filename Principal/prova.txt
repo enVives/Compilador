@@ -1,4 +1,4 @@
-ent id = 1*1*2;
+ent id = 1<1<1;
 metode main (cad arguments []) {
     
 }
