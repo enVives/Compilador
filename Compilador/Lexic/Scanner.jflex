@@ -155,6 +155,25 @@ endline      = ['\r'|'\n'|"\r\n"]+
 
         return new ComplexSymbol(ParserSym.terminalNames[type], type, esquerra, dreta);
     }
+
+    public class Token{
+      public Location esquerre;
+      public Location dreta;
+      public Object valor;
+
+      public Token(Object valor){
+        this.valor = valor;
+        esquerre = new Location(yyline+1, yycolumn+1);
+        dreta = new Location(yyline+1, yycolumn+yytext().length()+1);
+      }
+
+      public Token(){
+        esquerre = new Location(yyline+1, yycolumn+1);
+        dreta = new Location(yyline+1, yycolumn+yytext().length()+1);
+        valor = null;
+      }
+    }
+
     
     /**
      Construcció d'un symbol amb un atribut associat.
@@ -189,19 +208,19 @@ endline      = ['\r'|'\n'|"\r\n"]+
 // Regles/accions
 // És molt important l'ordre de les regles!!!
 
-{suma}                    { return symbol(ParserSym.ADD);  }
-{resta}                   { return symbol(ParserSym.SUB);    }
-{mul}                     { return symbol(ParserSym.MULT);}
-{div}                     { return symbol(ParserSym.DIV);}
-{mod}                     { return symbol(ParserSym.MOD);}
+{suma}                    { return symbol(ParserSym.ADD,new Token());  }
+{resta}                   { return symbol(ParserSym.SUB,new Token());    }
+{mul}                     { return symbol(ParserSym.MULT,new Token());}
+{div}                     { return symbol(ParserSym.DIV,new Token());}
+{mod}                     { return symbol(ParserSym.MOD,new Token());}
 {autosuma}                { return symbol(ParserSym.AUTOSUM);}
 {autoresta}               { return symbol(ParserSym.AUTOSUB);}
 {sumahi}                  { return symbol(ParserSym.SUMAHI);}
 {restahi}                 { return symbol(ParserSym.RESTAHI);}
 {dospunts}                { return symbol(ParserSym.DOSPUNTS);}
 {interrogant}             { return symbol(ParserSym.INTERROG);}
-{lparen}                  { return symbol(ParserSym.LPAREN);}
-{rparen}                  { return symbol(ParserSym.RPAREN);}
+{lparen}                  { return symbol(ParserSym.LPAREN,new Token());}
+{rparen}                  { return symbol(ParserSym.RPAREN,new Token());}
 {punticoma}               { return symbol(ParserSym.PUNTICOMA);}
 {assign}                  { return symbol(ParserSym.ASSIGN);}
 {lcorch}                  { return symbol(ParserSym.LCORCH);}
@@ -211,23 +230,23 @@ endline      = ['\r'|'\n'|"\r\n"]+
 {coma}                    { return symbol(ParserSym.COMA);}
 {punt}                    { return symbol(ParserSym.PUNT);}
 
-{diferent}                { return symbol(ParserSym.DIF);}
-{comp}                    { return symbol(ParserSym.IGIG);}
-{menori}                  { return symbol(ParserSym.MENORI);}
-{majori}                  { return symbol(ParserSym.MAJORI);}
-{menor}                   { return symbol(ParserSym.MENOR);}
-{major}                   { return symbol(ParserSym.MAJOR);}
+{diferent}                { return symbol(ParserSym.DIF,new Token());}
+{comp}                    { return symbol(ParserSym.IGIG,new Token());}
+{menori}                  { return symbol(ParserSym.MENORI,new Token());}
+{majori}                  { return symbol(ParserSym.MAJORI,new Token());}
+{menor}                   { return symbol(ParserSym.MENOR,new Token());}
+{major}                   { return symbol(ParserSym.MAJOR,new Token());}
  
-{or} { return symbol(ParserSym.OR);}
-{and}  { return symbol(ParserSym.AND);}
-{not}  { return symbol(ParserSym.NOT);}
+{or} { return symbol(ParserSym.OR,new Token());}
+{and}  { return symbol(ParserSym.AND,new Token());}
+{not}  { return symbol(ParserSym.NOT,new Token());}
 
 {ent}                     { return symbol(ParserSym.enter);}
 {decimals}                { return symbol(ParserSym.decimal);}       
 {caracter}                { return symbol(ParserSym.caracter);}
 {cad}                     { return symbol(ParserSym.cadena);}
 {logic}                   { return symbol(ParserSym.logic);}
-{zerodigit}               { return symbol(ParserSym.enter,0);}
+//{zerodigit}               { return symbol(ParserSym.enter,0);}
 
 {tupla}                   { return symbol(ParserSym.tupla);}
 {si}                      { return symbol(ParserSym.si);}
@@ -247,12 +266,12 @@ endline      = ['\r'|'\n'|"\r\n"]+
 {nou}                { return symbol(ParserSym.nou);}
 
 
-{enter}                   { return symbol(ParserSym.venter,Integer.parseInt(this.yytext()));}
-{decimal}                 { return symbol(ParserSym.vdecimal,Double.parseDouble(this.yytext()));}
-{vlogic}                   { return symbol(ParserSym.vlogic,this.yytext());}
+{enter}                   { return symbol(ParserSym.venter,new Token(Integer.parseInt(this.yytext())));}
+{decimal}                 { return symbol(ParserSym.vdecimal,new Token(Double.parseDouble(this.yytext())));}
+{vlogic}                   { return symbol(ParserSym.vlogic,new Token(this.yytext()));}
 
-{cadena}         {return symbol(ParserSym.vcadena,tractar(this.yytext()));} //return symbol(ParserSym.vcadena,this.yytext());
-{car}         {return symbol(ParserSym.vcaracter,tractar(this.yytext()));} //return symbol(ParserSym.vcaracter,this.yytext());
+{cadena}         {return symbol(ParserSym.vcadena,new Token(tractar(this.yytext())));} //return symbol(ParserSym.vcadena,this.yytext());
+{car}         {return symbol(ParserSym.vcaracter,new Token(tractar(this.yytext())));} //return symbol(ParserSym.vcaracter,this.yytext());
 
 //{cadena}    {System.out.println(tractar(this.yytext()));}
 //{car}     {System.out.println("Caracter " +tractar(this.yytext()));}
@@ -263,7 +282,7 @@ endline      = ['\r'|'\n'|"\r\n"]+
 {main}        { return symbol(ParserSym.main);}
 
 
-{id}                      {return symbol(ParserSym.ID,this.yytext());} //return symbol(ParserSym.ID,this.yytext());
+{id}                      {return symbol(ParserSym.ID,new Token(this.yytext()));} //return symbol(ParserSym.ID,this.yytext());
 //{id}  {System.out.println("Id :" +yytext());}
 
 {ws}                     {}

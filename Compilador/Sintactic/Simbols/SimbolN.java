@@ -1,19 +1,35 @@
 package Compilador.Sintactic.Simbols;
 
+import java_cup.runtime.ComplexSymbolFactory.Location;
+import java_cup.runtime.ComplexSymbolFactory.Location;
+
 public class SimbolN extends SimbolBase {
-    private String ts_heretat; //el tipus que heretam del F esquerre o la operació esquerre
+    private String ts_heretat; // el tipus que heretam del F esquerre o la operació esquerre
     private String tsb;
     private String tipus;
     private String mode;
+    private Location esquerre;
 
-    public SimbolN(String tsb, String tipus, String mode) { //alerta amb no afegir el tsb
+    public Location getEsquerre() {
+        return esquerre;
+    }
+
+    private Location dreta;
+
+    public Location getDreta() {
+        return dreta;
+    }
+
+    public SimbolN(String tsb, String tipus, String mode,Location esquerre,Location dreta) { // alerta amb no afegir el tsb
         super();
         this.tsb = tsb;
         this.tipus = tipus;
         this.mode = mode;
+        this.esquerre = esquerre;
+        this.dreta = dreta;
     }
 
-    public SimbolN(){
+    public SimbolN() {
         tsb = "ts_nul";
         tipus = "id_nula";
     }

@@ -2,12 +2,20 @@ package Compilador.Sintactic.Simbols;
 
 import Compilador.Sintactic.ParserSym;
 
+import java_cup.runtime.ComplexSymbolFactory.Location;
+
 public class SimbolNp extends SimbolBase {
     private String ts_heretat; //el tipus que heretam del F esquerre o la operació esquerre
     private String tsb;
     private String tipus;
     private String mode;
     private Integer operacio;
+    private Location dreta;
+
+
+    public Location getDreta() {
+        return dreta;
+    }
 
     public Integer getOperacio() {
         return operacio;
@@ -17,13 +25,14 @@ public class SimbolNp extends SimbolBase {
         this.operacio = operacio;
     }
 
-    public SimbolNp(String tsb, String tipus, Integer operacio, String mode) { // alerta amb no afegir el tsb
+    public SimbolNp(String tsb, String tipus, Integer operacio, String mode,Location dreta) { // alerta amb no afegir el tsb
         super();
         this.tsb = tsb;
         this.operacio = operacio;
         this.tipus = tipus;
         this.mode = mode;
         this.ts_heretat = null;
+        this.dreta = dreta;
     }
 
     public SimbolNp(){
