@@ -109,7 +109,6 @@ non terminal PROGRAMA,DECL,PROCEDIMENT,MAIN,DECL_TUPLA,DECL_TAULA,DECL_TIPUS,MOD
 non terminal SimbolF F;
 non terminal SimbolE E;
 non terminal SimbolEp E_1;
-//non terminal SimbolOP OP;
 non terminal SimbolT T;
 non terminal SimbolTp T_1;
 non terminal SimbolN N;
@@ -145,10 +144,10 @@ SENT ::= DECL {:System.out.println("SENT -> DECL");:}
             |MENTRE {:System.out.println("SENT -> MENTRE");:}
             |FMENTRE {:System.out.println("SENT -> FMENTRE");:}
             |IF {:System.out.println("SENT -> IF");:}
-            |SWITCH {:System.out.println("SENT -> SWITCH");:}
+            //|SWITCH {:System.out.println("SENT -> SWITCH");:} de moment no
             |CRIDA_PROC{:System.out.println("SENT -> CRIDA_PROC");:}
             |FOR {:System.out.println("SENT -> FOR");:}
-            |OP_CONDICIONAL PUNTICOMA{:System.out.println("SENT -> OP_CONDICIONAL");:}
+            //|OP_CONDICIONAL PUNTICOMA{:System.out.println("SENT -> OP_CONDICIONAL");:}
             |ENTRADAS PUNTICOMA {:System.out.println("SENT -> ENTRADAS");:}
             |SORTIDAS PUNTICOMA {:System.out.println("SENT -> SORTIDAS");:}
             ;
@@ -195,28 +194,30 @@ FOR_1 ::= E {:System.out.println("FOR_1 -> E");:}
     | {:System.out.println("FOR_1 -> NULL");:}
     ;
 
-OP_CONDICIONAL ::= LCLAUDAT E RCLAUDAT INTERROG OP_CONDICIONAL_1 DOSPUNTS OP_CONDICIONAL_1 {:System.out.println("OP_CONDICIONAL");:}
+/*OP_CONDICIONAL ::= LCLAUDAT E RCLAUDAT INTERROG OP_CONDICIONAL_1 DOSPUNTS OP_CONDICIONAL_1 {:System.out.println("OP_CONDICIONAL");:}
             ;
 
 OP_CONDICIONAL_1 ::= OP_CONDICIONAL {:System.out.println("OP_CONDICIONAL_1 -> OP_CONDICIONAL");:}
             | E {:System.out.println("OP_CONDICIONAL_1 -> E");:}
-            ;
+            ;*/
 
 ENTRADAS ::= entradaS LPAREN TIPUS COMA ID RPAREN {:System.out.println("ENTRADAS");:} ;
 SORTIDAS ::= sortidaS LPAREN E RPAREN {:System.out.println("SORTIDAS");:};
 
+/*
 SWITCH ::= seleccio LPAREN E RPAREN LCLAUDAT SWITCH_1 RCLAUDAT {:System.out.println("SWITCH");:}
         ;
 SWITCH_1 ::= cas E DOSPUNTS SENTENCIES acaba PUNTICOMA SWITCH_1 {:System.out.println("SWITCH_1");:}
         | pdefecte DOSPUNTS SENTENCIES acaba PUNTICOMA {:System.out.println("SWITCH_1");:}
         | {:System.out.println("@");:}
-        ;
+        ;*/
 DECL_CONST ::= constant DECL_TIPUS {:System.out.println("DECL_CONST -> constant DECL_TIPUS");:};
 
 DECL_TIPUS ::= TIPUS A {:System.out.println("DECL_TIPUS -> TIPUS A ");:}
         | TIPUS A_1 {:System.out.println("DECL_TIPUS -> TIPUS A_1");:}
         ;
 MODIF_TIPUS ::= ID I_1 {:System.out.println("MODIF_TIPUS -> ID I_1");:};
+
 
 A ::= A_1 I {:System.out.println("A");:};
 A_1 ::= ID COMA A_1 {:System.out.println("A_1 -> ID COMA A_1");:}
