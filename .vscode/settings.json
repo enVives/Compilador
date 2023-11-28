@@ -1,0 +1,7 @@
+{
+    "java.project.referencedLibraries": [
+        "lib/**/*.jar",
+        "/home/perejoan/Escritorio/jflex-full-1.8.2.jar",
+        "/home/perejoan/Escritorio/java-cup-11b-runtime.jar"
+    ]
+}

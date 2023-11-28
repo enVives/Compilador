@@ -211,39 +211,39 @@ SWITCH_1 ::= cas E DOSPUNTS SENTENCIES acaba PUNTICOMA SWITCH_1 {:System.out.pri
         | pdefecte DOSPUNTS SENTENCIES acaba PUNTICOMA {:System.out.println("SWITCH_1");:}
         | {:System.out.println("@");:}
         ;*/
-DECL_CONST ::= constant DECL_TIPUS {:System.out.println("DECL_CONST -> constant DECL_TIPUS");:};
+
+DECL_CONST ::= constant TIPUS A ASSIGN I  {:System.out.println("DECL_CONST -> constant TIPUS A ASSIGN I");:}
+        | constant DECL_TUPLA {:System.out.println("DECL_CONST -> constant DECL_TUPLA");:};
 
 DECL_TIPUS ::= TIPUS A {:System.out.println("DECL_TIPUS -> TIPUS A ");:}
-        | TIPUS A_1 {:System.out.println("DECL_TIPUS -> TIPUS A_1");:}
+        | TIPUS A ASSIGN I {:System.out.println("DECL_TIPUS -> TIPUS A ASSIGN I");:}
         ;
 MODIF_TIPUS ::= ID I_1 {:System.out.println("MODIF_TIPUS -> ID I_1");:};
 
 
-A ::= A_1 I {:System.out.println("A");:};
-A_1 ::= ID COMA A_1 {:System.out.println("A_1 -> ID COMA A_1");:}
-    | ID {:System.out.println("A_1 -> ID");:}
-    ;
+A ::= ID COMA A {:System.out.println("A -> ID COMA A");:}
+| ID {:System.out.println("A -> ID");:}
+;
 
-I ::= ASSIGN E {:System.out.println("I -> ASSIGN E");:}
-    | ASSIGN MODIF_TIPUS {:System.out.println("ASSIGN MODIF_TIPUS");:}
-    | ASSIGN VAL_TUPLA {:System.out.println("ASSIGN VAL_TUPLA");:}
+I ::= E {:System.out.println("I -> ASSIGN E");:}
+    | MODIF_TIPUS {:System.out.println("ASSIGN MODIF_TIPUS");:}
+    | VAL_TUPLA {:System.out.println("ASSIGN VAL_TUPLA");:}
+    | CRIDA_PROC {:System.out.println("ASSIGN CRIDA_PROC");:}
     ;
 
 I_1 ::= AUTOSUM {:System.out.println("I_1 -> AUTOSUM");:}
     | AUTOSUB {:System.out.println("I_1 -> AUTOSUB");:}
     | SUMAHI E {:System.out.println("I_1 -> SUMAHI E");:}
     | RESTAHI E {:System.out.println("I_1 -> RESTAHI E");:}
-    | I  {:System.out.println("I_1 -> I");:}
+    | ASSIGN I  {:System.out.println("I_1 -> ASSIGN I");:}
     ;
 
-VALORS ::= E {:System.out.println("VALORS -> E");:}
-        | E COMA VALORS {:System.out.println("VALORS -> E  COMA VALORS");:}
+VALORS ::= I {:System.out.println("VALORS -> I");:}
+        | I COMA VALORS {:System.out.println("VALORS -> I  COMA VALORS");:}
         ;
 VAL_TUPLA ::= ID LPAREN venter RPAREN {:System.out.println("VAL_TUPLA");:};
 
-DECL_TUPLA ::= tupla ID LPAREN RPAREN NOVA_TUPLA {:System.out.println("DECL_TUPLA");:}
-            | tupla ID LPAREN RPAREN {:System.out.println("DECL_TUPLA");:}
-            ;
+DECL_TUPLA ::= tupla ID LPAREN RPAREN NOVA_TUPLA {:System.out.println("DECL_TUPLA");:}; //sempre ha de tenir valors
 NOVA_TUPLA ::= ASSIGN LPAREN VALORS RPAREN {:System.out.println("NOVA_TUPLA");:};
 
 REDEF_TUPLA ::= ID ASSIGN NOVA_TUPLA {:System.out.println("REDEF_TUPLA");:};
