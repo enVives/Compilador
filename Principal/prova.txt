@@ -1,4 +1,7 @@
-ent id = 1+1+1+1 / 0;
+tupla nom1 () = (1,2:a,3,4);
+tupla nom2 () = (3,nom1,5);
+
+ent e = nom2.nom1.a;
 
 
 metode main (cad arguments []) {

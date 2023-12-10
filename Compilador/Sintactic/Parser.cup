@@ -11,6 +11,12 @@ import Compilador.TSimbols.Taula;
 import Compilador.TSimbols.DT.*;
 import Compilador.TSimbols.TD.*;
 import Compilador.Sintactic.Simbols.*;
+import Compilador.Sintactic.Simbols.SimbolValsTupla.KeyValue;
+import java.util.Iterator;
+import java.util.Stack;
+import java.util.ArrayList;
+import Compilador.TSimbols.Dada1;
+import Compilador.TSimbols.Dada2;
 
 class Parser;
 
@@ -100,11 +106,11 @@ terminal Token DIF, IGIG, MENORI, MAJORI, MENOR, MAJOR, OR, AND , NOT;
 terminal decimal,enter,logic,cadena,caracter,tupla,si,sino,seleccio,cas,pdefecte,acaba
     ,mentres,fer,per,metode,retorna,nou,constant,entradaS,sortidaS,main,borra,afegeix;
 
-non terminal PROGRAMA,DECL,PROCEDIMENT,MAIN,DECL_TUPLA,DECL_TAULA,DECL_TIPUS,MODIF,
-    MODIF_TUPLA, REM_TUPLA, AFG_TUPLA, MODIF_TAULA, REDEF_TAULA, REDEF_TUPLA, MODIF_TIPUS,
-    SENTENCIES, MENTRE, IF, SWITCH, FMENTRE, ARGS, TIPUS, RETURN, CRIDA_PROC, ARGS_1, SENT,VAL_TUPLA,
-    ARG,L,IF_1,SWITCH_1, I, I_1, A, A_1,NOVA_TAULA, NOVA_TUPLA,
-    VALORS,FOR,FOR_1,OP_CONDICIONAL,OP_CONDICIONAL_1,ENTRADAS,SORTIDAS,DECL_CONST;    
+non terminal PROGRAMA,DECL,PROCEDIMENT,MAIN,DECL_TAULA,MODIF,
+    MODIF_TUPLA, REM_TUPLA, AFG_TUPLA, MODIF_TAULA, REDEF_TAULA, REDEF_TUPLA,
+    SENTENCIES, MENTRE, IF, SWITCH, FMENTRE, ARGS, RETURN, CRIDA_PROC, ARGS_1, SENT,VAL_TUPLA,
+    ARG,L,IF_1,SWITCH_1, I, A_1,NOVA_TAULA, NOVA_TUPLA,
+    FOR,FOR_1,OP_CONDICIONAL,OP_CONDICIONAL_1,ENTRADAS,SORTIDAS,DECL_CONST;    
 
 non terminal SimbolF F;
 non terminal SimbolE E;
@@ -115,16 +121,40 @@ non terminal SimbolN N;
 non terminal SimbolNp N_1;
 non terminal SimbolM M;
 non terminal SimbolMp M_1;
+non terminal SimbolR R;
+non terminal SimbolValsTupla VALS_TUPLA;
+non terminal SimbolValors VALORS;
+non terminal SimbolDeclTupla DECL_TUPLA;
+non terminal M0;
+non terminal PROG;
+non terminal SimbolI I_1;
+non terminal SimbolA A;
+non terminal SimbolDeclTipus DECL_TIPUS ;
+non terminal SimbolTipus TIPUS;
+non terminal SimbolModifTipus MODIF_TIPUS;
 
 precedence left  ADD, SUB;
 precedence left  MULT, DIV, MOD;
 
-start with PROGRAMA;
+start with PROG;
+
+PROG ::= M0 PROGRAMA {:System.out.println("PROG -> M0 PROGRAMA");:};
 
 PROGRAMA ::= DECL PROGRAMA {:System.out.println("PROGRAMA -> DECL PROGRAMA");:}
             | PROCEDIMENT PROGRAMA {:System.out.println("PROGRAMA -> PROCEDIMENT PROGRAMA");:}
             | MAIN {:System.out.println("PROGRAMA -> MAIN");:}
             ;
+
+M0 ::= {:System.out.println("Inicialització");
+        taula_simbols.posar("ent", new Dtipus(new Escalar("ts_enter", Integer.MIN_VALUE, Integer.MAX_VALUE)));
+        taula_simbols.posar("decimal", new Dtipus(new Escalar("ts_decimal", (int)Double.MIN_VALUE, (int)Double.MAX_VALUE)));
+        taula_simbols.posar("cad", new Dtipus(new DefinicioTipus("ts_cadena")));
+        taula_simbols.posar("bool", new Dtipus(new Escalar("ts_boolea", -1, 0)));
+        taula_simbols.posar("car", new Dtipus(new Escalar("ts_enter", 0, 255)));
+        taula_simbols.posar("tupla", new Dtipus(new Tupla()));
+        taula_simbols.posar("VER", new Dconst(-1,"boolea"));
+        taula_simbols.posar("FALS", new Dconst(0,"boolea"));
+        :};
 
 DECL ::= DECL_TUPLA PUNTICOMA {:System.out.println("DECL -> DECL TUPLA");:} 
         |DECL_TIPUS PUNTICOMA {:System.out.println("DECL -> DECL_TIPUS");:}
@@ -144,10 +174,8 @@ SENT ::= DECL {:System.out.println("SENT -> DECL");:}
             |MENTRE {:System.out.println("SENT -> MENTRE");:}
             |FMENTRE {:System.out.println("SENT -> FMENTRE");:}
             |IF {:System.out.println("SENT -> IF");:}
-            //|SWITCH {:System.out.println("SENT -> SWITCH");:} de moment no
             |CRIDA_PROC{:System.out.println("SENT -> CRIDA_PROC");:}
             |FOR {:System.out.println("SENT -> FOR");:}
-            //|OP_CONDICIONAL PUNTICOMA{:System.out.println("SENT -> OP_CONDICIONAL");:}
             |ENTRADAS PUNTICOMA {:System.out.println("SENT -> ENTRADAS");:}
             |SORTIDAS PUNTICOMA {:System.out.println("SENT -> SORTIDAS");:}
             ;
@@ -157,16 +185,26 @@ PROCEDIMENT ::= metode ID LPAREN ARGS RPAREN LCLAUDAT SENTENCIES RCLAUDAT {:Syst
                 ;
 RETURN ::= retorna E {:System.out.println("RETURN -> retorna E");:};
 
-CRIDA_PROC ::= ID LPAREN ARGS RPAREN PUNTICOMA {:System.out.println("CRIDA_PROC");:};
+CRIDA_PROC ::= R {:System.out.println("CRIDA_PROC");:};
 
 MAIN ::= metode main LPAREN cadena ID LCORCH RCORCH RPAREN LCLAUDAT SENTENCIES RCLAUDAT {:System.out.println("MAIN");:}
         ;
 
-TIPUS ::= decimal {:System.out.println("TIPUS -> decimal");:}
-            |enter {:System.out.println("TIPUS -> enter");:}
-            |logic {:System.out.println("TIPUS -> logic");:}
-            |cadena{:System.out.println("TIPUS -> cadena");:}
-            |caracter {:System.out.println("TIPUS -> caracter");:}
+TIPUS ::= decimal {:System.out.println("TIPUS -> decimal");
+                RESULT = new SimbolTipus("decimal");
+            :}
+            |enter {:System.out.println("TIPUS -> enter");
+                RESULT = new SimbolTipus("ent");
+            :}
+            |logic {:System.out.println("TIPUS -> logic");
+                RESULT = new SimbolTipus("bool");
+                :}
+            |cadena{:System.out.println("TIPUS -> cadena");
+                RESULT = new SimbolTipus("cad");
+                :}
+            |caracter {:System.out.println("TIPUS -> caracter");
+                RESULT = new SimbolTipus("car");
+                :}
             ;
 
 ARGS ::= ARGS_1 {:System.out.println("ARGS -> ARGS_1");:}
@@ -194,59 +232,506 @@ FOR_1 ::= E {:System.out.println("FOR_1 -> E");:}
     | {:System.out.println("FOR_1 -> NULL");:}
     ;
 
-/*OP_CONDICIONAL ::= LCLAUDAT E RCLAUDAT INTERROG OP_CONDICIONAL_1 DOSPUNTS OP_CONDICIONAL_1 {:System.out.println("OP_CONDICIONAL");:}
-            ;
-
-OP_CONDICIONAL_1 ::= OP_CONDICIONAL {:System.out.println("OP_CONDICIONAL_1 -> OP_CONDICIONAL");:}
-            | E {:System.out.println("OP_CONDICIONAL_1 -> E");:}
-            ;*/
-
-ENTRADAS ::= entradaS LPAREN TIPUS COMA ID RPAREN {:System.out.println("ENTRADAS");:} ;
+ENTRADAS ::= entradaS LPAREN TIPUS COMA R RPAREN {:System.out.println("ENTRADAS");:} ;
 SORTIDAS ::= sortidaS LPAREN E RPAREN {:System.out.println("SORTIDAS");:};
 
-/*
-SWITCH ::= seleccio LPAREN E RPAREN LCLAUDAT SWITCH_1 RCLAUDAT {:System.out.println("SWITCH");:}
-        ;
-SWITCH_1 ::= cas E DOSPUNTS SENTENCIES acaba PUNTICOMA SWITCH_1 {:System.out.println("SWITCH_1");:}
-        | pdefecte DOSPUNTS SENTENCIES acaba PUNTICOMA {:System.out.println("SWITCH_1");:}
-        | {:System.out.println("@");:}
-        ;*/
+DECL_CONST ::= constant TIPUS:t A:a ASSIGN E:e  {:System.out.println("DECL_CONST -> constant TIPUS A ASSIGN E");
+            if(errorSemantic){
+                RESULT = new SimbolDeclTipus();
+            }else{
+                Dtipus tipus = (Dtipus) taula_simbols.consulta(t.getTipus());
+                if(tipus.dt().tipus_subjacent()!=e.getTsb()){
+                    report_error_semantic("El tipus de les variables es diferent del valor assignat", a.getEsquerre(),e.getDreta());
+                    errorSemantic = true;
+                }else{
+                    ArrayList<String> llista = a.getLlista();
+                    Iterator<String> it = llista.iterator();
+                    String ti = t.getTipus(); //tipus que afegirem als identificadors
 
-DECL_CONST ::= constant TIPUS A ASSIGN I  {:System.out.println("DECL_CONST -> constant TIPUS A ASSIGN I");:}
-        | constant DECL_TUPLA {:System.out.println("DECL_CONST -> constant DECL_TUPLA");:};
+                    while(it.hasNext()){
+                        taula_simbols.posar(it.next(),new Dconst(ti));
+                    }
+                }
+            }
 
-DECL_TIPUS ::= TIPUS A {:System.out.println("DECL_TIPUS -> TIPUS A ");:}
-        | TIPUS A ASSIGN I {:System.out.println("DECL_TIPUS -> TIPUS A ASSIGN I");:}
-        ;
-MODIF_TIPUS ::= ID I_1 {:System.out.println("MODIF_TIPUS -> ID I_1");:};
+        :}
+        | constant TIPUS:t A:a ASSIGN MODIF_TIPUS:m {:System.out.println("DECL_CONST -> constant TIPUS A ASSIGN MODIF_TIPUS");
+            if(errorSemantic){
+                RESULT = new SimbolDeclTipus();
+            }else{
+                Dtipus tipus = (Dtipus) taula_simbols.consulta(t.getTipus());
 
+                if(tipus.dt().tipus_subjacent()!=m.getTsb()){
+                    report_error_semantic("El tipus de les variables es diferent del valor assignat",a.getEsquerre(),a.getDreta());
+                    errorSemantic = true;
+                    RESULT = new SimbolDeclTipus();
+                }else{
+                    ArrayList<String> llista = a.getLlista();
+                    Iterator<String> it = llista.iterator();
+                    String ti = t.getTipus(); //tipus que afegirem als identificadors
 
-A ::= ID COMA A {:System.out.println("A -> ID COMA A");:}
-| ID {:System.out.println("A -> ID");:}
+                    while(it.hasNext()){
+                        taula_simbols.posar(it.next(),new Dconst(ti));
+                    }
+                }
+            }    
+        
+        :} //una tupla sempre és constant
 ;
 
-I ::= E {:System.out.println("I -> ASSIGN E");:}
-    | MODIF_TIPUS {:System.out.println("ASSIGN MODIF_TIPUS");:}
-    | VAL_TUPLA {:System.out.println("ASSIGN VAL_TUPLA");:}
-    | CRIDA_PROC {:System.out.println("ASSIGN CRIDA_PROC");:}
-    ;
+DECL_TIPUS ::= TIPUS:t A:a {:System.out.println("DECL_TIPUS -> TIPUS A ");
+            ArrayList<String> llista = a.getLlista();
+            Iterator<String> it = llista.iterator();
+            String tipus = t.getTipus(); //tipus que afegirem als identificadors
 
-I_1 ::= AUTOSUM {:System.out.println("I_1 -> AUTOSUM");:}
-    | AUTOSUB {:System.out.println("I_1 -> AUTOSUB");:}
-    | SUMAHI E {:System.out.println("I_1 -> SUMAHI E");:}
-    | RESTAHI E {:System.out.println("I_1 -> RESTAHI E");:}
-    | ASSIGN I  {:System.out.println("I_1 -> ASSIGN I");:}
-    ;
+            while(it.hasNext()){
+                taula_simbols.posar(it.next(),new Dvar(tipus));
+            }
+        
+        :}
+        | TIPUS:t A:a ASSIGN E:e {:System.out.println("DECL_TIPUS -> TIPUS A ASSIGN E");
+            if(errorSemantic){
+                RESULT = new SimbolDeclTipus();
+            }else{
+                Dtipus tipus = (Dtipus) taula_simbols.consulta(t.getTipus());
+                if(tipus.dt().tipus_subjacent()!=e.getTsb()){
+                    report_error_semantic("El tipus de les variables es diferent del valor assignat", a.getEsquerre(),e.getDreta());
+                    errorSemantic = true;
+                    RESULT = new SimbolDeclTipus();
+                }else{
+                    ArrayList<String> llista = a.getLlista();
+                    Iterator<String> it = llista.iterator();
+                    String ti = t.getTipus(); //tipus que afegirem als identificadors
 
-VALORS ::= I {:System.out.println("VALORS -> I");:}
-        | I COMA VALORS {:System.out.println("VALORS -> I  COMA VALORS");:}
+                    while(it.hasNext()){
+                        taula_simbols.posar(it.next(),new Dvar(ti));
+                    }
+                }
+            }
+        :}
+        | TIPUS:t A:a ASSIGN MODIF_TIPUS:m {:System.out.println("DECL_TIPUS -> TIPUS A ASSIGN MODIF_TIPUS");
+            if(errorSemantic){
+                RESULT = new SimbolDeclTipus();
+            }else{
+                Dtipus tipus = (Dtipus) taula_simbols.consulta(t.getTipus());
+
+                if(tipus.dt().tipus_subjacent()!=m.getTsb()){
+                    report_error_semantic("El tipus de les variables es diferent del valor assignat",a.getEsquerre(),a.getDreta());
+                    errorSemantic = true;
+                    RESULT = new SimbolDeclTipus();
+                }else{
+                    ArrayList<String> llista = a.getLlista();
+                    Iterator<String> it = llista.iterator();
+                    String ti = t.getTipus(); //tipus que afegirem als identificadors
+
+                    while(it.hasNext()){
+                        taula_simbols.posar(it.next(),new Dvar(ti));
+                    }
+                }
+            }
+        
+        :}
         ;
-VAL_TUPLA ::= ID LPAREN venter RPAREN {:System.out.println("VAL_TUPLA");:};
 
-DECL_TUPLA ::= tupla ID LPAREN RPAREN NOVA_TUPLA {:System.out.println("DECL_TUPLA");:}; //sempre ha de tenir valors
-NOVA_TUPLA ::= ASSIGN LPAREN VALORS RPAREN {:System.out.println("NOVA_TUPLA");:};
+MODIF_TIPUS ::= R:r I_1:i {:System.out.println("MODIF_TIPUS -> R I_1");
+            if(errorSemantic){
+                RESULT = new SimbolModifTipus();
+            }else{
+                switch(i.getOperacio()){
+                    case "as": //cas ++
+                        if((r.getTsb()!="ts_enter")&&(r.getTsb()!="ts_decimal")&&(r.getTsb()!="ts_caracter")){
+                            report_error_semantic("Tipus equivocat per a la operació ++", r.getEsquerre(),r.getDreta());
+                            errorSemantic = true;
+                            RESULT = new SimbolModifTipus();
+                        }else{
+                            RESULT = new SimbolModifTipus(r.getTsb(),r.getTipus());
+                        }
+                        break;
+                    case "ar":
+                        if((r.getTsb()!="ts_enter")&&(r.getTsb()!="ts_decimal")&&(r.getTsb()!="ts_caracter")){
+                            report_error_semantic("Tipus equivocat per a la operació ++", r.getEsquerre(),r.getDreta());
+                            errorSemantic = true;
+                            RESULT = new SimbolModifTipus();
+                        }else{
+                            RESULT = new SimbolModifTipus(r.getTsb(),r.getTipus());
+                        }
+                        break;
+                    case "si":
+                        if((i.getTsb()!="ts_enter")||(i.getTsb()!="ts_caracter")||(i.getTsb()!="ts_decimal")){
+                            report_error_semantic("La Expresió té un tipus equivocat per l'operacio: +=", r.getEsquerre(),r.getDreta());
+                            errorSemantic = true;
+                            RESULT = new SimbolModifTipus();
+                        }else{
+                            RESULT = new SimbolModifTipus(r.getTsb(),r.getTipus());
+                        }
+                        break;
+                    case "ri":
+                        if((i.getTsb()!="ts_enter")||(i.getTsb()!="ts_caracter")||(i.getTsb()!="ts_decimal")){
+                            report_error_semantic("La Expresió té un tipus equivocat per l'operacio: +=", r.getEsquerre(),r.getDreta());
+                            errorSemantic = true;
+                            RESULT = new SimbolModifTipus();
+                        }else{
+                            if((i.getTsb()!="ts_enter")||(i.getTsb()!="ts_caracter")||(i.getTsb()!="ts_decimal")){
+                            report_error_semantic("La Expresió té un tipus equivocat per l'operacio: +=", r.getEsquerre(),r.getDreta());
+                            errorSemantic = true;
+                            RESULT = new SimbolModifTipus();
+                            }else{
+                             RESULT = new SimbolModifTipus(r.getTsb(),r.getTipus());  
+                            }
+                        }
+                        break;
+                    case "ig":
+                        if(i.getTsb()!=r.getTsb()){
+                            report_error_semantic("El tipus de la referència i la expresió no coincideixen amb l'operacio: =", r.getEsquerre(),r.getDreta());
+                            errorSemantic = true;
+                            RESULT = new SimbolModifTipus();
+                        }else{
+                            RESULT = new SimbolModifTipus(r.getTsb(),r.getTipus()); 
+                        }
+                        break;
+                }
+            }
 
-REDEF_TUPLA ::= ID ASSIGN NOVA_TUPLA {:System.out.println("REDEF_TUPLA");:};
+            :}
+            | R:r ASSIGN MODIF_TIPUS:m {:System.out.println("MODIF_TIPUS -> R ASSIGN MODIF_TIPUS");
+            if(errorSemantic){
+                RESULT = new SimbolModifTipus();
+            }else{
+                if(m.getTsb() != r.getTsb()){
+                    report_error_semantic("El tipus de la referència i la modificacio no coincideixen amb l'operacio: =", r.getEsquerre(),r.getDreta());
+                    errorSemantic = true;
+                    RESULT = new SimbolModifTipus();
+                }else{
+                    RESULT = new SimbolModifTipus(r.getTsb(),r.getTipus()); 
+                }
+            }
+            
+            :}; //R només pot ser id var o constant
+
+//Si R.tsb = ts_record -> referència a tupla
+//Si R.tsb = int -> pot venir de id1.id2 on id1.tsb = ts_record
+
+R ::= ID:d {:System.out.println("R -> ID");
+        Descripcio descripcio = taula_simbols.consulta((String)d.valor);
+        if(descripcio == null){ //no es troba a la taula de simbols
+            report_error_semantic("Undefined id \""+d.valor+"\"", d.esquerre,d.dreta);
+            errorSemantic = true;
+            RESULT  = new SimbolR();
+        }else{ //ja es troba a la taula de simbols.
+            if(descripcio instanceof Dvar){ //variable
+                Dvar var = (Dvar) descripcio;
+                Dtipus tipus = (Dtipus) taula_simbols.consulta(var.tipus()); //ALERTA EN NO TROBAR
+                RESULT = new SimbolR((String)d.valor,tipus.dt().tipus_subjacent(),var.tipus(),"var",d.esquerre,d.dreta);
+            }else if(descripcio instanceof Dconst){ //variable o tupla
+                Dconst c = (Dconst) descripcio;
+                Dtipus tipus = (Dtipus) taula_simbols.consulta(c.tipus()); //ALERTA EN NO TROBAR
+                RESULT = new SimbolR((String)d.valor,tipus.dt().tipus_subjacent(),c.tipus(),"const",d.esquerre,d.dreta);
+                //el tipus pot ser tupla També
+                //això es per quan ens interessa ficar una tupla dins una tupla o un subprograma
+                //id(a) on 'a' és una tupla.
+            }else{ //si no es tracta ni d'una variable, ni d'una constant, error
+                report_error_semantic("ID es un procediment \""+d.valor+"\"", d.esquerre,d.dreta);
+                errorSemantic = true;
+                RESULT  = new SimbolR();
+            }
+        }
+        :} //per identificadors, constants i variables
+    //Idea: cercar id a la ts i mirar si es un subprograma
+    //agafar els tipus de tots els valors i cercar el nom amb els tipus.
+    | ID:id LPAREN VALORS:v RPAREN:r {:System.out.println("R -> ID (VALORS)"); //subprograma
+        //1: mirar si id es un subprograma, amb els valors
+        //2: comprovar si el subprograma te un tipus subjacent
+        //si en té l'afegim a R amb la resta de informació
+
+        ArrayList<SimbolE> llista = v.getLlista(); //llista amb els paràmetres
+        if(llista.isEmpty()){ //crida a un subprograma fora paràmetres
+           Descripcio descripcio = taula_simbols.consulta((String)id.valor);
+           if(descripcio == null){
+            report_error_semantic("Undefined id \""+id.valor+"\"", id.esquerre,id.dreta);
+            errorSemantic = true;
+            RESULT  = new SimbolR();
+            }else{
+                if(descripcio instanceof Dproc){
+                    Dproc proc = (Dproc) descripcio;
+                    String tipus = proc.getTipus(); //miram si el procediment té algun tipus de retorn
+                    if(tipus == "id_nula"){
+                      RESULT = new SimbolR((String)id.valor,"ts_nul","id_nula","procc",id.esquerre,id.dreta);  
+                    }else{
+                        Descripcio t = taula_simbols.consulta(proc.getTipus());
+                        if(t instanceof Dtipus){
+                            Dtipus t1 = (Dtipus) t;
+                            RESULT = new SimbolR((String)id.valor,t1.dt().tipus_subjacent(),tipus,"procc",id.esquerre,id.dreta); 
+                        }else{
+                            report_error_semantic("El tipus del subprograma \""+id.valor+"\" es erroni", id.esquerre,id.dreta);
+                            errorSemantic = true;
+                            RESULT  = new SimbolR();
+                        }
+                    }
+                    
+                }else{
+                    report_error_semantic("L'ID \""+id.valor+"\" no és un subprograma", id.esquerre,id.dreta);
+                    errorSemantic = true;
+                    RESULT  = new SimbolR();
+                }
+            } 
+        }else{
+            Iterator <SimbolE> it = llista.iterator();
+            String nom = (String)id.valor;
+            while(it.hasNext()){
+                SimbolE e = it.next();
+                if(e.getTsb() == "ts_nul"){
+                    report_error_semantic("El paràmetre no té el tipus adecuat per un subprograma", e.getEsquerre(),e.getDreta());
+                    errorSemantic = true;
+                    RESULT  = new SimbolR();
+                }else{
+                    switch(e.getTsb()){
+                        case "ts_boolea":
+                                nom += "_"+"boolea";
+                                break;
+                        case "ts_cadena":
+                                nom+= "_"+"cadena";
+                                break;
+                        case "ts_decimal":
+                                nom+= "_"+"decimal";
+                                break;
+                        case "ts_enter":
+                                nom+= "_"+"enter";
+                                break;
+                        case "ts_caracter":
+                                nom+= "_"+"caracter";
+                                break;
+                        case "ts_record":
+                                nom+= "_"+"tupla";
+                                break;
+                    }
+                }
+            }
+
+            Descripcio descripcio = taula_simbols.consulta(nom);
+            if(descripcio == null){
+                report_error_semantic("El subprograma amb aquests paràmetres no existeix", id.esquerre,r.dreta);
+                errorSemantic = true;
+                RESULT  = new SimbolR();
+            }else{
+                if(descripcio instanceof Dproc){
+                    Dproc proc = (Dproc) descripcio;
+                    if(proc.getTipus() == "id_nula"){
+                        RESULT = new SimbolR(nom,"ts_nul","id_nula","procc",id.esquerre,r.dreta);
+                    }else{
+                      Dtipus tipus = (Dtipus) taula_simbols.consulta(proc.getTipus()); //alerta
+                      RESULT = new SimbolR(nom,tipus.dt().tipus_subjacent(),proc.getTipus(),"procc",id.esquerre,r.dreta); 
+                    }
+                }else{ //per si acàs
+                    report_error_semantic("Id no és un subprograma", id.esquerre,r.dreta);
+                    errorSemantic = true;
+                    RESULT  = new SimbolR();
+                }
+            }
+        }
+        :} //per subprogrames
+    | ID:id1 PUNT ID:id2 {:System.out.println("R -> ID PUNT ID");
+
+        Descripcio descripcio = taula_simbols.consulta((String)id1.valor);
+        if(descripcio!=null){
+            if(descripcio instanceof Dconst){
+                        Dconst c = (Dconst) descripcio;
+                        String tipus = c.tipus();
+                        if(tipus == "tupla"){
+                            Dcamp ca = (Dcamp) taula_simbols.consultacamp((String)id1.valor,(String)id2.valor);
+                            //camp pot ser null
+
+                            if(ca != null){
+                                Descripcio d = taula_simbols.consulta(ca.tipus());
+                                Dtipus t = (Dtipus) d; //alerta que a D camp no li hem posat el tipus que toca.
+                                RESULT = new SimbolR((String)id1.valor,t.dt().tipus_subjacent(),ca.tipus(),"const",id1.esquerre,id2.dreta);
+                                //posarem const, perquè un camp d'una tupla no és pot modificar
+                            }else{
+                                report_error_semantic("El camp \""+id2.valor+"\" no existeix", id2.esquerre,id2.dreta);
+                                errorSemantic = true;
+                                RESULT  = new SimbolR(); 
+                            }
+                        }else{
+                            report_error_semantic("L'ID \""+id1.valor+"\" no és una tupla", id1.esquerre,id1.dreta);
+                            errorSemantic = true;
+                            RESULT  = new SimbolR();
+                        }
+                    }else{
+                        report_error_semantic("L'ID \""+id1.valor+"\" no és una tupla", id1.esquerre,id1.dreta);
+                        errorSemantic = true;
+                        RESULT  = new SimbolR();
+                    }
+        }else{
+            report_error_semantic("L'ID \""+id1.valor+"\" no és una tupla", id1.esquerre,id1.dreta);
+            errorSemantic = true;
+            RESULT  = new SimbolR();
+        }
+        
+
+    :}; //per tuples
+
+A ::= ID:i COMA A:a {:System.out.println("A -> ID COMA A");
+    a.afegir_id((String)i.valor);
+    RESULT = new SimbolA(a.getLlista(),i.esquerre,i.dreta);
+    :}
+
+    | ID:i {:System.out.println("A -> ID");
+    SimbolA simbol = new SimbolA(i.esquerre,i.dreta);
+    simbol.afegir_id((String)i.valor);
+    RESULT = simbol;
+    :}
+ ; 
+
+I_1 ::= AUTOSUM {:System.out.println("I_1 -> AUTOSUM");
+    RESULT = new SimbolI("as","id_nula","ts_nul");
+    :}
+    | AUTOSUB {:System.out.println("I_1 -> AUTOSUB");
+    RESULT = new SimbolI("ar","id_nula","ts_nul");
+    :}
+    | SUMAHI E:e {:System.out.println("I_1 -> SUMAHI E");
+        if(errorSemantic){
+        RESULT = new SimbolI();
+        }else{
+        RESULT = new SimbolI("si",e.getTipus(),e.getTsb());   
+        }
+    :}
+    | RESTAHI E:e {:System.out.println("I_1 -> RESTAHI E");
+        if(errorSemantic){
+            RESULT = new SimbolI();
+        }else{
+            RESULT = new SimbolI("ri",e.getTipus(),e.getTsb());   
+        }
+    :}
+    | ASSIGN E:e  {:System.out.println("I_1 -> ASSIGN E");
+        if(errorSemantic){
+            RESULT = new SimbolI();
+        }else{
+            RESULT = new SimbolI("ig",e.getTipus(),e.getTsb());   
+        }
+    
+    :}
+    ;
+
+//REVISAR que ens pot arribar per E
+
+VALORS ::= E:e {:System.out.println("VALORS -> E");
+        if(errorSemantic){ //error a E
+            RESULT = new SimbolValors();
+        }else{
+            SimbolValors v = new SimbolValors();
+            v.afegirE(e); //afegim e
+            RESULT = new SimbolValors();
+        }
+        :}
+        | E:e COMA VALORS:v {:System.out.println("VALORS -> E  COMA VALORS");
+            if(errorSemantic){
+                RESULT = new SimbolValors();
+            }else{
+                v.afegirE(e); //alreves, hauriem d'agafar la llista, i després ficarli
+                RESULT = new SimbolValors(v.getLlista());
+            }
+            :}
+        ;
+
+//una tupla no serà mai buida
+
+VALS_TUPLA ::= E:e COMA VALS_TUPLA:v {:System.out.println("VALS_TUPLA -> E COMA VALS_TUPLA");
+                if(errorSemantic){
+                    RESULT = new SimbolValsTupla();
+                }else{
+                    v.afegeix("buit", e);
+                    RESULT = new SimbolValsTupla(v.getLlista());
+                }
+            :}
+            | E:e DOSPUNTS ID:d COMA VALS_TUPLA:v {:System.out.println("VALS_TUPLA -> E DOSPUNTS ID COMA VALS_TUPLA");
+                if(errorSemantic){
+                    RESULT = new SimbolValsTupla();
+                }else{
+                    v.afegeix((String)d.valor, e);
+                    RESULT = new SimbolValsTupla(v.getLlista());
+                }
+            :}
+            | E:e {:System.out.println("VALS_TUPLA -> E");
+                if(errorSemantic){
+                    RESULT = new SimbolValsTupla();
+                }else{
+                    SimbolValsTupla sim = new SimbolValsTupla();
+                    sim.afegeix("buit", e);
+                    RESULT = sim;
+                }  
+            :}
+            | E:e DOSPUNTS ID:d {:System.out.println("VALS_TUPLA -> E DOSPUNTS ID");
+                if(errorSemantic){
+                    RESULT = new SimbolValsTupla();
+                }else{
+                    SimbolValsTupla sim = new SimbolValsTupla();
+                    sim.afegeix((String) d.valor, e);
+                    RESULT = sim;
+                }  
+                :};
+
+DECL_TUPLA ::= tupla ID:i LPAREN RPAREN ASSIGN LPAREN:r VALS_TUPLA:v RPAREN {:System.out.println("DECL_TUPLA");
+                if(errorSemantic){
+                    RESULT = new SimbolDeclTupla();
+                }else{
+                    //Gestió
+                    int n =0;
+                    Stack<KeyValue> llista = v.getLlista();
+                    Boolean bol = taula_simbols.posar((String)i.valor,new Dconst("tupla")); //mirar si posar es true o false
+                    if(bol){
+                        while(!llista.isEmpty()){
+                            KeyValue k = llista.pop();
+                            String nom = k.key; //nom del paràmetre
+                            SimbolE simbol = k.value; //valor o variable a afegir
+                            if(nom == "buit"){ //no té identificador
+                                nom = "Item"+n; //nom que li posam als camps que no tenen id
+                                n++;
+                            }else{
+                                n++; 
+                            }
+                            bol = taula_simbols.posarcamp((String)i.valor,nom,new Dcamp(simbol.getTipus(),n,simbol.getTsb()));
+                            if(bol == false){
+                                break;
+                            }
+                        }
+                        //no retornam res encara
+                    }else{
+                        report_error_semantic("La tupla \""+(String)i.valor+"\" ja existeix", i.esquerre,r.dreta);
+                        errorSemantic = true;
+                    }
+                }
+
+                :}
+                
+            | tupla ID:i LPAREN RPAREN ASSIGN R:r {:System.out.println("TUPLA -> R"); //revisar
+                if(r.getTsb() != "ts_record"){
+                    report_error_semantic("A la tupla \""+(String)i.valor+"\" no es pot assignar una referència que no sigui tupla", i.esquerre,r.getDreta());
+                    errorSemantic = true;
+                }else{
+                    Boolean bol = taula_simbols.posar((String)i.valor,new Dconst("tupla")); //mirar si posar es true o false
+                    if(bol){
+                        String tu = r.getIdb(); //id de la nostra referència
+                        Dada1 d = taula_simbols.consulta_tupla(tu);
+                        Descripcio descripcio = d.td();
+
+                        if(descripcio instanceof Dconst){
+                            Dada2 first = d.first(); //volem obtenir els elements de R
+
+                            while(first!=null){
+                                Dcamp camp = (Dcamp) taula_simbols.consultacamp(tu,first.idcamp());
+                                taula_simbols.posarcamp((String)i.valor,first.idcamp(),new Dcamp(camp.tipus(),camp.getDespl(),camp.getTsb()));
+                                first = first.next();
+                            }
+                        }else{
+                           report_error_semantic("La referència "+r.getIdb()+"no es una tupla", i.esquerre,r.getDreta());
+                            errorSemantic = true; 
+                        }
+                    }else{
+                        report_error_semantic("La tupla \""+(String)i.valor+"\" ja existeix", i.esquerre,r.getDreta());
+                        errorSemantic = true;
+                    }
+                }
+            
+            :}; //sempre ha de tenir valors
 
 
 E ::= T:t E_1:e {:System.out.println("E -> T E_1");
@@ -682,59 +1167,89 @@ F ::= LPAREN:l E:e RPAREN:r {:System.out.println("F -> LPAREN E RPAREN");
                     :}
 
     | venter:v {:System.out.println("F -> venter");
-                RESULT = new SimbolF("ts_enter","id_nula","modeconst",v.esquerre,v.dreta);
+                RESULT = new SimbolF("ts_enter","ent","modeconst",v.esquerre,v.dreta);
                 :} 
     | SUB:s venter:v {:System.out.println("F -> SUB venter");
-                RESULT = new SimbolF("ts_enter","id_nula","modeconst",s.esquerre,v.dreta);
+                RESULT = new SimbolF("ts_enter","ent","modeconst",s.esquerre,v.dreta);
                 :}
     | ADD:a venter:v {:System.out.println("F -> ADD venter");
-                RESULT = new SimbolF("ts_enter","id_nula","modeconst",a.esquerre,v.dreta);
+                RESULT = new SimbolF("ts_enter","ent","modeconst",a.esquerre,v.dreta);
                 :}
     | vdecimal:v {:System.out.println("F -> vdecimal");
-                RESULT = new SimbolF("ts_decimal","id_nula","modeconst",v.esquerre,v.dreta);
+                RESULT = new SimbolF("ts_decimal","decimal","modeconst",v.esquerre,v.dreta);
                 :}
     | ADD:a vdecimal:v {:System.out.println("F -> ADD vdecimal");
-                RESULT = new SimbolF("ts_decimal","id_nula","modeconst",a.esquerre,a.dreta);
+                RESULT = new SimbolF("ts_decimal","decimal","modeconst",a.esquerre,a.dreta);
                 :}
     | SUB:s vdecimal:v {:System.out.println("F -> SUB vdecimal");
-                RESULT = new SimbolF("ts_decimal","id_nula","modeconst",s.esquerre,s.dreta);
+                RESULT = new SimbolF("ts_decimal","decimal","modeconst",s.esquerre,s.dreta);
                 :}
     | vcaracter:v {:System.out.println("F -> vcaracter");
-                RESULT = new SimbolF("ts_caracter","id_nula","modeconst",v.esquerre,v.dreta);
+                RESULT = new SimbolF("ts_caracter","car","modeconst",v.esquerre,v.dreta);
                 :}
     | ADD:a vcaracter:v {:System.out.println("F -> ADD");
-                RESULT = new SimbolF("ts_caracter","id_nula","modeconst",a.esquerre,v.dreta); //assegurar que a car hi posam ts_caracter
+                RESULT = new SimbolF("ts_caracter","car","modeconst",a.esquerre,v.dreta); //assegurar que a car hi posam ts_caracter
                 :}
     | SUB:s vcaracter:v {:System.out.println("F -> SUB");
-                RESULT = new SimbolF("ts_caracter","id_nula","modeconst",s.esquerre,v.dreta);
+                RESULT = new SimbolF("ts_caracter","car","modeconst",s.esquerre,v.dreta);
                 :}
     | vcadena:v {:System.out.println("F -> vcadena");
-                RESULT = new SimbolF("ts_cadena","id_nula","modeconst",v.esquerre,v.dreta);
+                RESULT = new SimbolF("ts_cadena","cad","modeconst",v.esquerre,v.dreta);
                 :}
-    | ID: id {:System.out.println("F -> ID");
-                Descripcio descripcio = taula_simbols.consulta((String)id.valor);
-                if(descripcio == null){ //si l'identificador no es troba a la taula de símbols
-                    report_error_semantic("Undefined id \""+id.valor+"\"", id.esquerre,id.dreta);
-                    errorSemantic = true;
-                    RESULT  = new SimbolF();
-                }else{ //mirar si accepta tuples
-                    if(descripcio instanceof Dvar){
-                        Dvar var = (Dvar) descripcio;
-                        Dtipus tipus = (Dtipus) taula_simbols.consulta(var.tipus()); //ALERTA EN NO TROBAR
-                        RESULT = new SimbolF(tipus.dt().tipus_subjacent(),var.tipus(),"modevar",id.esquerre,id.dreta);
-                    }else if(descripcio instanceof Dconst){
-                        Dconst cons = (Dconst) descripcio;
-                        Dtipus tipus = (Dtipus) taula_simbols.consulta(cons.tipus()); //ALERTA EN NO TROBAR
-                        RESULT = new SimbolF(tipus.dt().tipus_subjacent(),cons.tipus(),"modeconst",id.esquerre,id.dreta);
-                    }else{
-                        report_error_semantic("L'identificador: "+id.valor+" té el tipus erroni per a expresions",id.esquerre,id.dreta);
+    | R: r {:System.out.println("F -> ID");
+                if(errorSemantic){
+                    RESULT  = new SimbolF(); 
+                }else{
+                    if(r.getTsb() == "ts_nul"){ //error
+                        report_error_semantic("La referència "+r.getIdb()+" te tipus subjacent nul",r.getEsquerre(),r.getDreta());
                         errorSemantic = true;
                         RESULT  = new SimbolF();
-                    }
+                    }else{
+                        if(r.getMvp() == "var"){
+                            RESULT = new SimbolF(r.getTsb(),r.getTipus(),"modevar",r.getEsquerre(),r.getDreta());
+                        }else if((r.getMvp() == "const")||(r.getMvp() == "procc")){
+                            RESULT = new SimbolF(r.getTsb(),r.getTipus(),"modeconst",r.getEsquerre(),r.getDreta());
+                        }
+                    }  
+                }
+                :}
+    | SUB:s R:r {:System.out.println("F -> SUB R");
+                if(errorSemantic){
+                    RESULT  = new SimbolF(); 
+                }else{
+                    if(r.getTsb() == "ts_nul"){ //error
+                        report_error_semantic("La referència "+r.getIdb()+" te tipus subjacent nul",s.esquerre,r.getDreta());
+                        errorSemantic = true;
+                        RESULT  = new SimbolF();
+                    }else{
+                        if(r.getMvp() == "var"){
+                            RESULT = new SimbolF(r.getTsb(),r.getTipus(),"modevar",r.getEsquerre(),r.getDreta());
+                        }else if((r.getMvp() == "const")||(r.getMvp() == "procc")){
+                            RESULT = new SimbolF(r.getTsb(),r.getTipus(),"modeconst",r.getEsquerre(),r.getDreta());
+                        }
+                    }  
+                }
+                :}
+
+    | ADD:a R:r {:System.out.println("F -> ADD R");
+                if(errorSemantic){
+                    RESULT  = new SimbolF(); 
+                }else{
+                    if(r.getTsb() == "ts_nul"){ //error
+                        report_error_semantic("La referència "+r.getIdb()+" te tipus subjacent nul",a.esquerre,r.getDreta());
+                        errorSemantic = true;
+                        RESULT  = new SimbolF();
+                    }else{
+                        if(r.getMvp() == "var"){
+                            RESULT = new SimbolF(r.getTsb(),r.getTipus(),"modevar",r.getEsquerre(),r.getDreta());
+                        }else if((r.getMvp() == "const")||(r.getMvp() == "procc")){
+                            RESULT = new SimbolF(r.getTsb(),r.getTipus(),"modeconst",r.getEsquerre(),r.getDreta());
+                        }
+                    }  
                 }
                 :}
     | vlogic:v {:System.out.println("F -> vlogic");
-                RESULT = new SimbolF("ts_boolea","id_nula","modeconst",v.esquerre,v.dreta);
+                RESULT = new SimbolF("ts_boolea","bool","modeconst",v.esquerre,v.dreta);
                 :} 
     | SUB:s LPAREN E:e RPAREN:r {:System.out.println("F -> SUB LPAREN E RPAREN"); //REVISAR
 
@@ -755,44 +1270,36 @@ F ::= LPAREN:l E:e RPAREN:r {:System.out.println("F -> LPAREN E RPAREN");
                 }
                 :}
     | NOT:n vlogic:v {:System.out.println("F -> NOT vlogic");
-                RESULT = new SimbolF("ts_boolea","id_nula","modeconst",n.esquerre,v.dreta);
+                RESULT = new SimbolF("ts_boolea","bool","modeconst",n.esquerre,v.dreta);
                 :}
-    | NOT:n ID:id {:System.out.println("F -> NOT ID");
-                Descripcio descripcio = taula_simbols.consulta((String)id.valor);
-
-                if(descripcio == null){ //si l'identificador no es troba a la taula de símbols
-                    report_error_semantic("Undefined id \""+(String)id.valor+"\"", id.esquerre,id.dreta);
-                    errorSemantic = true;
-                    RESULT  = new SimbolF();
+    | NOT:n R:r {:System.out.println("F -> NOT ID");
+                if(errorSemantic){
+                    RESULT  = new SimbolF(); 
                 }else{
-                    if(descripcio instanceof Dvar){
-                        Dvar var = (Dvar) descripcio;
-                        Dtipus tipus = (Dtipus) taula_simbols.consulta(var.tipus()); //ALERTA EN NO TROBAR
-
-                        if(tipus.dt().tipus_subjacent()!= "ts_boolea"){
-                            report_error_semantic("L'identificador: "+(String)id.valor+" té el tipus erroni per al NOT",id.esquerre,id.dreta);
-                            errorSemantic = true;
-                            RESULT  = new SimbolF();
-                        }else{
-                            RESULT = new SimbolF(tipus.dt().tipus_subjacent(),var.tipus(),"modevar",n.esquerre,id.dreta);
-                        }
-                        
-                    }else if(descripcio instanceof Dconst){
-                        Dconst cons = (Dconst) descripcio;
-                        Dtipus tipus = (Dtipus) taula_simbols.consulta(cons.tipus()); //ALERTA EN NO TROBAR
-
-                        if(tipus.dt().tipus_subjacent()!= "ts_boolea"){
-                            report_error_semantic("L'identificador: "+(String)id.valor+" té el tipus erroni per al NOT",id.esquerre,id.dreta);
-                            errorSemantic = true;
-                            RESULT  = new SimbolF();
-                        }else{
-                          RESULT = new SimbolF(tipus.dt().tipus_subjacent(),cons.tipus(),"modeconst",n.esquerre,id.dreta); //no sé perquè result  
-                        }
-                    }else{
-                        report_error_semantic("L'identificador: "+(String)id.valor+" té el tipus erroni per al NOT",id.esquerre,id.dreta);
+                    if(r.getTsb() == "ts_nul"){ //error
+                        report_error_semantic("La referència "+r.getIdb()+" te tipus subjacent nul",r.getEsquerre(),r.getDreta());
                         errorSemantic = true;
                         RESULT  = new SimbolF();
-                    }
+                    }else{
+                        if(r.getMvp() == "var"){
+                            if(r.getTsb() != "ts_boolea"){
+                                report_error_semantic("La referència "+r.getIdb()+" no té tsb booleà", n.esquerre,r.getDreta());
+                                errorSemantic = true;
+                                RESULT  = new SimbolF();
+                            }else{
+                              RESULT = new SimbolF(r.getTsb(),r.getTipus(),"modevar",r.getEsquerre(),r.getDreta());  
+                            }
+                            
+                        }else if(r.getMvp() == "const"){
+                            if(r.getTsb() != "ts_boolea"){
+                                report_error_semantic("La referència "+r.getIdb()+" no té tsb booleà", n.esquerre,r.getDreta());
+                                errorSemantic = true;
+                             RESULT  = new SimbolF();
+                            }else{
+                              RESULT = new SimbolF(r.getTsb(),r.getTipus(),"modeconst",r.getEsquerre(),r.getDreta());  
+                            }
+                        }
+                    }  
                 }
                 :}
     | NOT:n LPAREN:l E:e RPAREN:r {:System.out.println("F -> NOT LPAREN E RPAREN"); //posar error semantic

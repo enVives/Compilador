@@ -10,6 +10,12 @@ public class Dconst extends Descripcio {
         valor = v;
     }
 
+    public Dconst(String t){
+        super("dconst");
+        tipus = t;
+        valor = null;
+    }
+
     public Object valor(){
         return valor;
     }

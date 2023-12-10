@@ -246,7 +246,7 @@ endline      = ['\r'|'\n'|"\r\n"]+
 {caracter}                { return symbol(ParserSym.caracter);}
 {cad}                     { return symbol(ParserSym.cadena);}
 {logic}                   { return symbol(ParserSym.logic);}
-//{zerodigit}               { return symbol(ParserSym.enter,0);}
+{zerodigit}               { return symbol(ParserSym.venter,new Token(0));}
 
 {tupla}                   { return symbol(ParserSym.tupla);}
 {si}                      { return symbol(ParserSym.si);}

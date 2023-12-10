@@ -23,11 +23,13 @@ public class Principal {
     Taula taula;
 
     public static void main(String[] args) {
-        (new Principal()).main();
+        new Principal().main();
     }
 
     public void main(){
         carrega_fitxers();
+
+
         //Proves de Taula de Simbols
 
         taula = new Taula();
@@ -46,29 +48,57 @@ public class Principal {
         //t = dvar -> li afegirem el tipus de tupla
         //1,2,3,4,5 = dcamp.
 
+        //Prova amb tuples i blocs
         /*
         taula.posar("tupla", new Dtipus(new Tupla()));
-        taula.posar("t",new Dvar("tupla"));
+        taula.posar("int", new Dtipus(new Escalar("ts_enter", Integer.MIN_VALUE, Integer.MAX_VALUE)));
+
+        
+        taula.entra_bloc();
+
+        
+        taula.posar("t",new Dconst("tupla"));
+        taula.posar("j",new Dvar("int"));
+        
         taula.posarcamp("t","1",new Dcamp("Integer", 0));
         taula.posarcamp("t","2",new Dcamp("Integer", 1));
-        taula.posarcamp("t","5",new Dcamp("Integer", 2));
 
-        */
+        taula.surtbloc();
+
+        taula.entra_bloc();
+
+        taula.posar("a",new Dconst("tupla"));
+        taula.posarcamp("a","3",new Dcamp("Integer", 0));
+        taula.posarcamp("a","4",new Dcamp("Integer", 0));*/
+
+
+
 
 
         //metode nom int (int a, int b)
         //Dargin -> només de lectura -> se pot fer
         //Darg -> in i out -> per jo sempre in
         
+        //Prova amb subprogrames i tuples
         taula.posar("int", new Dtipus(new Escalar("ts_enter", Integer.MIN_VALUE, Integer.MAX_VALUE)));
         taula.posar("nom", new Dproc());
         taula.posarparam("nom","a",new Dvar("int"));
-        taula.posarparam("nom","b",new Dvar("int"));
+        taula.posarparam("nom_int","b",new Dvar("int"));
+        
+        taula.entra_bloc();
+        taula.posar("j",new Dvar("int"));
+        taula.surtbloc();
+
+        taula.posar("tupla", new Dtipus(new Tupla()));
+        taula.posar("a",new Dconst("tupla"));
+        taula.posarcamp("a","3",new Dcamp("Integer", 0));
+        taula.posarcamp("a","4",new Dcamp("Integer", 0));
+
         escriu_fitxers();
     }
 
     public void escriu_fitxers(){
-        HashMap<String,Dada1> mapa = taula.getTd();
+        Map<String,Dada1> mapa = taula.getTd();
 
         for (Map.Entry<String, Dada1> entry : mapa.entrySet()) {
             String key = entry.getKey();
@@ -108,13 +138,13 @@ public class Principal {
 
     public void carrega_fitxers(){
         try{
-            td = new FileWriter("Compilador/TSimbols/td.txt");
+            td = new FileWriter("td.txt");
             td_1 = new BufferedWriter(td);
 
-            te = new FileWriter("Compilador/TSimbols/te.txt");
+            te = new FileWriter("te.txt");
             te_1 = new BufferedWriter(te);
 
-            ta = new FileWriter("Compilador/TSimbols/ta.txt");
+            ta = new FileWriter("ta.txt");
             ta_1 = new BufferedWriter(ta);
         }catch(IOException error){
             System.out.println(error.toString());
