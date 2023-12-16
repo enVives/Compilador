@@ -7,6 +7,11 @@ public class SimbolM extends SimbolBase {
     private String tsb;
     private String tipus;
     private String mode;
+    private String idb;
+    public String getIdb() {
+        return idb;
+    }
+
     private Location esquerre;
     public Location getEsquerre() {
         return esquerre;
@@ -25,6 +30,17 @@ public class SimbolM extends SimbolBase {
         this.mode = mode;
         this.esquerre = esquerre;
         this.dreta = dreta;
+        this.idb = null;
+    }
+
+    public SimbolM(String idb,String tsb, String tipus, String mode,Location esquerre,Location dreta) { //alerta amb no afegir el tsb
+        super();
+        this.tsb = tsb;
+        this.tipus = tipus;
+        this.mode = mode;
+        this.esquerre = esquerre;
+        this.dreta = dreta;
+        this.idb = idb;
     }
 
     public SimbolM(){

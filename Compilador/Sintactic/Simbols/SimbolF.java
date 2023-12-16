@@ -6,6 +6,11 @@ public class SimbolF extends SimbolBase {
     private String tipus;
     private String tsb;
     private String mode;
+    private String idb;
+    public String getIdb() {
+        return idb;
+    }
+
     private Location esquerre;
     
     public Location getEsquerre() {
@@ -26,6 +31,17 @@ public class SimbolF extends SimbolBase {
         this.mode = mode;
         this.esquerre = esquerre;
         this.dreta = dreta;
+        this.idb = null;
+    }
+
+    public SimbolF(String idb,String tsb, String tipus, String mode,Location esquerre,Location dreta) {
+        super();
+        this.tsb = tsb;
+        this.tipus = tipus;
+        this.mode = mode;
+        this.esquerre = esquerre;
+        this.dreta = dreta;
+        this.idb = idb;
     }
 
     public SimbolF(){

@@ -17,6 +17,7 @@ import java.util.Stack;
 import java.util.ArrayList;
 import Compilador.TSimbols.Dada1;
 import Compilador.TSimbols.Dada2;
+import Compilador.Sintactic.Simbols.SimbolArgsp.KeyValor;
 
 class Parser;
 
@@ -98,7 +99,8 @@ terminal Token vcaracter; //char
 
 terminal  Token  ADD,SUB,MULT,DIV,MOD;
 terminal Token LPAREN,RPAREN;
-terminal ASSIGN,AUTOSUM,AUTOSUB,SUMAHI,RESTAHI,DOSPUNTS,PUNTICOMA,INTERROG,LCORCH
+terminal Token AUTOSUM,AUTOSUB,SUMAHI,RESTAHI,ASSIGN;
+terminal DOSPUNTS,PUNTICOMA,INTERROG,LCORCH
     ,RCORCH,LCLAUDAT, RCLAUDAT,PUNT, COMA;
 
 terminal Token DIF, IGIG, MENORI, MAJORI, MENOR, MAJOR, OR, AND , NOT;
@@ -108,8 +110,8 @@ terminal decimal,enter,logic,cadena,caracter,tupla,si,sino,seleccio,cas,pdefecte
 
 non terminal PROGRAMA,DECL,PROCEDIMENT,MAIN,DECL_TAULA,MODIF,
     MODIF_TUPLA, REM_TUPLA, AFG_TUPLA, MODIF_TAULA, REDEF_TAULA, REDEF_TUPLA,
-    SENTENCIES, MENTRE, IF, SWITCH, FMENTRE, ARGS, RETURN, CRIDA_PROC, ARGS_1, SENT,VAL_TUPLA,
-    ARG,L,IF_1,SWITCH_1, I, A_1,NOVA_TAULA, NOVA_TUPLA,
+    SENTENCIES, MENTRE, IF, SWITCH, FMENTRE, CRIDA_PROC, SENT,VAL_TUPLA,
+    L,IF_1,SWITCH_1, I, A_1,NOVA_TAULA, NOVA_TUPLA,
     FOR,FOR_1,OP_CONDICIONAL,OP_CONDICIONAL_1,ENTRADAS,SORTIDAS,DECL_CONST;    
 
 non terminal SimbolF F;
@@ -132,6 +134,10 @@ non terminal SimbolA A;
 non terminal SimbolDeclTipus DECL_TIPUS ;
 non terminal SimbolTipus TIPUS;
 non terminal SimbolModifTipus MODIF_TIPUS;
+non terminal SimbolArg ARG;
+non terminal SimbolArgsp ARGS_1;
+non terminal SimbolArgs ARGS;
+non terminal SimbolReturn RETURN; 
 
 precedence left  ADD, SUB;
 precedence left  MULT, DIV, MOD;
@@ -174,18 +180,82 @@ SENT ::= DECL {:System.out.println("SENT -> DECL");:}
             |MENTRE {:System.out.println("SENT -> MENTRE");:}
             |FMENTRE {:System.out.println("SENT -> FMENTRE");:}
             |IF {:System.out.println("SENT -> IF");:}
-            |CRIDA_PROC{:System.out.println("SENT -> CRIDA_PROC");:}
+            |CRIDA_PROC PUNTICOMA{:System.out.println("SENT -> CRIDA_PROC");:}
             |FOR {:System.out.println("SENT -> FOR");:}
             |ENTRADAS PUNTICOMA {:System.out.println("SENT -> ENTRADAS");:}
             |SORTIDAS PUNTICOMA {:System.out.println("SENT -> SORTIDAS");:}
             ;
 
-PROCEDIMENT ::= metode ID LPAREN ARGS RPAREN LCLAUDAT SENTENCIES RCLAUDAT {:System.out.println("PROC");:}
-                | metode TIPUS ID LPAREN ARGS RPAREN LCLAUDAT SENTENCIES RCLAUDAT RETURN {:System.out.println("PROC");:}
-                ;
-RETURN ::= retorna E {:System.out.println("RETURN -> retorna E");:};
+PROCEDIMENT ::= metode ID:i LPAREN ARGS:a RPAREN LCLAUDAT SENTENCIES RCLAUDAT {:System.out.println("PROC");
+                    String nom = (String) i.valor;
+                    Stack<KeyValor> llista = a.getLlista();
 
-CRIDA_PROC ::= R {:System.out.println("CRIDA_PROC");:};
+                    taula_simbols.posar(nom, new Dproc());
+
+                    while(!llista.isEmpty()){
+                            KeyValor k = llista.pop();
+                            String id = k.key; //nom del paràmetre
+                            String tipus = k.tipus; //valor o variable a afegir
+
+                            taula_simbols.posarparam(nom,id,new Dvar(tipus));
+                            nom += "_"+tipus;
+                    }
+
+
+
+                :}
+                | metode TIPUS:t ID:i LPAREN ARGS:a RPAREN LCLAUDAT SENTENCIES RETURN:r RCLAUDAT {:System.out.println("PROC");
+                    Dtipus ti = (Dtipus) taula_simbols.consulta(t.getTipus());
+                    if(ti.dt().tipus_subjacent()!=r.getExpresio().getTsb()){
+                        report_error_semantic("El tipus de retorn es diferent del procediment", r.getEsquerre(),r.getDreta());
+                        errorSemantic = true;
+                    }else{
+                        String nom = (String) i.valor;
+                        Stack<KeyValor> llista = a.getLlista();
+
+                        taula_simbols.posar(nom, new Dproc(t.getTipus()));
+    
+                        while(!llista.isEmpty()){
+                                KeyValor k = llista.pop();
+                                String id = k.key; //nom del paràmetre
+                                String tipus = k.tipus; //valor o variable a afegir
+
+                                taula_simbols.posarparam(nom,id,new Dvar(tipus));
+                                nom += "_"+tipus;
+                        }  
+                    }
+                    
+                :}
+                ;
+RETURN ::= retorna E:e PUNTICOMA {:System.out.println("RETURN -> retorna E");
+        RESULT = new SimbolReturn(e,e.getEsquerre(),e.getDreta());
+        :};
+
+CRIDA_PROC ::= R:r {:System.out.println("CRIDA_PROC");
+            if(!errorSemantic){
+                if(r.getMvp() =="procc"){
+
+                }else{
+                    report_error_semantic("No es pot posar una referència tota sola", r.getEsquerre(),r.getDreta());
+                    errorSemantic = true;
+                }        
+            }
+            
+            :}
+            |
+            ID:i LPAREN RPAREN {:System.out.println("CRIDA_PROC -> ID LPAREN RPAREN");
+               Descripcio d = taula_simbols.consulta((String)i.valor);
+               if(d!=null){
+                    if(!(d instanceof Dproc)){
+                        report_error_semantic("L'identificador "+(String)i.valor+" no es un procediment", i.esquerre,i.dreta);
+                        errorSemantic = true;
+                }
+               }else{
+                    report_error_semantic("L'identificador "+(String)i.valor+" li falten parametres o no existeix", i.esquerre,i.dreta);
+                    errorSemantic = true;
+               }
+               
+            :};
 
 MAIN ::= metode main LPAREN cadena ID LCORCH RCORCH RPAREN LCLAUDAT SENTENCIES RCLAUDAT {:System.out.println("MAIN");:}
         ;
@@ -207,13 +277,26 @@ TIPUS ::= decimal {:System.out.println("TIPUS -> decimal");
                 :}
             ;
 
-ARGS ::= ARGS_1 {:System.out.println("ARGS -> ARGS_1");:}
-            | {:System.out.println("@");:}
+ARGS ::= ARGS_1:a {:System.out.println("ARGS -> ARGS_1");
+                RESULT = new SimbolArgs(a.getLlista());
+            :}
+            | {:System.out.println("@");
+                RESULT = new SimbolArgs();
+            :}
             ;
-ARGS_1 ::= ARG COMA ARGS_1 {:System.out.println("ARGS_1 -> ARG COMA ARGS_1");:}
-            | ARG {:System.out.println("ARGS_1 -> ARG");:}
+ARGS_1 ::= ARG:a COMA ARGS_1:b {:System.out.println("ARGS_1 -> ARG COMA ARGS_1");
+                b.afegeix(a.getId(),a.getTipus());
+                RESULT = b;
+            :}
+            | ARG:a {:System.out.println("ARGS_1 -> ARG");
+                SimbolArgsp p = new SimbolArgsp();
+                p.afegeix(a.getId(),a.getTipus());
+                RESULT = p;
+            :}
             ;
-ARG ::= TIPUS ID {:System.out.println("ARG -> TIPUS ID");:};
+ARG ::= TIPUS:t ID:d {:System.out.println("ARG -> TIPUS ID");
+    RESULT = new SimbolArg((String)d.valor,t.getTipus());
+    :};
 
 MENTRE ::= mentres LPAREN E RPAREN fer LCLAUDAT SENTENCIES RCLAUDAT {:System.out.println("MENTRE");:} ;
 
@@ -253,7 +336,6 @@ DECL_CONST ::= constant TIPUS:t A:a ASSIGN E:e  {:System.out.println("DECL_CONST
                     }
                 }
             }
-
         :}
         | constant TIPUS:t A:a ASSIGN MODIF_TIPUS:m {:System.out.println("DECL_CONST -> constant TIPUS A ASSIGN MODIF_TIPUS");
             if(errorSemantic){
@@ -337,59 +419,70 @@ MODIF_TIPUS ::= R:r I_1:i {:System.out.println("MODIF_TIPUS -> R I_1");
             if(errorSemantic){
                 RESULT = new SimbolModifTipus();
             }else{
-                switch(i.getOperacio()){
+                if(r.getMvp()=="const"){ //malament
+                    report_error_semantic("No es pot modificar una constant", r.getEsquerre(),r.getDreta());
+                    errorSemantic = true;
+                    RESULT = new SimbolModifTipus();
+                }else if(r.getMvp()=="procc"){
+                    report_error_semantic("No es pot modificar un procediment", r.getEsquerre(),r.getDreta());
+                    errorSemantic = true;
+                    RESULT = new SimbolModifTipus();
+                }else{
+                    switch(i.getOperacio()){
                     case "as": //cas ++
                         if((r.getTsb()!="ts_enter")&&(r.getTsb()!="ts_decimal")&&(r.getTsb()!="ts_caracter")){
-                            report_error_semantic("Tipus equivocat per a la operació ++", r.getEsquerre(),r.getDreta());
+                            report_error_semantic("Tipus equivocat per a la operació ++", r.getEsquerre(),i.getDreta());
                             errorSemantic = true;
                             RESULT = new SimbolModifTipus();
                         }else{
-                            RESULT = new SimbolModifTipus(r.getTsb(),r.getTipus());
+                            RESULT = new SimbolModifTipus(r.getTsb(),r.getTipus(),r.getEsquerre(),i.getDreta());
                         }
                         break;
                     case "ar":
                         if((r.getTsb()!="ts_enter")&&(r.getTsb()!="ts_decimal")&&(r.getTsb()!="ts_caracter")){
-                            report_error_semantic("Tipus equivocat per a la operació ++", r.getEsquerre(),r.getDreta());
+                            report_error_semantic("Tipus equivocat per a la operació --", r.getEsquerre(),r.getDreta());
                             errorSemantic = true;
                             RESULT = new SimbolModifTipus();
                         }else{
-                            RESULT = new SimbolModifTipus(r.getTsb(),r.getTipus());
+                            RESULT = new SimbolModifTipus(r.getTsb(),r.getTipus(),r.getEsquerre(),i.getDreta());
                         }
                         break;
                     case "si":
-                        if((i.getTsb()!="ts_enter")||(i.getTsb()!="ts_caracter")||(i.getTsb()!="ts_decimal")){
-                            report_error_semantic("La Expresió té un tipus equivocat per l'operacio: +=", r.getEsquerre(),r.getDreta());
+                        if((i.getTsb()!="ts_enter")&&(i.getTsb()!="ts_caracter")&&(i.getTsb()!="ts_decimal")){
+                            report_error_semantic("La Expresió té un tipus equivocat per l'operacio: +=", i.getEsquerre(),i.getDreta());
                             errorSemantic = true;
                             RESULT = new SimbolModifTipus();
                         }else{
-                            RESULT = new SimbolModifTipus(r.getTsb(),r.getTipus());
+                            RESULT = new SimbolModifTipus(r.getTsb(),r.getTipus(),r.getEsquerre(),i.getDreta());
                         }
                         break;
                     case "ri":
-                        if((i.getTsb()!="ts_enter")||(i.getTsb()!="ts_caracter")||(i.getTsb()!="ts_decimal")){
-                            report_error_semantic("La Expresió té un tipus equivocat per l'operacio: +=", r.getEsquerre(),r.getDreta());
+                        if((i.getTsb()!="ts_enter")&&(i.getTsb()!="ts_caracter")&&(i.getTsb()!="ts_decimal")){
+                            report_error_semantic("La Expresió té un tipus equivocat per l'operacio: -=", r.getEsquerre(),i.getDreta());
                             errorSemantic = true;
                             RESULT = new SimbolModifTipus();
                         }else{
-                            if((i.getTsb()!="ts_enter")||(i.getTsb()!="ts_caracter")||(i.getTsb()!="ts_decimal")){
-                            report_error_semantic("La Expresió té un tipus equivocat per l'operacio: +=", r.getEsquerre(),r.getDreta());
+                            if((r.getTsb()!="ts_enter")&&(r.getTsb()!="ts_caracter")&&(r.getTsb()!="ts_decimal")){
+                            report_error_semantic("La Referència te un tipus equivocat per l'operació: +=", r.getEsquerre(),r.getDreta());
                             errorSemantic = true;
                             RESULT = new SimbolModifTipus();
                             }else{
-                             RESULT = new SimbolModifTipus(r.getTsb(),r.getTipus());  
+                             RESULT = new SimbolModifTipus(r.getTsb(),r.getTipus(),r.getEsquerre(),i.getDreta()); 
                             }
                         }
                         break;
                     case "ig":
-                        if(i.getTsb()!=r.getTsb()){
-                            report_error_semantic("El tipus de la referència i la expresió no coincideixen amb l'operacio: =", r.getEsquerre(),r.getDreta());
+                        if(!(i.getTsb().equals(r.getTsb()))){
+                            report_error_semantic("El tipus de la referència i la expresió no coincideixen amb l'operacio: =", r.getEsquerre(),i.getDreta());
                             errorSemantic = true;
                             RESULT = new SimbolModifTipus();
                         }else{
-                            RESULT = new SimbolModifTipus(r.getTsb(),r.getTipus()); 
+                            RESULT = new SimbolModifTipus(r.getTsb(),r.getTipus(),r.getEsquerre(),i.getDreta());
                         }
                         break;
                 }
+                }
+                
             }
 
             :}
@@ -397,12 +490,13 @@ MODIF_TIPUS ::= R:r I_1:i {:System.out.println("MODIF_TIPUS -> R I_1");
             if(errorSemantic){
                 RESULT = new SimbolModifTipus();
             }else{
-                if(m.getTsb() != r.getTsb()){
-                    report_error_semantic("El tipus de la referència i la modificacio no coincideixen amb l'operacio: =", r.getEsquerre(),r.getDreta());
+
+                if(!m.getTsb().equals(r.getTsb())){
+                    report_error_semantic("El tipus de la referència i la modificacio no coincideixen amb l'operacio: =", r.getEsquerre(),m.getDreta());
                     errorSemantic = true;
                     RESULT = new SimbolModifTipus();
                 }else{
-                    RESULT = new SimbolModifTipus(r.getTsb(),r.getTipus()); 
+                    RESULT = new SimbolModifTipus(r.getTsb(),r.getTipus(),r.getEsquerre(),m.getDreta()); 
                 }
             }
             
@@ -411,7 +505,7 @@ MODIF_TIPUS ::= R:r I_1:i {:System.out.println("MODIF_TIPUS -> R I_1");
 //Si R.tsb = ts_record -> referència a tupla
 //Si R.tsb = int -> pot venir de id1.id2 on id1.tsb = ts_record
 
-R ::= ID:d {:System.out.println("R -> ID");
+R ::= ID:d {:System.out.println("R -> ID ");
         Descripcio descripcio = taula_simbols.consulta((String)d.valor);
         if(descripcio == null){ //no es troba a la taula de simbols
             report_error_semantic("Undefined id \""+d.valor+"\"", d.esquerre,d.dreta);
@@ -458,7 +552,7 @@ R ::= ID:d {:System.out.println("R -> ID");
                       RESULT = new SimbolR((String)id.valor,"ts_nul","id_nula","procc",id.esquerre,id.dreta);  
                     }else{
                         Descripcio t = taula_simbols.consulta(proc.getTipus());
-                        if(t instanceof Dtipus){
+                        if(t instanceof Dtipus){ //no fa falta crec
                             Dtipus t1 = (Dtipus) t;
                             RESULT = new SimbolR((String)id.valor,t1.dt().tipus_subjacent(),tipus,"procc",id.esquerre,id.dreta); 
                         }else{
@@ -486,19 +580,19 @@ R ::= ID:d {:System.out.println("R -> ID");
                 }else{
                     switch(e.getTsb()){
                         case "ts_boolea":
-                                nom += "_"+"boolea";
+                                nom += "_"+"bool";
                                 break;
                         case "ts_cadena":
-                                nom+= "_"+"cadena";
+                                nom+= "_"+"cad";
                                 break;
                         case "ts_decimal":
                                 nom+= "_"+"decimal";
                                 break;
                         case "ts_enter":
-                                nom+= "_"+"enter";
+                                nom+= "_"+"ent";
                                 break;
                         case "ts_caracter":
-                                nom+= "_"+"caracter";
+                                nom+= "_"+"car";
                                 break;
                         case "ts_record":
                                 nom+= "_"+"tupla";
@@ -506,7 +600,6 @@ R ::= ID:d {:System.out.println("R -> ID");
                     }
                 }
             }
-
             Descripcio descripcio = taula_simbols.consulta(nom);
             if(descripcio == null){
                 report_error_semantic("El subprograma amb aquests paràmetres no existeix", id.esquerre,r.dreta);
@@ -529,41 +622,29 @@ R ::= ID:d {:System.out.println("R -> ID");
             }
         }
         :} //per subprogrames
-    | ID:id1 PUNT ID:id2 {:System.out.println("R -> ID PUNT ID");
-
-        Descripcio descripcio = taula_simbols.consulta((String)id1.valor);
-        if(descripcio!=null){
-            if(descripcio instanceof Dconst){
-                        Dconst c = (Dconst) descripcio;
-                        String tipus = c.tipus();
-                        if(tipus == "tupla"){
-                            Dcamp ca = (Dcamp) taula_simbols.consultacamp((String)id1.valor,(String)id2.valor);
-                            //camp pot ser null
-
-                            if(ca != null){
-                                Descripcio d = taula_simbols.consulta(ca.tipus());
-                                Dtipus t = (Dtipus) d; //alerta que a D camp no li hem posat el tipus que toca.
-                                RESULT = new SimbolR((String)id1.valor,t.dt().tipus_subjacent(),ca.tipus(),"const",id1.esquerre,id2.dreta);
-                                //posarem const, perquè un camp d'una tupla no és pot modificar
-                            }else{
-                                report_error_semantic("El camp \""+id2.valor+"\" no existeix", id2.esquerre,id2.dreta);
-                                errorSemantic = true;
-                                RESULT  = new SimbolR(); 
-                            }
-                        }else{
-                            report_error_semantic("L'ID \""+id1.valor+"\" no és una tupla", id1.esquerre,id1.dreta);
-                            errorSemantic = true;
-                            RESULT  = new SimbolR();
-                        }
-                    }else{
-                        report_error_semantic("L'ID \""+id1.valor+"\" no és una tupla", id1.esquerre,id1.dreta);
-                        errorSemantic = true;
-                        RESULT  = new SimbolR();
-                    }
-        }else{
-            report_error_semantic("L'ID \""+id1.valor+"\" no és una tupla", id1.esquerre,id1.dreta);
-            errorSemantic = true;
+    | R:r PUNT ID:i {:System.out.println("R -> R PUNT ID "+(String)i.valor);
+        if(errorSemantic){
             RESULT  = new SimbolR();
+        }else{
+            if((r.getMvp()=="const")&&(r.getTsb()=="ts_record")){
+                Dcamp c = (Dcamp) taula_simbols.consultacamp(r.getIdb_dreta(),(String)i.valor);
+                if(c!=null){
+                    Dtipus tipus = (Dtipus) taula_simbols.consulta(c.tipus());
+                    if(c.tipus()=="tupla"){
+                        RESULT = new SimbolR(r.getIdb(),c.getIdb(),tipus.dt().tipus_subjacent(),c.tipus(),"const",r.getEsquerre(),i.dreta);
+                    }else{
+                        RESULT = new SimbolR(r.getIdb(),(String)i.valor,tipus.dt().tipus_subjacent(),c.tipus(),"var",r.getEsquerre(),i.dreta);
+                    }
+                }else{
+                    report_error_semantic("Id no es un camp de la tupla: "+r.getIdb_dreta(), i.esquerre,i.dreta);
+                    errorSemantic = true;
+                    RESULT  = new SimbolR(); 
+                }
+            }else{
+            report_error_semantic("La referència "+r.getIdb_dreta()+" no és una tupla", r.getEsquerre(),r.getDreta());
+                errorSemantic = true;
+                RESULT  = new SimbolR(); 
+            } 
         }
         
 
@@ -581,31 +662,31 @@ A ::= ID:i COMA A:a {:System.out.println("A -> ID COMA A");
     :}
  ; 
 
-I_1 ::= AUTOSUM {:System.out.println("I_1 -> AUTOSUM");
-    RESULT = new SimbolI("as","id_nula","ts_nul");
+I_1 ::= AUTOSUM:a {:System.out.println("I_1 -> AUTOSUM");
+    RESULT = new SimbolI("as","id_nula","ts_nul",a.esquerre,a.dreta);
     :}
-    | AUTOSUB {:System.out.println("I_1 -> AUTOSUB");
-    RESULT = new SimbolI("ar","id_nula","ts_nul");
+    | AUTOSUB:a {:System.out.println("I_1 -> AUTOSUB");
+    RESULT = new SimbolI("ar","id_nula","ts_nul",a.esquerre,a.dreta);
     :}
-    | SUMAHI E:e {:System.out.println("I_1 -> SUMAHI E");
+    | SUMAHI:s E:e {:System.out.println("I_1 -> SUMAHI E");
         if(errorSemantic){
         RESULT = new SimbolI();
         }else{
-        RESULT = new SimbolI("si",e.getTipus(),e.getTsb());   
+        RESULT = new SimbolI("si",e.getTipus(),e.getTsb(),s.esquerre,e.getDreta());   
         }
     :}
-    | RESTAHI E:e {:System.out.println("I_1 -> RESTAHI E");
+    | RESTAHI:r E:e {:System.out.println("I_1 -> RESTAHI E");
         if(errorSemantic){
             RESULT = new SimbolI();
         }else{
-            RESULT = new SimbolI("ri",e.getTipus(),e.getTsb());   
+            RESULT = new SimbolI("ri",e.getTipus(),e.getTsb(),r.esquerre,e.getDreta());   
         }
     :}
-    | ASSIGN E:e  {:System.out.println("I_1 -> ASSIGN E");
+    | ASSIGN:a E:e  {:System.out.println("I_1 -> ASSIGN E");
         if(errorSemantic){
             RESULT = new SimbolI();
         }else{
-            RESULT = new SimbolI("ig",e.getTipus(),e.getTsb());   
+            RESULT = new SimbolI("ig",e.getTipus(),e.getTsb(),a.esquerre,e.getDreta());   
         }
     
     :}
@@ -619,7 +700,7 @@ VALORS ::= E:e {:System.out.println("VALORS -> E");
         }else{
             SimbolValors v = new SimbolValors();
             v.afegirE(e); //afegim e
-            RESULT = new SimbolValors();
+            RESULT = v;
         }
         :}
         | E:e COMA VALORS:v {:System.out.println("VALORS -> E  COMA VALORS");
@@ -688,7 +769,11 @@ DECL_TUPLA ::= tupla ID:i LPAREN RPAREN ASSIGN LPAREN:r VALS_TUPLA:v RPAREN {:Sy
                             }else{
                                 n++; 
                             }
-                            bol = taula_simbols.posarcamp((String)i.valor,nom,new Dcamp(simbol.getTipus(),n,simbol.getTsb()));
+                            if(simbol.getTsb()=="ts_record"){
+                                bol = taula_simbols.posarcamp((String)i.valor,nom,new Dcamp(simbol.getIdb(),simbol.getTipus(),n,simbol.getTsb()));
+                            }else{
+                                bol = taula_simbols.posarcamp((String)i.valor,nom,new Dcamp(simbol.getTipus(),n,simbol.getTsb()));
+                            }
                             if(bol == false){
                                 break;
                             }
@@ -709,7 +794,7 @@ DECL_TUPLA ::= tupla ID:i LPAREN RPAREN ASSIGN LPAREN:r VALS_TUPLA:v RPAREN {:Sy
                 }else{
                     Boolean bol = taula_simbols.posar((String)i.valor,new Dconst("tupla")); //mirar si posar es true o false
                     if(bol){
-                        String tu = r.getIdb(); //id de la nostra referència
+                        String tu = r.getIdb_dreta(); //id de la nostra referència
                         Dada1 d = taula_simbols.consulta_tupla(tu);
                         Descripcio descripcio = d.td();
 
@@ -718,7 +803,11 @@ DECL_TUPLA ::= tupla ID:i LPAREN RPAREN ASSIGN LPAREN:r VALS_TUPLA:v RPAREN {:Sy
 
                             while(first!=null){
                                 Dcamp camp = (Dcamp) taula_simbols.consultacamp(tu,first.idcamp());
-                                taula_simbols.posarcamp((String)i.valor,first.idcamp(),new Dcamp(camp.tipus(),camp.getDespl(),camp.getTsb()));
+                                if(camp.getTsb() == "ts_record"){
+                                    taula_simbols.posarcamp((String)i.valor,first.idcamp(),new Dcamp(camp.getIdb(),camp.tipus(),camp.getDespl(),camp.getTsb()));
+                                }else{
+                                    taula_simbols.posarcamp((String)i.valor,first.idcamp(),new Dcamp(camp.tipus(),camp.getDespl(),camp.getTsb()));
+                                }
                                 first = first.next();
                             }
                         }else{
@@ -739,7 +828,7 @@ E ::= T:t E_1:e {:System.out.println("E -> T E_1");
         RESULT = new SimbolE();
     }else{
         if((e==null)||(e.getTsb()=="ts_nul")){
-            RESULT = new SimbolE(t.getTsb(),t.getTipus(),t.getMode(),t.getEsquerre(),t.getDreta());
+            RESULT = new SimbolE(t.getIdb(),t.getTsb(),t.getTipus(),t.getMode(),t.getEsquerre(),t.getDreta());
         }else{
            if(t.getTsb()!="ts_boolea"){
                 report_error_semantic("L'operand ha de ser de tipus booleà", t.getEsquerre(),t.getDreta());
@@ -813,7 +902,7 @@ T ::= N:n T_1:t {:System.out.println("T -> N T_1");
         RESULT = new SimbolT();
     }else{
         if((t==null)||(t.getTsb() == "ts_nul")){ //venim de Tp -> @
-            RESULT = new SimbolT(n.getTsb(),n.getTipus(),n.getMode(),n.getEsquerre(),n.getDreta());
+            RESULT = new SimbolT(n.getIdb(),n.getTsb(),n.getTipus(),n.getMode(),n.getEsquerre(),n.getDreta());
         }else{
             if((n.getTsb() == "ts_nul")||(n.getTsb() == "ts_cadena")||(n.getTsb()=="ts_boolea")){
                 report_error_semantic("El terminal no es adequat per una operació lògica", n.getEsquerre(),n.getDreta()); //arreglar
@@ -916,7 +1005,7 @@ N ::= M:m N_1:n {:System.out.println("N -> M N_1");
             RESULT = new SimbolN();
         }else{
             if((n==null)||(n.getTsb()=="ts_nul")){ //vol dir que M_1 -> @
-                RESULT = new SimbolN(m.getTsb(),m.getTipus(),m.getMode(),m.getEsquerre(),m.getDreta()); //pot ser tupla
+                RESULT = new SimbolN(m.getIdb(),m.getTsb(),m.getTipus(),m.getMode(),m.getEsquerre(),m.getDreta()); //pot ser tupla
             }else{ //M_1 ha fet qualque operació, hem de passar el tsb de f
 
                 if((m.getTsb() == "ts_nul")||(m.getTsb() == "ts_cadena")||(m.getTsb()=="ts_boolea")){
@@ -1009,7 +1098,7 @@ M ::= F:f M_1:m {:System.out.println("M -> F M_1");
             RESULT = new SimbolM();
         }else{
             if((m==null)||(m.getTsb() == "ts_nul")){ //vol dir que M_1 -> @
-                RESULT = new SimbolM(f.getTsb(),f.getTipus(),f.getMode(),f.getEsquerre(),f.getDreta()); //pot ser tupla
+                RESULT = new SimbolM(f.getIdb(),f.getTsb(),f.getTipus(),f.getMode(),f.getEsquerre(),f.getDreta()); //pot ser tupla
             }else{ //M_1 ha fet qualque operació, hem de passar el tsb de f
 
                 if((f.getTsb() == "ts_nul")||(f.getTsb() == "ts_cadena")||(f.getTsb()=="ts_boolea")){
@@ -1208,7 +1297,7 @@ F ::= LPAREN:l E:e RPAREN:r {:System.out.println("F -> LPAREN E RPAREN");
                         if(r.getMvp() == "var"){
                             RESULT = new SimbolF(r.getTsb(),r.getTipus(),"modevar",r.getEsquerre(),r.getDreta());
                         }else if((r.getMvp() == "const")||(r.getMvp() == "procc")){
-                            RESULT = new SimbolF(r.getTsb(),r.getTipus(),"modeconst",r.getEsquerre(),r.getDreta());
+                            RESULT = new SimbolF(r.getIdb(),r.getTsb(),r.getTipus(),"modeconst",r.getEsquerre(),r.getDreta());
                         }
                     }  
                 }

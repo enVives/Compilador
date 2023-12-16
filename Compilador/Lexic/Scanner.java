@@ -853,7 +853,7 @@ public class Scanner implements java_cup.runtime.Scanner {
             // fall through
           case 74: break;
           case 12: 
-            { return symbol(ParserSym.ASSIGN);
+            { return symbol(ParserSym.ASSIGN,new Token());
             } 
             // fall through
           case 75: break;
@@ -938,22 +938,22 @@ public class Scanner implements java_cup.runtime.Scanner {
             // fall through
           case 91: break;
           case 29: 
-            { return symbol(ParserSym.AUTOSUM);
+            { return symbol(ParserSym.AUTOSUM,new Token());
             } 
             // fall through
           case 92: break;
           case 30: 
-            { return symbol(ParserSym.SUMAHI);
+            { return symbol(ParserSym.SUMAHI,new Token());
             } 
             // fall through
           case 93: break;
           case 31: 
-            { return symbol(ParserSym.AUTOSUB);
+            { return symbol(ParserSym.AUTOSUB,new Token());
             } 
             // fall through
           case 94: break;
           case 32: 
-            { return symbol(ParserSym.RESTAHI);
+            { return symbol(ParserSym.RESTAHI,new Token());
             } 
             // fall through
           case 95: break;

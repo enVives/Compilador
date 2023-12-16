@@ -9,6 +9,11 @@ public class SimbolT extends SimbolBase {
     private String tipus;
     private String mode;
     private Location esquerre;
+    private String idb;
+
+    public String getIdb() {
+        return idb;
+    }
 
     public Location getEsquerre() {
         return esquerre;
@@ -27,8 +32,18 @@ public class SimbolT extends SimbolBase {
         this.mode = mode;
         this.esquerre = esquerre;
         this.dreta = dreta;
+        this.idb = null;
     }
-
+    
+    public SimbolT(String idb,String tsb, String tipus, String mode,Location esquerre,Location dreta) { //alerta amb no afegir el tsb
+        super();
+        this.tsb = tsb;
+        this.tipus = tipus;
+        this.mode = mode;
+        this.esquerre = esquerre;
+        this.dreta = dreta;
+        this.idb = idb;
+    }
     public SimbolT(){
         tsb = "ts_nul";
         tipus = "id_nula";

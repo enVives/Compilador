@@ -1,11 +1,15 @@
-tupla nom1 () = (1,2:a,3,4);
-tupla nom2 () = (3,nom1,5);
+ent j = 4;
+ent h = 2;
+tupla nom1 () = (FALS,2,3);
+tupla nom2 () = (nom1,4,5);
 
-ent e = nom2.nom1.a;
+metode ent a (ent b, ent c) {
 
+    RETORNA 2;
+}
 
 metode main (cad arguments []) {
-    
+    decimal p = a(j,h) + 2.14 + nom2.Item0.Item0;
 }
     
 

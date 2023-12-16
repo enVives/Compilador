@@ -214,6 +214,7 @@ public class Taula {
             System.out.println("Error : l'dentificador '"+idpr+"' no és un subprograma");
             return false;
         }
+        Dproc proc = (Dproc) t;
         Dada2 dada = td.get(idpr).first();
         Dada2 idxe = null;
 
@@ -247,8 +248,9 @@ public class Taula {
 
         String nou_nom = idpr + "_" + tipus;
         Dada2 first = td.get(idpr).first();
+    
         td.remove(idpr);
-        posar(nou_nom, new Dproc());
+        posar(nou_nom, new Dproc(proc.getTipus()));
         td.get(nou_nom).set_first(first);
 
         if (idxe == null) {

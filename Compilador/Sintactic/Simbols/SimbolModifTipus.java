@@ -1,4 +1,5 @@
 package Compilador.Sintactic.Simbols;
+import java_cup.runtime.ComplexSymbolFactory.Location;
 
 public class SimbolModifTipus extends SimbolBase {
     private String tsb;
@@ -8,6 +9,17 @@ public class SimbolModifTipus extends SimbolBase {
 
 
     private String tipus;
+    private Location esquerre;
+    public Location getEsquerre() {
+        return esquerre;
+    }
+
+
+    private Location dreta;
+
+    public Location getDreta() {
+        return dreta;
+    }
 
 
     public SimbolModifTipus(){
@@ -16,9 +28,11 @@ public class SimbolModifTipus extends SimbolBase {
     }
 
 
-    public SimbolModifTipus(String tsb, String tipus){
+    public SimbolModifTipus(String tsb, String tipus,Location esquerre,Location dreta){
         this.tsb = tsb;
         this.tipus = tipus;
+        this.esquerre = esquerre;
+        this.dreta = dreta;
     }
 
 

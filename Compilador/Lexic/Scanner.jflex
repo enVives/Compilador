@@ -213,16 +213,18 @@ endline      = ['\r'|'\n'|"\r\n"]+
 {mul}                     { return symbol(ParserSym.MULT,new Token());}
 {div}                     { return symbol(ParserSym.DIV,new Token());}
 {mod}                     { return symbol(ParserSym.MOD,new Token());}
-{autosuma}                { return symbol(ParserSym.AUTOSUM);}
-{autoresta}               { return symbol(ParserSym.AUTOSUB);}
-{sumahi}                  { return symbol(ParserSym.SUMAHI);}
-{restahi}                 { return symbol(ParserSym.RESTAHI);}
+
+{autosuma}                { return symbol(ParserSym.AUTOSUM,new Token());}
+{autoresta}               { return symbol(ParserSym.AUTOSUB,new Token());}
+{sumahi}                  { return symbol(ParserSym.SUMAHI,new Token());}
+{restahi}                 { return symbol(ParserSym.RESTAHI,new Token());}
+
 {dospunts}                { return symbol(ParserSym.DOSPUNTS);}
 {interrogant}             { return symbol(ParserSym.INTERROG);}
 {lparen}                  { return symbol(ParserSym.LPAREN,new Token());}
 {rparen}                  { return symbol(ParserSym.RPAREN,new Token());}
 {punticoma}               { return symbol(ParserSym.PUNTICOMA);}
-{assign}                  { return symbol(ParserSym.ASSIGN);}
+{assign}                  { return symbol(ParserSym.ASSIGN,new Token());}
 {lcorch}                  { return symbol(ParserSym.LCORCH);}
 {rcorch}                  { return symbol(ParserSym.RCORCH);}
 {lclaudat}                { return symbol(ParserSym.LCLAUDAT);}

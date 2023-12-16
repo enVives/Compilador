@@ -30,15 +30,15 @@ public class ParserSym {
   public static final int RCORCH = 24;
   public static final int caracter = 42;
   public static final int borra = 60;
-  public static final int AUTOSUM = 16;
+  public static final int AUTOSUM = 15;
   public static final int sortidaS = 58;
   public static final int OR = 35;
   public static final int si = 44;
-  public static final int SUMAHI = 18;
+  public static final int SUMAHI = 17;
   public static final int DIV = 11;
   public static final int MAJOR = 34;
-  public static final int ASSIGN = 15;
-  public static final int AUTOSUB = 17;
+  public static final int ASSIGN = 19;
+  public static final int AUTOSUB = 16;
   public static final int ID = 2;
   public static final int LCLAUDAT = 25;
   public static final int EOF = 0;
@@ -58,7 +58,7 @@ public class ParserSym {
   public static final int vlogic = 5;
   public static final int metode = 53;
   public static final int logic = 40;
-  public static final int RESTAHI = 19;
+  public static final int RESTAHI = 18;
   public static final int nou = 55;
   public static final int venter = 4;
   public static final int acaba = 49;
@@ -86,11 +86,11 @@ public class ParserSym {
   "MOD",
   "LPAREN",
   "RPAREN",
-  "ASSIGN",
   "AUTOSUM",
   "AUTOSUB",
   "SUMAHI",
   "RESTAHI",
+  "ASSIGN",
   "DOSPUNTS",
   "PUNTICOMA",
   "INTERROG",

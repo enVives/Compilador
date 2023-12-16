@@ -2,17 +2,16 @@ package Compilador.Sintactic.Simbols;
 
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
-public class SimbolR {
+public class SimbolCamps extends SimbolBase {
     private String idb;
-    private String idb_dreta;
-    public String getIdb_dreta() {
-        return idb_dreta;
-    }
-
     private String tsb;
     private String tipus;
-    private String mvp;
     private Location esquerre;
+    private Character mode; //mode d:darrer o n:no
+
+    public Character getMode() {
+        return mode;
+    }
 
     public Location getEsquerre() {
         return esquerre;
@@ -27,34 +26,24 @@ public class SimbolR {
     //si id-id -> cercam el tsb del component i l'afegim aquí, també tipus si en té, mvp = constant
     //si id(a,b,c) -> cercam el tipus de retorn de subprograma i el posam com a tipus i tipus subjacent
     //id normal -> res
-    public SimbolR(String idb, String tsb, String tipus, String mvp,Location esquerre,Location dreta){
-        this.mvp = mvp;
+    public SimbolCamps(String idb, String tsb, String tipus,Location esquerre,Location dreta){
         this.tsb = tsb;
         this.idb = idb;
         this.tipus = tipus;
         this.esquerre = esquerre;
         this.dreta = dreta;
-        this.idb_dreta = idb;
+        this.mode = 'n';
     }
 
-    public SimbolR(String idb,String idb_dreta, String tsb, String tipus, String mvp,Location esquerre,Location dreta){
-        this.mvp = mvp;
-        this.tsb = tsb;
-        this.idb = idb;
-        this.tipus = tipus;
-        this.esquerre = esquerre;
-        this.dreta = dreta;
-        this.idb_dreta = idb_dreta;
-    }
-
-    public SimbolR(){
+    public SimbolCamps(){
         idb = null;
         tsb = null;
         tipus = null;
-        mvp = null;
     }
-    public String getMvp() {
-        return mvp;
+
+    public SimbolCamps(String idb){
+        this.idb = idb;
+        this.mode = 'd';
     }
 
     public String getTipus() {
@@ -68,5 +57,4 @@ public class SimbolR {
     public String getIdb() {
         return idb;
     }
-
 }
