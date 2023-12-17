@@ -137,7 +137,11 @@ non terminal SimbolModifTipus MODIF_TIPUS;
 non terminal SimbolArg ARG;
 non terminal SimbolArgsp ARGS_1;
 non terminal SimbolArgs ARGS;
-non terminal SimbolReturn RETURN; 
+non terminal SimbolReturn RETURN;
+non terminal INICI;
+non terminal FOR_2;
+non terminal DEF;
+
 
 precedence left  ADD, SUB;
 precedence left  MULT, DIV, MOD;
@@ -298,25 +302,90 @@ ARG ::= TIPUS:t ID:d {:System.out.println("ARG -> TIPUS ID");
     RESULT = new SimbolArg((String)d.valor,t.getTipus());
     :};
 
-MENTRE ::= mentres LPAREN E RPAREN fer LCLAUDAT SENTENCIES RCLAUDAT {:System.out.println("MENTRE");:} ;
+MENTRE ::= mentres LPAREN E:e RPAREN fer LCLAUDAT SENTENCIES RCLAUDAT {:System.out.println("MENTRE");
+            if(!errorSemantic){
+                if(e.getTsb()!="ts_boolea"){
+                    report_error_semantic("La expresió ha de ser de tipus booleà", e.getEsquerre(),e.getDreta());
+                    errorSemantic = true;
+                }
+            }
+            :} ;
 
-IF ::=  si LPAREN E RPAREN LCLAUDAT SENTENCIES RCLAUDAT IF_1 {:System.out.println("IF");:};
-IF_1 ::= sino si LPAREN E RPAREN LCLAUDAT SENTENCIES RCLAUDAT IF_1 {:System.out.println("IF_1");:}
+IF ::=  si LPAREN E:e RPAREN LCLAUDAT SENTENCIES RCLAUDAT IF_1 {:System.out.println("IF");
+                if(!errorSemantic){
+                    if(e.getTsb()!="ts_boolea"){
+                        report_error_semantic("La expresió ha de ser de tipus booleà", e.getEsquerre(),e.getDreta());
+                        errorSemantic = true;
+                    }
+                }
+            :};
+IF_1 ::= sino si LPAREN E:e RPAREN LCLAUDAT SENTENCIES RCLAUDAT IF_1 {:System.out.println("IF_1");
+                if(!errorSemantic){
+                    if(e.getTsb()!="ts_boolea"){
+                        report_error_semantic("La expresió ha de ser de tipus booleà", e.getEsquerre(),e.getDreta());
+                        errorSemantic = true;
+                    }
+                }
+            :}
             | sino LCLAUDAT SENTENCIES RCLAUDAT {:System.out.println("IF_1");:}
+
             | {:System.out.println("@");:}
             ;
-FMENTRE ::= fer LCLAUDAT SENTENCIES RCLAUDAT  mentres LPAREN L RPAREN PUNTICOMA {:System.out.println("FMENTRE");:} ;
+//FMENTRE ::= fer LCLAUDAT SENTENCIES RCLAUDAT  mentres LPAREN L RPAREN PUNTICOMA {:System.out.println("FMENTRE");:} ;
 
-FOR ::= per LPAREN TIPUS A PUNTICOMA FOR_1 PUNTICOMA FOR_1 RPAREN LCLAUDAT SENT RCLAUDAT {:System.out.println("FOR");:}
-    | per LPAREN PUNTICOMA FOR_1 PUNTICOMA FOR_1 RPAREN LCLAUDAT SENT RCLAUDAT {:System.out.println("FOR");:}
+SWITCH ::= seleccio LPAREN E RPAREN LCLAUDAT SWITCH_1 DEF RCLAUDAT {:System.out.println("SWITCH");:};
+SWITCH_1 ::= cas E DOSPUNTS SENTENCIES acaba PUNTICOMA SWITCH_1 {:System.out.println("SWITCH_1");:}
+    | {:System.out.println("SWITCH_1 -> @");:};
+DEF  ::= pdefecte DOSPUNTS SENTENCIES acaba PUNTICOMA {:System.out.println("DEF");:};
+
+
+FOR ::= per LPAREN INICI PUNTICOMA FOR_1 PUNTICOMA FOR_2 RPAREN LCLAUDAT SENT RCLAUDAT {:System.out.println("FOR");:}
+    | per LPAREN PUNTICOMA FOR_1 PUNTICOMA FOR_2 RPAREN LCLAUDAT SENT RCLAUDAT {:System.out.println("FOR");:}
     ;
 
-FOR_1 ::= E {:System.out.println("FOR_1 -> E");:}
+FOR_1 ::= E:e {:System.out.println("FOR_1 -> E");
+    if(!errorSemantic){
+                    if(e.getTsb()!="ts_boolea"){
+                        report_error_semantic("La expresió ha de ser de tipus booleà", e.getEsquerre(),e.getDreta());
+                        errorSemantic = true;
+                    }
+                }
+    :}
     | {:System.out.println("FOR_1 -> NULL");:}
     ;
 
-ENTRADAS ::= entradaS LPAREN TIPUS COMA R RPAREN {:System.out.println("ENTRADAS");:} ;
-SORTIDAS ::= sortidaS LPAREN E RPAREN {:System.out.println("SORTIDAS");:};
+FOR_2 ::= E:e {:System.out.println("FOR_1 -> E");
+    :}
+    | {:System.out.println("FOR_1 -> NULL");:}
+    ;
+
+INICI ::= DECL COMA INICI {:System.out.println("INICI -> DECL COMA INICI");:}
+        | MODIF COMA INICI {:System.out.println("INICI -> MODIF COMA INICI");:}
+        | MODIF {:System.out.println("INICI -> MODIF");:}
+        | DECL {:System.out.println("INICI -> DECL");:}
+;
+
+ENTRADAS ::= entradaS LPAREN TIPUS:t COMA R:r RPAREN {:System.out.println("ENTRADAS");
+            if(!errorSemantic){
+                if(r.getTsb()!="ts_record"){
+                    if(t.getTipus()!=r.getTipus()){
+                        report_error_semantic("Els tipus no coincideixen", t.getEsquerre(),r.getDreta());
+                        errorSemantic = true;
+                    } 
+                }else{
+                    report_error_semantic("No es pot posar la entrada dins una tupla", r.getEsquerre(),r.getDreta());
+                    errorSemantic = true;
+                }
+            }
+            :} ;
+SORTIDAS ::= sortidaS LPAREN E:e RPAREN {:System.out.println("SORTIDAS");
+        if(!errorSemantic){
+            if((e.getTsb()=="ts_nul")&&(e.getTsb()=="ts_record")){
+                report_error_semantic("Tipus erroni de sortida de teclat", e.getEsquerre(),e.getDreta());
+                errorSemantic = true;
+            } 
+        }
+        :};
 
 DECL_CONST ::= constant TIPUS:t A:a ASSIGN E:e  {:System.out.println("DECL_CONST -> constant TIPUS A ASSIGN E");
             if(errorSemantic){
