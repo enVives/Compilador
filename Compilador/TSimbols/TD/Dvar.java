@@ -15,6 +15,11 @@ public class Dvar extends Descripcio {
         return nv;
     }
 
+    public Dvar(){
+        super("dvar");
+        nv++;
+    }
+
     public String tipus(){
         return tipus;
     }

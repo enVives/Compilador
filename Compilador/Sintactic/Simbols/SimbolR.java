@@ -1,5 +1,7 @@
 package Compilador.Sintactic.Simbols;
 
+import java.util.ArrayList;
+
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
 public class SimbolR {
@@ -53,6 +55,15 @@ public class SimbolR {
         tipus = null;
         mvp = null;
     }
+
+
+    //Atributs Intermedi
+
+    private String r;
+    private ArrayList<Integer> dpc;
+    private String tp;
+
+
     public String getMvp() {
         return mvp;
     }

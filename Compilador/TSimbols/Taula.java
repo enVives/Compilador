@@ -78,7 +78,7 @@ public class Taula {
 
         if (td.get(id) != null) { // si ja tenim una variable dins td amb el mateix id
             if (td.get(id).np() == n) {
-                System.out.println("Error, ja hi ha un identificador amb el nom: '"+id+"' dins el mateix àmbit");
+                //System.out.println("Error, ja hi ha un identificador amb el nom: '"+id+"' dins el mateix àmbit");
                 return false;
             }
             idxe = ta.get(n);
@@ -117,12 +117,13 @@ public class Taula {
         }
 
         Dada2 i = td.get(idr).first();
-        while ((i != null) && (i.idcamp() != idc)) {
-            i = i.next();
+
+        while ((i != null) && (!i.idcamp().equals(idc))) {
+            i = i.next();  
         }
 
         if (i != null) {
-            System.out.println("Error, el camp amb identificador: '"+idc+"' ja existeix");
+            //System.out.println("Error, el camp amb identificador: '"+idc+"' ja existeix");
             return false;
         }
 
@@ -207,6 +208,10 @@ public class Taula {
 
     }
 
+    public Dada2 primer_parametre(String subprograma){
+        return td.get(subprograma).first();
+    }
+
     public boolean posarparam(String idpr, String idparam, Descripcio d) {
         Descripcio t = td.get(idpr).td();
 
@@ -214,7 +219,6 @@ public class Taula {
             System.out.println("Error : l'dentificador '"+idpr+"' no és un subprograma");
             return false;
         }
-        Dproc proc = (Dproc) t;
         Dada2 dada = td.get(idpr).first();
         Dada2 idxe = null;
 
@@ -238,23 +242,20 @@ public class Taula {
         }
 
         String tipus = "";
-        if (d instanceof Dvar) {
-            Dvar var = (Dvar) d;
-            tipus = var.tipus();
-        } else if (d instanceof Dconst) {
-            Dconst c = (Dconst) d;
-            tipus = c.tipus();
+
+        if(d instanceof Darg){
+            Darg arg = (Darg) d;
+            tipus = arg.tipus();
         }
 
         String nou_nom = idpr + "_" + tipus;
         Dada2 first = td.get(idpr).first();
-    
         td.remove(idpr);
-        posar(nou_nom, new Dproc(proc.getTipus()));
+        posar(nou_nom, new Dproc());
         td.get(nou_nom).set_first(first);
 
         if (idxe == null) {
-            td.get(nou_nom).set_first(null);
+            td.get(nou_nom).set_first(te.get(idx));
         } else {
             idxe.set_next(te.get(idx));
         }
