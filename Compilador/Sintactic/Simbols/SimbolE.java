@@ -8,6 +8,19 @@ public class SimbolE extends SimbolBase {
     private Location esquerre,dreta;
     private String idb;
 
+
+    //Atributs per el codi Intermedi
+    private Integer r;
+    public Integer getR() {
+        return r;
+    }
+
+    private Integer d;
+
+    public Integer getD() {
+        return d;
+    }
+
     public String getIdb() {
         return idb;
     }

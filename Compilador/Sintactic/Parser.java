@@ -9,6 +9,10 @@ import java_cup.runtime.*;
 import java_cup.runtime.ComplexSymbolFactory.ComplexSymbol;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 import Compilador.Lexic.Scanner.Token;
+import Compilador.Intermedi.TaulaIntermedi;
+import Compilador.Intermedi.Operacio;
+import Compilador.Intermedi.TaulaVariables;
+import Compilador.Intermedi.TaulaProcediments;
 import java.io.PrintStream;
 import java.util.HashMap;
 import Compilador.TSimbols.Taula;
@@ -22,6 +26,7 @@ import java.util.ArrayList;
 import Compilador.TSimbols.Dada1;
 import Compilador.TSimbols.Dada2;
 import Compilador.Sintactic.Simbols.SimbolArgsp.KeyValor;
+import java.util.Stack;
 import java_cup.runtime.XMLElement;
 
 /** CUP v0.11b 20160615 generated parser.
@@ -675,6 +680,13 @@ public class Parser extends java_cup.runtime.lr_parser {
      *             Tot sobre el codi Intermedi                            *
      **********************************************************************/
 
+    //Pila de subprograma actual
+
+    Stack<String> pila_procediments = new Stack<>();
+    Integer etiquetes = 0; //anirà incrementant
+    TaulaIntermedi taula_intermedi = new TaulaIntermedi();
+    TaulaVariables taula_variables = new TaulaVariables();
+    TaulaProcediments taula_procediments = new TaulaProcediments();
 
     /**********************************************************************
      * sobrecàrrega de mètodes per gestionar els errors que es localitzin *
@@ -997,8 +1009,8 @@ class CUP$Parser$actions {
                     String nom = (String) i.valor;
                     Stack<KeyValor> llista = a.getLlista();
 
-                    taula_simbols.posar(nom, new Dproc());
-
+                   taula_simbols.posar(nom, new Dproc());
+                    
                     while(!llista.isEmpty()){
                             KeyValor k = llista.pop();
                             String id = k.key; //nom del paràmetre
@@ -1019,6 +1031,8 @@ class CUP$Parser$actions {
                 taula_simbols.posar(idparam, arg);
                 dada = dada.next();
             }
+
+            pila_procediments.push(nom);
 
 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("PROCEDIMENT_1",64, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-4)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
@@ -1063,7 +1077,8 @@ class CUP$Parser$actions {
                             taula_simbols.posar(idparam, arg);
                             dada = dada.next();
                         }
-
+                        
+                        pila_procediments.push(nom);
                         RESULT = new SimbolProcediment2(t.getTipus());
 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("PROCEDIMENT_2",65, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-5)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
@@ -1076,6 +1091,7 @@ class CUP$Parser$actions {
               Object RESULT =null;
 		System.out.println("PROC");
                     taula_simbols.surtbloc();
+                    pila_procediments.pop();
                 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("PROCEDIMENT",2, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-3)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
@@ -1099,7 +1115,7 @@ class CUP$Parser$actions {
                     }
 
                     taula_simbols.surtbloc();
-                    
+                    pila_procediments.pop();
                 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("PROCEDIMENT",2, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-4)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }

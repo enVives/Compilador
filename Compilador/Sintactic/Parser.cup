@@ -4,6 +4,10 @@ import java_cup.runtime.*;
 import java_cup.runtime.ComplexSymbolFactory.ComplexSymbol;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 import Compilador.Lexic.Scanner.Token;
+import Compilador.Intermedi.TaulaIntermedi;
+import Compilador.Intermedi.Operacio;
+import Compilador.Intermedi.TaulaVariables;
+import Compilador.Intermedi.TaulaProcediments;
 
 import java.io.PrintStream;
 import java.util.HashMap;
@@ -18,6 +22,7 @@ import java.util.ArrayList;
 import Compilador.TSimbols.Dada1;
 import Compilador.TSimbols.Dada2;
 import Compilador.Sintactic.Simbols.SimbolArgsp.KeyValor;
+import java.util.Stack;
 
 class Parser;
 
@@ -39,6 +44,13 @@ parser code {:
      *             Tot sobre el codi Intermedi                            *
      **********************************************************************/
 
+    //Pila de subprograma actual
+
+    Stack<String> pila_procediments = new Stack<>();
+    Integer etiquetes = 0; //anirà incrementant
+    TaulaIntermedi taula_intermedi = new TaulaIntermedi();
+    TaulaVariables taula_variables = new TaulaVariables();
+    TaulaProcediments taula_procediments = new TaulaProcediments();
 
     /**********************************************************************
      * sobrecàrrega de mètodes per gestionar els errors que es localitzin *
@@ -234,6 +246,8 @@ PROCEDIMENT_1 ::= metode ID:i LPAREN ARGS:a RPAREN {:System.out.println("PROCEDI
                 dada = dada.next();
             }
 
+            pila_procediments.push(nom);
+
 :};
 
 PROCEDIMENT_2 ::= metode TIPUS:t ID:i LPAREN ARGS:a RPAREN{:System.out.println("PROCEDIMENT_2");
@@ -261,12 +275,14 @@ PROCEDIMENT_2 ::= metode TIPUS:t ID:i LPAREN ARGS:a RPAREN{:System.out.println("
                             taula_simbols.posar(idparam, arg);
                             dada = dada.next();
                         }
-
+                        
+                        pila_procediments.push(nom);
                         RESULT = new SimbolProcediment2(t.getTipus());
 :}; 
 
 PROCEDIMENT ::= PROCEDIMENT_1 LCLAUDAT SENTENCIES RCLAUDAT {:System.out.println("PROC");
                     taula_simbols.surtbloc();
+                    pila_procediments.pop();
                 :}
                 | PROCEDIMENT_2:t LCLAUDAT SENTENCIES RETURN:r RCLAUDAT {:System.out.println("PROC");
                     Dtipus ti = (Dtipus) taula_simbols.consulta(t.getTipus());
@@ -276,7 +292,7 @@ PROCEDIMENT ::= PROCEDIMENT_1 LCLAUDAT SENTENCIES RCLAUDAT {:System.out.println(
                     }
 
                     taula_simbols.surtbloc();
-                    
+                    pila_procediments.pop();
                 :}
                 ;
 RETURN ::= retorna E:e PUNTICOMA {:System.out.println("RETURN -> retorna E");
