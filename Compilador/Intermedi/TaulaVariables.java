@@ -9,6 +9,10 @@ public class TaulaVariables{
         files = new ArrayList<>();
     }
 
+    public Integer n(){
+        return files.size();
+    }
+
     public void afegeix_variable(String subprograma,Boolean parametre){
         files.add(new Entrada(subprograma, parametre));
     }

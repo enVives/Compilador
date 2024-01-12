@@ -1,0 +1,1 @@
+Operacio: 0 Op1: -4 Op2: null Desti: 1

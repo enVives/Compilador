@@ -28,6 +28,7 @@ public class Principal {
             SymbolFactory sf = new ComplexSymbolFactory();
             Parser parser = new Parser(scanner, sf);
             parser.parse();
+            parser.mostra_intermedi();
         } catch(Exception e) {
             System.err.println("error: "+e);
             e.printStackTrace(System.err);

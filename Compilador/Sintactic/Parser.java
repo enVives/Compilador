@@ -10,9 +10,12 @@ import java_cup.runtime.ComplexSymbolFactory.ComplexSymbol;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 import Compilador.Lexic.Scanner.Token;
 import Compilador.Intermedi.TaulaIntermedi;
+import Compilador.Intermedi.TaulaIntermedi.Sentencia;
 import Compilador.Intermedi.Operacio;
 import Compilador.Intermedi.TaulaVariables;
 import Compilador.Intermedi.TaulaProcediments;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.PrintStream;
 import java.util.HashMap;
 import Compilador.TSimbols.Taula;
@@ -27,6 +30,7 @@ import Compilador.TSimbols.Dada1;
 import Compilador.TSimbols.Dada2;
 import Compilador.Sintactic.Simbols.SimbolArgsp.KeyValor;
 import java.util.Stack;
+import java.io.IOException;
 import java_cup.runtime.XMLElement;
 
 /** CUP v0.11b 20160615 generated parser.
@@ -687,6 +691,51 @@ public class Parser extends java_cup.runtime.lr_parser {
     TaulaIntermedi taula_intermedi = new TaulaIntermedi();
     TaulaVariables taula_variables = new TaulaVariables();
     TaulaProcediments taula_procediments = new TaulaProcediments();
+
+    public Integer novavar(Boolean temporal){ //revisar lo des parametres
+        if(temporal){
+            new Dvar(); //incrementam n antes de afegir-ho
+        }
+        if(!pila_procediments.isEmpty()){
+            String procediment = pila_procediments.peek();
+            taula_variables.afegeix_variable(procediment,null);
+        }else{
+            taula_variables.afegeix_variable(null,null);
+        }
+        return taula_variables.n(); //darrer n
+    }
+
+    public void nouproc(){
+
+    }
+
+    public void mostra_intermedi() throws IOException {
+      FileWriter sortidap;
+      BufferedWriter sortida;
+
+      sortidap = new FileWriter("Intermedi.txt");
+      sortida = new BufferedWriter(sortidap);
+    
+
+    ArrayList<Sentencia> llista = taula_intermedi.get_Llista();
+    Iterator<Sentencia> iterator = llista.iterator();
+    while (iterator.hasNext()) {
+      Sentencia s = iterator.next();
+      try {
+        sortida.write(
+            "Operacio: " + s.getOperacio() + " Op1: " + s.getOp1() + " Op2: " + s.getOp2() + " Desti: " + s.getDesti());
+            sortida.write("\n");
+      } catch (IOException error) {
+        System.out.println(error.toString());
+      }
+    }
+
+    try {
+      sortida.close();
+    } catch (IOException error) {
+      System.out.println(error.toString());
+    }
+  }
 
     /**********************************************************************
      * sobrecàrrega de mètodes per gestionar els errors que es localitzin *
@@ -3079,7 +3128,7 @@ class CUP$Parser$actions {
 		int rleft = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).left;
 		int rright = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		Token r = (Token)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
-		System.out.println("F -> LPAREN E RPAREN");
+		System.out.println("F -> LPAREN E RPAREN"); //pendent intermedi
                 if(errorSemantic){
                     RESULT = new SimbolF();
                 }else{
@@ -3104,7 +3153,8 @@ class CUP$Parser$actions {
 		int vright = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		Token v = (Token)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		System.out.println("F -> venter");
-                RESULT = new SimbolF("ts_enter","ent","modeconst",v.esquerre,v.dreta);
+                Integer n = novavar(true);
+                RESULT = new SimbolF("ts_enter","ent","modeconst",v.esquerre,v.dreta,n,null);
                 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("F",34, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
@@ -3121,6 +3171,8 @@ class CUP$Parser$actions {
 		int vright = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		Token v = (Token)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		System.out.println("F -> SUB venter");
+                Integer n = novavar(true);
+                taula_intermedi.genera(Operacio.copia,(Integer)v.valor*-1,null,n);
                 RESULT = new SimbolF("ts_enter","ent","modeconst",s.esquerre,v.dreta);
                 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("F",34, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);

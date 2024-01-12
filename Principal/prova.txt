@@ -1,7 +1,5 @@
-ent a = 4;
+ent a = -4;
 
-metode a(){
-}
 
 metode main (cad arguments []) {
 
