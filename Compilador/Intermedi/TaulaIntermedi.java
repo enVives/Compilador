@@ -7,7 +7,7 @@ public class TaulaIntermedi {
         llista = new ArrayList<>();
     }
 
-    public void genera(Integer mnemonic,Integer op1, Integer op2,Integer desti){
+    public void genera(Integer mnemonic,Object op1, Integer op2,Integer desti){
         llista.add(new Sentencia(mnemonic, op1, op2, desti));
     }
 
@@ -21,8 +21,8 @@ public class TaulaIntermedi {
             return operacio;
         }
 
-        private Integer op1;
-        public Integer getOp1() {
+        private Object op1;
+        public Object getOp1() {
             return op1;
         }
 
@@ -37,7 +37,7 @@ public class TaulaIntermedi {
             return desti;
         }
 
-        public Sentencia(Integer operacio,Integer op1, Integer op2,Integer desti){
+        public Sentencia(Integer operacio,Object op1, Integer op2,Integer desti){
             this.operacio = operacio;
             this.op1 = op1;
             this.op2 = op2;

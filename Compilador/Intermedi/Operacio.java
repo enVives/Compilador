@@ -36,6 +36,7 @@ public class Operacio {
     public static final int retorn = 26;
     public static final int param_simple = 27;
     public static final int param_compost = 28; // per tuples
+    public static final int copia_valor = 29;
 
     public static final String[] mnemonic = new String[] {
         "copia",
@@ -66,7 +67,8 @@ public class Operacio {
         "crida",
         "retorn",
         "param_simple",
-        "param_compost"
+        "param_compost",
+        "copia_valor"
     };
 
 }

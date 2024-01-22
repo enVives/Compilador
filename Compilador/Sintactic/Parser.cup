@@ -1433,36 +1433,53 @@ F ::= LPAREN:l E:e RPAREN:r {:System.out.println("F -> LPAREN E RPAREN"); //pend
 
     | venter:v {:System.out.println("F -> venter");
                 Integer n = novavar(true);
+                taula_intermedi.genera(Operacio.copia_valor,(Integer)v.valor,null,n);
                 RESULT = new SimbolF("ts_enter","ent","modeconst",v.esquerre,v.dreta,n,null);
                 :} 
     | SUB:s venter:v {:System.out.println("F -> SUB venter");
                 Integer n = novavar(true);
-                taula_intermedi.genera(Operacio.copia,(Integer)v.valor*-1,null,n);
-                RESULT = new SimbolF("ts_enter","ent","modeconst",s.esquerre,v.dreta);
+                taula_intermedi.genera(Operacio.copia_valor,(Integer)v.valor*-1,null,n);
+                RESULT = new SimbolF("ts_enter","ent","modeconst",s.esquerre,v.dreta,n,null);
                 :}
     | ADD:a venter:v {:System.out.println("F -> ADD venter");
-                RESULT = new SimbolF("ts_enter","ent","modeconst",a.esquerre,v.dreta);
+                Integer n = novavar(true);
+                taula_intermedi.genera(Operacio.copia_valor,(Integer)v.valor,null,n);
+                RESULT = new SimbolF("ts_enter","ent","modeconst",a.esquerre,v.dreta,n,null);
                 :}
     | vdecimal:v {:System.out.println("F -> vdecimal");
-                RESULT = new SimbolF("ts_decimal","decimal","modeconst",v.esquerre,v.dreta);
+                Integer n = novavar(true);
+                taula_intermedi.genera(Operacio.copia_valor,(Double)v.valor,null,n);
+                RESULT = new SimbolF("ts_decimal","decimal","modeconst",v.esquerre,v.dreta,n,null);
                 :}
     | ADD:a vdecimal:v {:System.out.println("F -> ADD vdecimal");
-                RESULT = new SimbolF("ts_decimal","decimal","modeconst",a.esquerre,a.dreta);
+                Integer n = novavar(true);
+                taula_intermedi.genera(Operacio.copia_valor,(Double)v.valor,null,n);
+                RESULT = new SimbolF("ts_decimal","decimal","modeconst",a.esquerre,a.dreta,n,null);
                 :}
     | SUB:s vdecimal:v {:System.out.println("F -> SUB vdecimal");
-                RESULT = new SimbolF("ts_decimal","decimal","modeconst",s.esquerre,s.dreta);
+                Integer n = novavar(true);
+                taula_intermedi.genera(Operacio.copia_valor,(Double)v.valor*-1,null,n);
+                RESULT = new SimbolF("ts_decimal","decimal","modeconst",s.esquerre,s.dreta,n,null);
                 :}
     | vcaracter:v {:System.out.println("F -> vcaracter");
-                RESULT = new SimbolF("ts_caracter","car","modeconst",v.esquerre,v.dreta);
+                Integer n = novavar(true);
+                taula_intermedi.genera(Operacio.copia_valor,(Character)v.valor,null,n);
+                RESULT = new SimbolF("ts_caracter","car","modeconst",v.esquerre,v.dreta,n,null);
                 :}
     | ADD:a vcaracter:v {:System.out.println("F -> ADD");
-                RESULT = new SimbolF("ts_caracter","car","modeconst",a.esquerre,v.dreta); //assegurar que a car hi posam ts_caracter
+                Integer n = novavar(true);
+                taula_intermedi.genera(Operacio.copia_valor,(Integer)v.valor,null,n); //revisar si passar a decimal o enter
+                RESULT = new SimbolF("ts_caracter","car","modeconst",a.esquerre,v.dreta,n,null); //assegurar que a car hi posam ts_caracter
                 :}
     | SUB:s vcaracter:v {:System.out.println("F -> SUB");
-                RESULT = new SimbolF("ts_caracter","car","modeconst",s.esquerre,v.dreta);
+                Integer n = novavar(true);
+                taula_intermedi.genera(Operacio.copia_valor,(Integer)v.valor*-1,null,n); //revisar si passar a decimal o enter
+                RESULT = new SimbolF("ts_caracter","car","modeconst",s.esquerre,v.dreta,n,null);
                 :}
     | vcadena:v {:System.out.println("F -> vcadena");
-                RESULT = new SimbolF("ts_cadena","cad","modeconst",v.esquerre,v.dreta);
+                Integer n = novavar(true);
+                taula_intermedi.genera(Operacio.copia_valor,(String)v.valor,null,n); //revisar si passar a decimal o enter
+                RESULT = new SimbolF("ts_cadena","cad","modeconst",v.esquerre,v.dreta,n,null);
                 :}
     | R: r {:System.out.println("F -> ID");
                 if(errorSemantic){
@@ -1517,7 +1534,9 @@ F ::= LPAREN:l E:e RPAREN:r {:System.out.println("F -> LPAREN E RPAREN"); //pend
                 }
                 :}
     | vlogic:v {:System.out.println("F -> vlogic");
-                RESULT = new SimbolF("ts_boolea","bool","modeconst",v.esquerre,v.dreta);
+                Integer n = novavar(true);
+                taula_intermedi.genera(Operacio.copia_valor,(Boolean)v.valor,null,n); //revisar si passar a decimal o enter
+                RESULT = new SimbolF("ts_boolea","bool","modeconst",v.esquerre,v.dreta,n,null);
                 :} 
     | SUB:s LPAREN E:e RPAREN:r {:System.out.println("F -> SUB LPAREN E RPAREN"); //REVISAR
 
@@ -1538,7 +1557,9 @@ F ::= LPAREN:l E:e RPAREN:r {:System.out.println("F -> LPAREN E RPAREN"); //pend
                 }
                 :}
     | NOT:n vlogic:v {:System.out.println("F -> NOT vlogic");
-                RESULT = new SimbolF("ts_boolea","bool","modeconst",n.esquerre,v.dreta);
+                Integer ni = novavar(true);
+                taula_intermedi.genera(Operacio.copia_valor,!(Boolean)v.valor,null,ni); //revisar si passar a decimal o enter
+                RESULT = new SimbolF("ts_boolea","bool","modeconst",n.esquerre,v.dreta,ni,null);
                 :}
     | NOT:n R:r {:System.out.println("F -> NOT ID");
                 if(errorSemantic){

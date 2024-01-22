@@ -3154,6 +3154,7 @@ class CUP$Parser$actions {
 		Token v = (Token)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		System.out.println("F -> venter");
                 Integer n = novavar(true);
+                taula_intermedi.genera(Operacio.copia_valor,(Integer)v.valor,null,n);
                 RESULT = new SimbolF("ts_enter","ent","modeconst",v.esquerre,v.dreta,n,null);
                 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("F",34, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
@@ -3172,8 +3173,8 @@ class CUP$Parser$actions {
 		Token v = (Token)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		System.out.println("F -> SUB venter");
                 Integer n = novavar(true);
-                taula_intermedi.genera(Operacio.copia,(Integer)v.valor*-1,null,n);
-                RESULT = new SimbolF("ts_enter","ent","modeconst",s.esquerre,v.dreta);
+                taula_intermedi.genera(Operacio.copia_valor,(Integer)v.valor*-1,null,n);
+                RESULT = new SimbolF("ts_enter","ent","modeconst",s.esquerre,v.dreta,n,null);
                 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("F",34, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
@@ -3190,7 +3191,9 @@ class CUP$Parser$actions {
 		int vright = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		Token v = (Token)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		System.out.println("F -> ADD venter");
-                RESULT = new SimbolF("ts_enter","ent","modeconst",a.esquerre,v.dreta);
+                Integer n = novavar(true);
+                taula_intermedi.genera(Operacio.copia_valor,(Integer)v.valor,null,n);
+                RESULT = new SimbolF("ts_enter","ent","modeconst",a.esquerre,v.dreta,n,null);
                 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("F",34, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
@@ -3204,7 +3207,9 @@ class CUP$Parser$actions {
 		int vright = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		Token v = (Token)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		System.out.println("F -> vdecimal");
-                RESULT = new SimbolF("ts_decimal","decimal","modeconst",v.esquerre,v.dreta);
+                Integer n = novavar(true);
+                taula_intermedi.genera(Operacio.copia_valor,(Double)v.valor,null,n);
+                RESULT = new SimbolF("ts_decimal","decimal","modeconst",v.esquerre,v.dreta,n,null);
                 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("F",34, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
@@ -3221,7 +3226,9 @@ class CUP$Parser$actions {
 		int vright = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		Token v = (Token)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		System.out.println("F -> ADD vdecimal");
-                RESULT = new SimbolF("ts_decimal","decimal","modeconst",a.esquerre,a.dreta);
+                Integer n = novavar(true);
+                taula_intermedi.genera(Operacio.copia_valor,(Double)v.valor,null,n);
+                RESULT = new SimbolF("ts_decimal","decimal","modeconst",a.esquerre,a.dreta,n,null);
                 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("F",34, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
@@ -3238,7 +3245,9 @@ class CUP$Parser$actions {
 		int vright = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		Token v = (Token)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		System.out.println("F -> SUB vdecimal");
-                RESULT = new SimbolF("ts_decimal","decimal","modeconst",s.esquerre,s.dreta);
+                Integer n = novavar(true);
+                taula_intermedi.genera(Operacio.copia_valor,(Double)v.valor*-1,null,n);
+                RESULT = new SimbolF("ts_decimal","decimal","modeconst",s.esquerre,s.dreta,n,null);
                 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("F",34, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
@@ -3252,7 +3261,9 @@ class CUP$Parser$actions {
 		int vright = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		Token v = (Token)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		System.out.println("F -> vcaracter");
-                RESULT = new SimbolF("ts_caracter","car","modeconst",v.esquerre,v.dreta);
+                Integer n = novavar(true);
+                taula_intermedi.genera(Operacio.copia_valor,(Character)v.valor,null,n);
+                RESULT = new SimbolF("ts_caracter","car","modeconst",v.esquerre,v.dreta,n,null);
                 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("F",34, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
@@ -3269,7 +3280,9 @@ class CUP$Parser$actions {
 		int vright = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		Token v = (Token)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		System.out.println("F -> ADD");
-                RESULT = new SimbolF("ts_caracter","car","modeconst",a.esquerre,v.dreta); //assegurar que a car hi posam ts_caracter
+                Integer n = novavar(true);
+                taula_intermedi.genera(Operacio.copia_valor,(Integer)v.valor,null,n); //revisar si passar a decimal o enter
+                RESULT = new SimbolF("ts_caracter","car","modeconst",a.esquerre,v.dreta,n,null); //assegurar que a car hi posam ts_caracter
                 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("F",34, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
@@ -3286,7 +3299,9 @@ class CUP$Parser$actions {
 		int vright = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		Token v = (Token)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		System.out.println("F -> SUB");
-                RESULT = new SimbolF("ts_caracter","car","modeconst",s.esquerre,v.dreta);
+                Integer n = novavar(true);
+                taula_intermedi.genera(Operacio.copia_valor,(Integer)v.valor*-1,null,n); //revisar si passar a decimal o enter
+                RESULT = new SimbolF("ts_caracter","car","modeconst",s.esquerre,v.dreta,n,null);
                 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("F",34, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
@@ -3300,7 +3315,9 @@ class CUP$Parser$actions {
 		int vright = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		Token v = (Token)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		System.out.println("F -> vcadena");
-                RESULT = new SimbolF("ts_cadena","cad","modeconst",v.esquerre,v.dreta);
+                Integer n = novavar(true);
+                taula_intermedi.genera(Operacio.copia_valor,(String)v.valor,null,n); //revisar si passar a decimal o enter
+                RESULT = new SimbolF("ts_cadena","cad","modeconst",v.esquerre,v.dreta,n,null);
                 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("F",34, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
@@ -3404,7 +3421,9 @@ class CUP$Parser$actions {
 		int vright = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		Token v = (Token)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		System.out.println("F -> vlogic");
-                RESULT = new SimbolF("ts_boolea","bool","modeconst",v.esquerre,v.dreta);
+                Integer n = novavar(true);
+                taula_intermedi.genera(Operacio.copia_valor,(Boolean)v.valor,null,n); //revisar si passar a decimal o enter
+                RESULT = new SimbolF("ts_boolea","bool","modeconst",v.esquerre,v.dreta,n,null);
                 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("F",34, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
@@ -3456,7 +3475,9 @@ class CUP$Parser$actions {
 		int vright = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		Token v = (Token)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		System.out.println("F -> NOT vlogic");
-                RESULT = new SimbolF("ts_boolea","bool","modeconst",n.esquerre,v.dreta);
+                Integer ni = novavar(true);
+                taula_intermedi.genera(Operacio.copia_valor,!(Boolean)v.valor,null,ni); //revisar si passar a decimal o enter
+                RESULT = new SimbolF("ts_boolea","bool","modeconst",n.esquerre,v.dreta,ni,null);
                 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("F",34, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
