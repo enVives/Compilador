@@ -33,7 +33,7 @@ public class SimbolE extends SimbolBase {
         return dreta;
     }
 
-    public SimbolE(String tsb, String tipus, String mode,Location esquerre,Location dreta) {
+    public SimbolE(String tsb, String tipus, String mode,Location esquerre,Location dreta,Integer r) {
         super();
         this.tsb = tsb;
         this.tipus = tipus;
@@ -41,9 +41,10 @@ public class SimbolE extends SimbolBase {
         this.esquerre = esquerre;
         this.dreta = dreta;
         this.idb = null;
+        this.r = r;
     }
 
-    public SimbolE(String idb,String tsb, String tipus, String mode,Location esquerre,Location dreta) {
+    public SimbolE(String idb,String tsb, String tipus, String mode,Location esquerre,Location dreta,Integer r) {
         super();
         this.tsb = tsb;
         this.tipus = tipus;
@@ -51,6 +52,7 @@ public class SimbolE extends SimbolBase {
         this.esquerre = esquerre;
         this.dreta = dreta;
         this.idb = idb;
+        this.r = r;
     }
 
     public SimbolE(){

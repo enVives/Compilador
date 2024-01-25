@@ -9,3 +9,55 @@ MODIF_TAULA ::= ID LCORCH venter RCORCH I_1 {:System.out.println("MODIF_TAULA");
 REDEF_TAULA ::= ID ASSIGN NOVA_TAULA {:System.out.println("REDEF_TAULA");:};
 
 */
+
+/*
+
+| tupla ID:i LPAREN RPAREN ASSIGN R:r {:System.out.println("TUPLA -> R"); //revisar
+                if(r.getTsb() != "ts_record"){
+                    report_error_semantic("A la tupla \""+(String)i.valor+"\" no es pot assignar una referència que no sigui tupla", i.esquerre,r.getDreta());
+                    errorSemantic = true;
+                }else{
+                    Boolean bol = taula_simbols.posar((String)i.valor,new Dconst("tupla")); //mirar si posar es true o false
+                    if(bol){
+                        //*********Gestió Intermedi************
+                        Integer nv = novavar(true); //per guardar els elements de la tupla
+                        Integer n2;
+                        //*************************************
+
+                        String tu = r.getIdb_dreta(); //id de la nostra referència
+                        Dada1 d = taula_simbols.consulta_tupla(tu);
+                        Descripcio descripcio = d.td();
+
+                        if(descripcio instanceof Dconst){
+                            Dada2 first = d.first(); //volem obtenir els elements de R
+
+                            while(first!=null){
+                                Dcamp camp = (Dcamp) taula_simbols.consultacamp(tu,first.idcamp());
+
+                                int n2 = camp.getDespl();
+
+                                if(camp.getTsb() == "ts_record"){
+                                    
+                                    taula_intermedi.genera(Operacio.param_simple,0,n2,nv);
+                                    n2++;
+                                    taula_intermedi.genera(Operacio.param_compost,simbol.getR(),n2,nv); //op,1,2,3 -> 3[2] = 1
+                                    n2++;
+
+                                    taula_simbols.posarcamp((String)i.valor,first.idcamp(),new Dcamp(camp.getIdb(),camp.tipus(),camp.getDespl(),camp.getTsb()));
+                                }else{
+                                    taula_simbols.posarcamp((String)i.valor,first.idcamp(),new Dcamp(camp.tipus(),camp.getDespl(),camp.getTsb()));
+                                }
+                                first = first.next();
+                            }
+                        }else{
+                           report_error_semantic("La referència "+r.getIdb()+"no es una tupla", i.esquerre,r.getDreta());
+                            errorSemantic = true; 
+                        }
+                    }else{
+                        report_error_semantic("La tupla \""+(String)i.valor+"\" ja existeix", i.esquerre,r.getDreta());
+                        errorSemantic = true;
+                    }
+                }
+            
+            :}; //sempre ha de tenir valors
+*/

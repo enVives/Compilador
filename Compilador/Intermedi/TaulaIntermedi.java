@@ -11,6 +11,10 @@ public class TaulaIntermedi {
         llista.add(new Sentencia(mnemonic, op1, op2, desti));
     }
 
+    public void genera(Integer mnemonic,Object op1, Integer op2,String desti){
+        llista.add(new Sentencia(mnemonic, op1, op2, desti));
+    }
+
     public ArrayList<Sentencia> get_Llista(){
         return llista;
     }
@@ -31,13 +35,20 @@ public class TaulaIntermedi {
             return op2;
         }
 
-        private Integer desti;
+        private Object desti;
 
-        public Integer getDesti() {
+        public Object getDesti() {
             return desti;
         }
-
+        
         public Sentencia(Integer operacio,Object op1, Integer op2,Integer desti){
+            this.operacio = operacio;
+            this.op1 = op1;
+            this.op2 = op2;
+            this.desti = desti;
+        }
+
+        public Sentencia(Integer operacio,Object op1, Integer op2,String desti){
             this.operacio = operacio;
             this.op1 = op1;
             this.op2 = op2;

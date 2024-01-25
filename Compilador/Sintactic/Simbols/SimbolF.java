@@ -24,7 +24,7 @@ public class SimbolF extends SimbolBase {
         return dreta;
     }
 
-    public SimbolF(String tsb, String tipus, String mode,Location esquerre,Location dreta,Integer r,Integer d) {
+    public SimbolF(String tsb, String tipus, String mode,Location esquerre,Location dreta,Integer r) {
         super();
         this.tsb = tsb;
         this.tipus = tipus;
@@ -33,7 +33,6 @@ public class SimbolF extends SimbolBase {
         this.dreta = dreta;
         this.idb = null;
         this.r = r;
-        this.d = d;
     }
 
     public SimbolF(String tsb, String tipus, String mode,Location esquerre,Location dreta) {
@@ -46,7 +45,7 @@ public class SimbolF extends SimbolBase {
         this.idb = null;
     }
 
-    public SimbolF(String idb,String tsb, String tipus, String mode,Location esquerre,Location dreta) {
+    public SimbolF(String idb,String tsb, String tipus, String mode,Location esquerre,Location dreta,Integer r) {
         super();
         this.tsb = tsb;
         this.tipus = tipus;
@@ -54,6 +53,7 @@ public class SimbolF extends SimbolBase {
         this.esquerre = esquerre;
         this.dreta = dreta;
         this.idb = idb;
+        this.r = r;
     }
 
     //Atributs codi Intermedi

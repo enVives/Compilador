@@ -20,7 +20,7 @@ public class SimbolMp extends SimbolBase {
 
     private String mode;
 
-    public SimbolMp(String tsb, String tipus, Integer operacio, String mode,Location dreta) { // alerta amb no afegir el tsb
+    public SimbolMp(String tsb, String tipus, Integer operacio, String mode,Location dreta,Integer n) { // alerta amb no afegir el tsb
         super();
         this.tsb = tsb;
         this.operacio = operacio;
@@ -28,6 +28,7 @@ public class SimbolMp extends SimbolBase {
         this.mode = mode;
         this.ts_heretat = null;
         this.dreta = dreta;
+        this.r = n;
     }
 
     public SimbolMp() {
@@ -71,6 +72,13 @@ public class SimbolMp extends SimbolBase {
 
         return str;
     }
+
+    private Integer r;
+
+    public Integer getR() {
+        return r;
+    }
+
 
     public void setTs_heretat(String ts_heretat) {
         this.ts_heretat = ts_heretat;

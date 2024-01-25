@@ -1,7 +1,8 @@
-ent a = -4;
+tupla a() = (1,VER,3);
+tupla b() = (1,2,a);
 
 
 metode main (cad arguments []) {
-
+   bool c =  b.Item2.Item1 o FALS;
 }
     

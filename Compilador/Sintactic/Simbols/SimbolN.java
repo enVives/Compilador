@@ -24,7 +24,7 @@ public class SimbolN extends SimbolBase {
         return dreta;
     }
 
-    public SimbolN(String tsb, String tipus, String mode,Location esquerre,Location dreta) { // alerta amb no afegir el tsb
+    public SimbolN(String tsb, String tipus, String mode,Location esquerre,Location dreta,Integer r) { // alerta amb no afegir el tsb
         super();
         this.tsb = tsb;
         this.tipus = tipus;
@@ -32,9 +32,10 @@ public class SimbolN extends SimbolBase {
         this.esquerre = esquerre;
         this.dreta = dreta;
         this.idb = null;
+        this.r = r;
     }
 
-    public SimbolN(String idb,String tsb, String tipus, String mode,Location esquerre,Location dreta) { // alerta amb no afegir el tsb
+    public SimbolN(String idb,String tsb, String tipus, String mode,Location esquerre,Location dreta,Integer r) { // alerta amb no afegir el tsb
         super();
         this.tsb = tsb;
         this.tipus = tipus;
@@ -42,6 +43,14 @@ public class SimbolN extends SimbolBase {
         this.esquerre = esquerre;
         this.dreta = dreta;
         this.idb = idb;
+        this.r = r;
+    }
+
+    private Integer r;
+    
+
+    public Integer getR() {
+        return r;
     }
 
     public SimbolN() {

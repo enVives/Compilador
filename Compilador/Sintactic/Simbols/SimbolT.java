@@ -25,7 +25,7 @@ public class SimbolT extends SimbolBase {
         return dreta;
     }
 
-    public SimbolT(String tsb, String tipus, String mode,Location esquerre,Location dreta) { //alerta amb no afegir el tsb
+    public SimbolT(String tsb, String tipus, String mode,Location esquerre,Location dreta,Integer r) { //alerta amb no afegir el tsb
         super();
         this.tsb = tsb;
         this.tipus = tipus;
@@ -33,9 +33,10 @@ public class SimbolT extends SimbolBase {
         this.esquerre = esquerre;
         this.dreta = dreta;
         this.idb = null;
+        this.r = r;
     }
     
-    public SimbolT(String idb,String tsb, String tipus, String mode,Location esquerre,Location dreta) { //alerta amb no afegir el tsb
+    public SimbolT(String idb,String tsb, String tipus, String mode,Location esquerre,Location dreta,Integer r) { //alerta amb no afegir el tsb
         super();
         this.tsb = tsb;
         this.tipus = tipus;
@@ -43,10 +44,17 @@ public class SimbolT extends SimbolBase {
         this.esquerre = esquerre;
         this.dreta = dreta;
         this.idb = idb;
+        this.r = r;
     }
     public SimbolT(){
         tsb = "ts_nul";
         tipus = "id_nula";
+    }
+
+    private Integer r;
+
+    public Integer getR() {
+        return r;
     }
 
     public String getTs_heretat() {

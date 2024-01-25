@@ -20,7 +20,13 @@ public class SimbolEp extends SimbolBase {
 
     private String mode;
 
-    public SimbolEp(String tsb, String tipus, Integer operacio, String mode,Location dreta) { // alerta amb no afegir el tsb
+    private Integer r;
+
+    public Integer getR() {
+        return r;
+    }
+
+    public SimbolEp(String tsb, String tipus, Integer operacio, String mode,Location dreta,Integer r) { // alerta amb no afegir el tsb
         super();
         this.tsb = tsb;
         this.operacio = operacio;
@@ -28,6 +34,7 @@ public class SimbolEp extends SimbolBase {
         this.mode = mode;
         this.ts_heretat = null;
         this.dreta = dreta;
+        this.r = r;
     }
 
     public String obtenir_sintetitzat() {

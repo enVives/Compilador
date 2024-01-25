@@ -25,7 +25,7 @@ public class SimbolNp extends SimbolBase {
         this.operacio = operacio;
     }
 
-    public SimbolNp(String tsb, String tipus, Integer operacio, String mode,Location dreta) { // alerta amb no afegir el tsb
+    public SimbolNp(String tsb, String tipus, Integer operacio, String mode,Location dreta,Integer r) { // alerta amb no afegir el tsb
         super();
         this.tsb = tsb;
         this.operacio = operacio;
@@ -33,6 +33,12 @@ public class SimbolNp extends SimbolBase {
         this.mode = mode;
         this.ts_heretat = null;
         this.dreta = dreta;
+        this.r = r;
+    }
+    private Integer r;
+
+    public Integer getR() {
+        return r;
     }
 
     public SimbolNp(){

@@ -25,7 +25,7 @@ public class SimbolTp extends SimbolBase {
         this.operacio = operacio;
     }
 
-    public SimbolTp(String tsb, String tipus, Integer operacio, String mode,Location dreta) { // alerta amb no afegir el tsb
+    public SimbolTp(String tsb, String tipus, Integer operacio, String mode,Location dreta,Integer r) { // alerta amb no afegir el tsb
         super();
         this.tsb = tsb;
         this.operacio = operacio;
@@ -33,8 +33,14 @@ public class SimbolTp extends SimbolBase {
         this.mode = mode;
         this.ts_heretat = null;
         this.dreta = dreta;
+        this.r = r;
     }
+    private Integer r;
 
+
+    public Integer getR() {
+        return r;
+    }
 
     public SimbolTp(){
         tsb = "ts_nul";

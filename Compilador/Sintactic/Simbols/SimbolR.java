@@ -7,6 +7,7 @@ import java_cup.runtime.ComplexSymbolFactory.Location;
 public class SimbolR {
     private String idb;
     private String idb_dreta;
+
     public String getIdb_dreta() {
         return idb_dreta;
     }
@@ -25,11 +26,13 @@ public class SimbolR {
     public Location getDreta() {
         return dreta;
     }
-    
-    //si id-id -> cercam el tsb del component i l'afegim aquí, també tipus si en té, mvp = constant
-    //si id(a,b,c) -> cercam el tipus de retorn de subprograma i el posam com a tipus i tipus subjacent
-    //id normal -> res
-    public SimbolR(String idb, String tsb, String tipus, String mvp,Location esquerre,Location dreta){
+
+    // si id-id -> cercam el tsb del component i l'afegim aquí, també tipus si en
+    // té, mvp = constant
+    // si id(a,b,c) -> cercam el tipus de retorn de subprograma i el posam com a
+    // tipus i tipus subjacent
+    // id normal -> res
+    public SimbolR(String idb, String tsb, String tipus, String mvp, Location esquerre, Location dreta) {
         this.mvp = mvp;
         this.tsb = tsb;
         this.idb = idb;
@@ -39,7 +42,8 @@ public class SimbolR {
         this.idb_dreta = idb;
     }
 
-    public SimbolR(String idb,String idb_dreta, String tsb, String tipus, String mvp,Location esquerre,Location dreta){
+    public SimbolR(String idb, String idb_dreta, String tsb, String tipus, String mvp,Integer r, Integer dpc,String tp, Location esquerre,
+            Location dreta) {
         this.mvp = mvp;
         this.tsb = tsb;
         this.idb = idb;
@@ -47,22 +51,50 @@ public class SimbolR {
         this.esquerre = esquerre;
         this.dreta = dreta;
         this.idb_dreta = idb_dreta;
+        this.r = r;
+        this.dpc = dpc;
+        this.tp = tp;
     }
 
-    public SimbolR(){
+    public SimbolR(String idb,String tsb, String tipus, String mvp, Integer r, Integer dpc,
+            String tp, Location esquerre, Location dreta) {
+        this.mvp = mvp;
+        this.tsb = tsb;
+        this.idb = idb;
+        this.tipus = tipus;
+        this.esquerre = esquerre;
+        this.dreta = dreta;
+        this.r = r;
+        this.dpc = dpc;
+        this.tp = tp;
+    }
+
+    public SimbolR() {
         idb = null;
         tsb = null;
         tipus = null;
         mvp = null;
     }
 
+    // Atributs Intermedi
 
-    //Atributs Intermedi
+    private Integer r;
 
-    private String r;
-    private ArrayList<Integer> dpc;
+    public Integer getR() {
+        return r;
+    }
+
+    private Integer dpc;
+
+    public Integer getDpc() {
+        return dpc;
+    }
+
     private String tp;
 
+    public String getTp() {
+        return tp;
+    }
 
     public String getMvp() {
         return mvp;

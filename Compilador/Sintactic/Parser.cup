@@ -701,11 +701,20 @@ R ::= ID:d {:System.out.println("R -> ID ");
             if(descripcio instanceof Dvar){ //variable
                 Dvar var = (Dvar) descripcio;
                 Dtipus tipus = (Dtipus) taula_simbols.consulta(var.tipus()); //ALERTA EN NO TROBAR
-                RESULT = new SimbolR((String)d.valor,tipus.dt().tipus_subjacent(),var.tipus(),"var",d.esquerre,d.dreta);
+                RESULT = new SimbolR((String)d.valor,(String)d.valor,tipus.dt().tipus_subjacent(),var.tipus(),"var",var.nv(),0,var.tipus(),d.esquerre,d.dreta);
             }else if(descripcio instanceof Dconst){ //variable o tupla
                 Dconst c = (Dconst) descripcio;
                 Dtipus tipus = (Dtipus) taula_simbols.consulta(c.tipus()); //ALERTA EN NO TROBAR
-                RESULT = new SimbolR((String)d.valor,tipus.dt().tipus_subjacent(),c.tipus(),"const",d.esquerre,d.dreta);
+
+                //novavar i afegir valor de la constant
+                Integer n = novavar(true);
+                if(c.tipus()=="tupla"){
+                    taula_intermedi.genera(Operacio.copia,(String)d.valor,null,n); // t1 = a = tupla a
+                }else{
+                    taula_intermedi.genera(Operacio.copia_valor,c.valor(),null,n); 
+                }
+                
+                RESULT = new SimbolR((String)d.valor,(String)d.valor,tipus.dt().tipus_subjacent(),c.tipus(),"const",n,0,c.tipus(),d.esquerre,d.dreta);
                 //el tipus pot ser tupla També
                 //això es per quan ens interessa ficar una tupla dins una tupla o un subprograma
                 //id(a) on 'a' és una tupla.
@@ -816,10 +825,13 @@ R ::= ID:d {:System.out.println("R -> ID ");
                 Dcamp c = (Dcamp) taula_simbols.consultacamp(r.getIdb_dreta(),(String)i.valor);
                 if(c!=null){
                     Dtipus tipus = (Dtipus) taula_simbols.consulta(c.tipus());
-                    if(c.tipus()=="tupla"){
-                        RESULT = new SimbolR(r.getIdb(),c.getIdb(),tipus.dt().tipus_subjacent(),c.tipus(),"const",r.getEsquerre(),i.dreta);
+                    Integer despl = c.getDespl();
+                    despl += r.getDpc();
+                    
+                    if(c.tipus()=="tupla"){ //comprovar cas pel intermedi
+                        RESULT = new SimbolR(r.getIdb(),c.getIdb(),tipus.dt().tipus_subjacent(),c.tipus(),"const",r.getR(),despl,c.tipus(),r.getEsquerre(),i.dreta);
                     }else{
-                        RESULT = new SimbolR(r.getIdb(),(String)i.valor,tipus.dt().tipus_subjacent(),c.tipus(),"var",r.getEsquerre(),i.dreta);
+                        RESULT = new SimbolR(r.getIdb(),(String)i.valor,tipus.dt().tipus_subjacent(),c.tipus(),"var",r.getR(),despl,c.tipus(),r.getEsquerre(),i.dreta);
                     }
                 }else{
                     report_error_semantic("Id no es un camp de la tupla: "+r.getIdb_dreta(), i.esquerre,i.dreta);
@@ -832,8 +844,6 @@ R ::= ID:d {:System.out.println("R -> ID ");
                 RESULT  = new SimbolR(); 
             } 
         }
-        
-
     :}; //per tuples
 
 I_1 ::= AUTOSUM:a {:System.out.println("I_1 -> AUTOSUM");
@@ -933,6 +943,11 @@ DECL_TUPLA ::= tupla ID:i LPAREN RPAREN ASSIGN LPAREN:r VALS_TUPLA:v RPAREN {:Sy
                     Stack<KeyValue> llista = v.getLlista();
                     Boolean bol = taula_simbols.posar((String)i.valor,new Dconst("tupla")); //mirar si posar es true o false
                     if(bol){
+                        //*********Gestió Intermedi************
+                        //Integer nv = novavar(true); //per guardar els elements de la tupla
+                        Integer n2 =0;
+                        //*************************************
+
                         while(!llista.isEmpty()){
                             KeyValue k = llista.pop();
                             String nom = k.key; //nom del paràmetre
@@ -943,9 +958,21 @@ DECL_TUPLA ::= tupla ID:i LPAREN RPAREN ASSIGN LPAREN:r VALS_TUPLA:v RPAREN {:Sy
                             }else{
                                 n++; 
                             }
+
                             if(simbol.getTsb()=="ts_record"){
+
+                                taula_intermedi.genera(Operacio.param_simple,1,n2,(String)i.valor);
+                                n2++;
+                                taula_intermedi.genera(Operacio.param_compost,simbol.getR(),n2,(String)i.valor); //op,1,2,3 -> 3[2] = 1
+                                n2++;
+
                                 bol = taula_simbols.posarcamp((String)i.valor,nom,new Dcamp(simbol.getIdb(),simbol.getTipus(),n,simbol.getTsb()));
                             }else{
+                                taula_intermedi.genera(Operacio.param_simple,0,n2,(String)i.valor);
+                                n2++;
+                                taula_intermedi.genera(Operacio.param_simple,simbol.getR(),n2,(String)i.valor); //op,1,2,3 -> 3[2] = 1
+                                n2++;
+
                                 bol = taula_simbols.posarcamp((String)i.valor,nom,new Dcamp(simbol.getTipus(),n,simbol.getTsb()));
                             }
                             if(bol == false){
@@ -960,43 +987,7 @@ DECL_TUPLA ::= tupla ID:i LPAREN RPAREN ASSIGN LPAREN:r VALS_TUPLA:v RPAREN {:Sy
                         errorSemantic = true;
                     }
                 }
-
-                :}
-                
-            | tupla ID:i LPAREN RPAREN ASSIGN R:r {:System.out.println("TUPLA -> R"); //revisar
-                if(r.getTsb() != "ts_record"){
-                    report_error_semantic("A la tupla \""+(String)i.valor+"\" no es pot assignar una referència que no sigui tupla", i.esquerre,r.getDreta());
-                    errorSemantic = true;
-                }else{
-                    Boolean bol = taula_simbols.posar((String)i.valor,new Dconst("tupla")); //mirar si posar es true o false
-                    if(bol){
-                        String tu = r.getIdb_dreta(); //id de la nostra referència
-                        Dada1 d = taula_simbols.consulta_tupla(tu);
-                        Descripcio descripcio = d.td();
-
-                        if(descripcio instanceof Dconst){
-                            Dada2 first = d.first(); //volem obtenir els elements de R
-
-                            while(first!=null){
-                                Dcamp camp = (Dcamp) taula_simbols.consultacamp(tu,first.idcamp());
-                                if(camp.getTsb() == "ts_record"){
-                                    taula_simbols.posarcamp((String)i.valor,first.idcamp(),new Dcamp(camp.getIdb(),camp.tipus(),camp.getDespl(),camp.getTsb()));
-                                }else{
-                                    taula_simbols.posarcamp((String)i.valor,first.idcamp(),new Dcamp(camp.tipus(),camp.getDespl(),camp.getTsb()));
-                                }
-                                first = first.next();
-                            }
-                        }else{
-                           report_error_semantic("La referència "+r.getIdb()+"no es una tupla", i.esquerre,r.getDreta());
-                            errorSemantic = true; 
-                        }
-                    }else{
-                        report_error_semantic("La tupla \""+(String)i.valor+"\" ja existeix", i.esquerre,r.getDreta());
-                        errorSemantic = true;
-                    }
-                }
-            
-            :}; //sempre ha de tenir valors
+                :};
 
 
 E ::= T:t E_1:e {:System.out.println("E -> T E_1");
@@ -1004,15 +995,26 @@ E ::= T:t E_1:e {:System.out.println("E -> T E_1");
         RESULT = new SimbolE();
     }else{
         if((e==null)||(e.getTsb()=="ts_nul")){
-            RESULT = new SimbolE(t.getIdb(),t.getTsb(),t.getTipus(),t.getMode(),t.getEsquerre(),t.getDreta());
+            RESULT = new SimbolE(t.getIdb(),t.getTsb(),t.getTipus(),t.getMode(),t.getEsquerre(),t.getDreta(),t.getR());
         }else{
            if(t.getTsb()!="ts_boolea"){
                 report_error_semantic("L'operand ha de ser de tipus booleà", t.getEsquerre(),t.getDreta());
                 errorSemantic = true;
                 RESULT = new SimbolE();
             }else{
-                e.setTs_heretat("ts_boolea"); //calcular
-                RESULT = new SimbolE("ts_boolea","id_nula","moderesult",t.getEsquerre(),e.getDreta());
+                e.setTs_heretat("ts_boolea");
+                //*********************Intermedi*********************************
+                    Integer n1 = novavar(true);
+                    switch(e.getOperacio()){
+                        case ParserSym.AND:
+                            taula_intermedi.genera(Operacio.and,t.getR(),e.getR(),n1);
+                            break;
+                        case ParserSym.OR:
+                            taula_intermedi.genera(Operacio.or,t.getR(),e.getR(),n1);
+                            break;
+                    }
+                    //***************************************************************
+                RESULT = new SimbolE("ts_boolea","id_nula","moderesult",t.getEsquerre(),e.getDreta(),n1);
             } 
         }
     }
@@ -1028,7 +1030,7 @@ E_1 ::= AND:op T:t E_1:e {:System.out.println("E_1 -> AND T E_1");
                     errorSemantic = true;
                     RESULT = new SimbolEp();
                 }else{ 
-                    RESULT = new SimbolEp("ts_boolea","id_nula",ParserSym.AND,"moderesult",t.getDreta());
+                    RESULT = new SimbolEp("ts_boolea","id_nula",ParserSym.AND,"moderesult",t.getDreta(),t.getR());
                 }
             }else{
                 if(t.getTsb() != "ts_boolea"){ //error, no podem operar amb valors que no son booleans
@@ -1037,8 +1039,18 @@ E_1 ::= AND:op T:t E_1:e {:System.out.println("E_1 -> AND T E_1");
                     RESULT = new SimbolEp();
                 }else{ 
                     e.setTs_heretat("ts_boolea");
-                    //operació
-                    RESULT = new SimbolEp("ts_boolea","id_nula",ParserSym.AND,"moderesult",e.getDreta());
+                    //*********************Intermedi*********************************
+                    Integer n1 = novavar(true);
+                    switch(e.getOperacio()){
+                        case ParserSym.AND:
+                            taula_intermedi.genera(Operacio.and,t.getR(),e.getR(),n1);
+                            break;
+                        case ParserSym.OR:
+                            taula_intermedi.genera(Operacio.or,t.getR(),e.getR(),n1);
+                            break;
+                    }
+                    //***************************************************************
+                    RESULT = new SimbolEp("ts_boolea","id_nula",ParserSym.AND,"moderesult",e.getDreta(),n1);
                 }  
             }
         }
@@ -1053,7 +1065,7 @@ E_1 ::= AND:op T:t E_1:e {:System.out.println("E_1 -> AND T E_1");
                     errorSemantic = true;
                     RESULT = new SimbolEp();
                 }else{ 
-                    RESULT = new SimbolEp("ts_boolea","id_nula",ParserSym.OR,"moderesult",t.getDreta());
+                    RESULT = new SimbolEp("ts_boolea","id_nula",ParserSym.OR,"moderesult",t.getDreta(),t.getR());
                 }
             }else{
                 if(t.getTsb() != "ts_boolea"){ //error, no podem operar amb valors que no son booleans
@@ -1062,8 +1074,18 @@ E_1 ::= AND:op T:t E_1:e {:System.out.println("E_1 -> AND T E_1");
                     RESULT = new SimbolEp();
                 }else{ 
                     e.setTs_heretat("ts_boolea");
-                    //operació
-                    RESULT = new SimbolEp("ts_boolea","id_nula",ParserSym.OR,"moderesult",e.getDreta());
+                    //*********************Intermedi*********************************
+                    Integer n1 = novavar(true);
+                    switch(e.getOperacio()){
+                        case ParserSym.AND:
+                            taula_intermedi.genera(Operacio.and,t.getR(),e.getR(),n1);
+                            break;
+                        case ParserSym.OR:
+                            taula_intermedi.genera(Operacio.or,t.getR(),e.getR(),n1);
+                            break;
+                    }
+                    //***************************************************************
+                    RESULT = new SimbolEp("ts_boolea","id_nula",ParserSym.OR,"moderesult",e.getDreta(),n1);
                 }  
             }
         }
@@ -1078,7 +1100,7 @@ T ::= N:n T_1:t {:System.out.println("T -> N T_1");
         RESULT = new SimbolT();
     }else{
         if((t==null)||(t.getTsb() == "ts_nul")){ //venim de Tp -> @
-            RESULT = new SimbolT(n.getIdb(),n.getTsb(),n.getTipus(),n.getMode(),n.getEsquerre(),n.getDreta());
+            RESULT = new SimbolT(n.getIdb(),n.getTsb(),n.getTipus(),n.getMode(),n.getEsquerre(),n.getDreta(),n.getR());
         }else{
             if((n.getTsb() == "ts_nul")||(n.getTsb() == "ts_cadena")||(n.getTsb()=="ts_boolea")){
                 report_error_semantic("El terminal no es adequat per una operació lògica", n.getEsquerre(),n.getDreta()); //arreglar
@@ -1086,7 +1108,42 @@ T ::= N:n T_1:t {:System.out.println("T -> N T_1");
                 RESULT = new SimbolT();
             }else{
                 t.setTs_heretat(n.getTsb()); //li afegim per si després hem de fer operacions
-                RESULT = new SimbolT("ts_boolea","id_nula","moderesult",n.getEsquerre(),t.getDreta());
+                //****************************Intermedi**************************************
+                Integer e1 = etiquetes;
+                etiquetes++;
+                Integer e2 = etiquetes;
+                etiquetes++;
+                Integer n1 = novavar(true);
+
+                switch(t.getOperacio()){
+                    case ParserSym.IGIG:
+                        taula_intermedi.genera(Operacio.salt_condicional_igual,n.getR(),t.getR(),e1);
+                    break;
+                    case ParserSym.DIF:
+                        taula_intermedi.genera(Operacio.salt_condicional_diferent,n.getR(),t.getR(),e1);
+                    break;
+                    case ParserSym.MENOR:
+                        taula_intermedi.genera(Operacio.salt_condicional_menor,n.getR(),t.getR(),e1);
+                    break;
+                    case ParserSym.MENORI:
+                        taula_intermedi.genera(Operacio.salt_condicional_menorigual,n.getR(),t.getR(),e1);
+                    break;
+                    case ParserSym.MAJOR:
+                        taula_intermedi.genera(Operacio.salt_condicional_major,n.getR(),t.getR(),e1);
+                    break;
+                    case ParserSym.MAJORI:
+                        taula_intermedi.genera(Operacio.salt_condicional_majorigual,n.getR(),t.getR(),e1);
+                    break;
+                }
+                taula_intermedi.genera(Operacio.copia_valor,0,null,n1);
+                taula_intermedi.genera(Operacio.salt_incondicional,null,null,e2);
+                taula_intermedi.genera(Operacio.skip,null,null,e1);
+                taula_intermedi.genera(Operacio.copia_valor,-1,null,n1);
+                taula_intermedi.genera(Operacio.skip,null,null,e2);
+
+                //***************************************************************************
+
+                RESULT = new SimbolT("ts_boolea","id_nula","moderesult",n.getEsquerre(),t.getDreta(),n1);
             }   
         }
     }
@@ -1102,7 +1159,7 @@ T_1 ::= IGIG N:n {:System.out.println("T_1 -> IGIG N T_1");
                         errorSemantic = true;
                         RESULT = new SimbolTp();
                     }else{ //assumim que a n.tsb = decimal o caracter 
-                        RESULT = new SimbolTp(n.getTsb(),n.getTipus(),ParserSym.IGIG,"moderesult",n.getDreta());
+                        RESULT = new SimbolTp(n.getTsb(),n.getTipus(),ParserSym.IGIG,"moderesult",n.getDreta(),n.getR());
                     }
         }
     :} //hauriem de llevar tp, no volem repetició en aquest cas
@@ -1115,7 +1172,7 @@ T_1 ::= IGIG N:n {:System.out.println("T_1 -> IGIG N T_1");
                         errorSemantic = true;
                         RESULT = new SimbolTp();
                     }else{ //assumim que a n.tsb = decimal o caracter 
-                        RESULT = new SimbolTp(n.getTsb(),n.getTipus(),ParserSym.DIF,"moderesult",n.getDreta());
+                        RESULT = new SimbolTp(n.getTsb(),n.getTipus(),ParserSym.DIF,"moderesult",n.getDreta(),n.getR());
                     }
         }
         :}
@@ -1128,7 +1185,7 @@ T_1 ::= IGIG N:n {:System.out.println("T_1 -> IGIG N T_1");
                         errorSemantic = true;
                         RESULT = new SimbolTp();
                     }else{ //assumim que a n.tsb = decimal o caracter 
-                        RESULT = new SimbolTp(n.getTsb(),n.getTipus(),ParserSym.MENORI,"moderesult",n.getDreta());
+                        RESULT = new SimbolTp(n.getTsb(),n.getTipus(),ParserSym.MENORI,"moderesult",n.getDreta(),n.getR());
                     }
         }
         :}
@@ -1141,7 +1198,7 @@ T_1 ::= IGIG N:n {:System.out.println("T_1 -> IGIG N T_1");
                         errorSemantic = true;
                         RESULT = new SimbolTp();
                     }else{ //assumim que a n.tsb = decimal o caracter 
-                        RESULT = new SimbolTp(n.getTsb(),n.getTipus(),ParserSym.MAJOR,"moderesult",n.getDreta());
+                        RESULT = new SimbolTp(n.getTsb(),n.getTipus(),ParserSym.MAJOR,"moderesult",n.getDreta(),n.getR());
                     }
         }
         :}
@@ -1154,7 +1211,7 @@ T_1 ::= IGIG N:n {:System.out.println("T_1 -> IGIG N T_1");
                         errorSemantic = true;
                         RESULT = new SimbolTp();
                     }else{ //assumim que a n.tsb = decimal o caracter 
-                        RESULT = new SimbolTp(n.getTsb(),n.getTipus(),ParserSym.MENORI,"moderesult",n.getDreta());
+                        RESULT = new SimbolTp(n.getTsb(),n.getTipus(),ParserSym.MENORI,"moderesult",n.getDreta(),n.getR());
                     }
         }
         :}
@@ -1167,7 +1224,7 @@ T_1 ::= IGIG N:n {:System.out.println("T_1 -> IGIG N T_1");
                         errorSemantic = true;
                         RESULT = new SimbolTp();
                     }else{ //assumim que a n.tsb = decimal o caracter 
-                        RESULT = new SimbolTp(n.getTsb(),n.getTipus(),ParserSym.MAJORI,"moderesult",n.getDreta());
+                        RESULT = new SimbolTp(n.getTsb(),n.getTipus(),ParserSym.MAJORI,"moderesult",n.getDreta(),n.getR());
                     }
         }
         :}
@@ -1181,7 +1238,7 @@ N ::= M:m N_1:n {:System.out.println("N -> M N_1");
             RESULT = new SimbolN();
         }else{
             if((n==null)||(n.getTsb()=="ts_nul")){ //vol dir que M_1 -> @
-                RESULT = new SimbolN(m.getIdb(),m.getTsb(),m.getTipus(),m.getMode(),m.getEsquerre(),m.getDreta()); //pot ser tupla
+                RESULT = new SimbolN(m.getIdb(),m.getTsb(),m.getTipus(),m.getMode(),m.getEsquerre(),m.getDreta(),m.getR()); //pot ser tupla
             }else{ //M_1 ha fet qualque operació, hem de passar el tsb de f
 
                 if((m.getTsb() == "ts_nul")||(m.getTsb() == "ts_cadena")||(m.getTsb()=="ts_boolea")){
@@ -1191,7 +1248,25 @@ N ::= M:m N_1:n {:System.out.println("N -> M N_1");
                 }else{
                     n.setTs_heretat(m.getTsb());
                     String tsb = n.obtenir_sintetitzat();
-                    RESULT = new SimbolN(tsb,"id_nula","moderesult",m.getEsquerre(),n.getDreta());
+
+                    if(tsb == "ts_nul"){
+                            report_error_semantic("No és pot fer una operació amb aquest tipus", m.getEsquerre(),m.getDreta());
+                            errorSemantic = true;
+                            RESULT = new SimbolN();
+                    }else{
+                        //**************Intermedi******************
+                            Integer n1 = novavar(true);
+                            switch(n.getOperacio()){
+                                case ParserSym.ADD:
+                                    taula_intermedi.genera(Operacio.suma,m.getR(),n.getR(),n1);
+                                    break;
+                                case ParserSym.SUB:
+                                    taula_intermedi.genera(Operacio.resta,m.getR(),n.getR(),n1);
+                                    break;
+                            }
+                        //*****************************************
+                        RESULT = new SimbolN(tsb,"id_nula","moderesult",m.getEsquerre(),n.getDreta(),n1);
+                    }
                 }
                 
             }
@@ -1208,7 +1283,7 @@ N_1 ::= ADD M:m N_1:n {:System.out.println("N_1 -> ADD M N_1");
                     errorSemantic = true;
                     RESULT = new SimbolNp();
                 }else{
-                    RESULT = new SimbolNp(m.getTsb(),m.getTipus(),ParserSym.ADD,"moderesult",m.getDreta());
+                    RESULT = new SimbolNp(m.getTsb(),m.getTipus(),ParserSym.ADD,"moderesult",m.getDreta(),m.getR());
                 }
             }else{ // N_1 té tsb i una operació associada
                 if((m.getTsb() == "ts_nul")||(m.getTsb() == "ts_cadena")||(m.getTsb()=="ts_boolea")){
@@ -1224,7 +1299,18 @@ N_1 ::= ADD M:m N_1:n {:System.out.println("N_1 -> ADD M N_1");
                             errorSemantic = true;
                             RESULT = new SimbolNp();
                         }else{
-                            RESULT = new SimbolNp(resultat,"id_nula",ParserSym.ADD,"moderesult",n.getDreta());
+                            //**************Intermedi******************
+                            Integer n1 = novavar(true);
+                            switch(n.getOperacio()){
+                                case ParserSym.ADD:
+                                    taula_intermedi.genera(Operacio.suma,m.getR(),n.getR(),n1);
+                                    break;
+                                case ParserSym.SUB:
+                                    taula_intermedi.genera(Operacio.resta,m.getR(),n.getR(),n1);
+                                    break;
+                            }
+                            //*****************************************
+                            RESULT = new SimbolNp(resultat,"id_nula",ParserSym.ADD,"moderesult",n.getDreta(),n1);
                         }
 
                     }
@@ -1241,7 +1327,7 @@ N_1 ::= ADD M:m N_1:n {:System.out.println("N_1 -> ADD M N_1");
                     errorSemantic = true;
                     RESULT = new SimbolNp();
                 }else{
-                    RESULT = new SimbolNp(m.getTsb(),m.getTipus(),ParserSym.ADD,"moderesult",m.getDreta());
+                    RESULT = new SimbolNp(m.getTsb(),m.getTipus(),ParserSym.ADD,"moderesult",m.getDreta(),m.getR());
                 }
             }else{ // N_1 té tsb i una operació associada
                 if((m.getTsb() == "ts_nul")||(m.getTsb() == "ts_cadena")||(m.getTsb()=="ts_boolea")){
@@ -1257,7 +1343,18 @@ N_1 ::= ADD M:m N_1:n {:System.out.println("N_1 -> ADD M N_1");
                             errorSemantic = true;
                             RESULT = new SimbolNp();
                         }else{
-                            RESULT = new SimbolNp(resultat,"id_nula",ParserSym.SUB,"moderesult",n.getDreta());
+                            //**************Intermedi******************
+                            Integer n1 = novavar(true);
+                            switch(n.getOperacio()){
+                                case ParserSym.ADD:
+                                    taula_intermedi.genera(Operacio.producte,m.getR(),n.getR(),n1);
+                                    break;
+                                case ParserSym.SUB:
+                                    taula_intermedi.genera(Operacio.divisio,m.getR(),n.getR(),n1);
+                                    break;
+                            }
+                            //*****************************************
+                            RESULT = new SimbolNp(resultat,"id_nula",ParserSym.SUB,"moderesult",n.getDreta(),n1);
                         }
 
                     }
@@ -1274,7 +1371,7 @@ M ::= F:f M_1:m {:System.out.println("M -> F M_1");
             RESULT = new SimbolM();
         }else{
             if((m==null)||(m.getTsb() == "ts_nul")){ //vol dir que M_1 -> @
-                RESULT = new SimbolM(f.getIdb(),f.getTsb(),f.getTipus(),f.getMode(),f.getEsquerre(),f.getDreta()); //pot ser tupla
+                RESULT = new SimbolM(f.getIdb(),f.getTsb(),f.getTipus(),f.getMode(),f.getEsquerre(),f.getDreta(),f.getR()); //pot ser tupla
             }else{ //M_1 ha fet qualque operació, hem de passar el tsb de f
 
                 if((f.getTsb() == "ts_nul")||(f.getTsb() == "ts_cadena")||(f.getTsb()=="ts_boolea")){
@@ -1291,7 +1388,22 @@ M ::= F:f M_1:m {:System.out.println("M -> F M_1");
                         errorSemantic = true;
                         RESULT = new SimbolM();
                     }else{
-                       RESULT = new SimbolM(tsb,"id_nula","moderesult",f.getEsquerre(),m.getDreta()); 
+                        //**************Intermedi******************
+                        Integer n = novavar(true);
+                        switch(m.getOperacio()){
+                            case ParserSym.MULT:
+                                taula_intermedi.genera(Operacio.producte,f.getR(),m.getR(),n);
+                                break;
+                            case ParserSym.DIV:
+                                taula_intermedi.genera(Operacio.divisio,f.getR(),m.getR(),n);
+                                break;
+                            case ParserSym.MOD:
+                                taula_intermedi.genera(Operacio.modul,f.getR(),m.getR(),n);
+                                break;
+                        }
+                        //*****************************************
+
+                        RESULT = new SimbolM(tsb,"id_nula","moderesult",f.getEsquerre(),m.getDreta(),n); 
                     }
                 }
             }
@@ -1309,7 +1421,7 @@ M_1 ::= MULT:e F:f M_1:m {:System.out.println("M_1 -> MULT F M_1");
                     errorSemantic = true;
                     RESULT = new SimbolMp();
                 }else{
-                    RESULT = new SimbolMp(f.getTsb(),f.getTipus(),ParserSym.MULT,"moderesult",f.getDreta());
+                    RESULT = new SimbolMp(f.getTsb(),f.getTipus(),ParserSym.MULT,"moderesult",f.getDreta(),f.getR());
                 }
             }else{ //M_1 té tipus subjacent i operació
 
@@ -1326,7 +1438,21 @@ M_1 ::= MULT:e F:f M_1:m {:System.out.println("M_1 -> MULT F M_1");
                         errorSemantic = true;
                         RESULT = new SimbolMp();
                     }else{
-                        RESULT = new SimbolMp(resultat,"id_nula",ParserSym.MULT,"moderesult",m.getDreta());
+                        //**************Intermedi******************
+                        Integer n = novavar(true);
+                        switch(m.getOperacio()){
+                            case ParserSym.MULT:
+                                taula_intermedi.genera(Operacio.producte,f.getR(),m.getR(),n);
+                                break;
+                            case ParserSym.DIV:
+                                taula_intermedi.genera(Operacio.divisio,f.getR(),m.getR(),n);
+                                break;
+                            case ParserSym.MOD:
+                                taula_intermedi.genera(Operacio.modul,f.getR(),m.getR(),n);
+                                break;
+                        }
+                        //*****************************************
+                        RESULT = new SimbolMp(resultat,"id_nula",ParserSym.MULT,"moderesult",m.getDreta(),n);
                     }
 
                 }
@@ -1347,7 +1473,8 @@ M_1 ::= MULT:e F:f M_1:m {:System.out.println("M_1 -> MULT F M_1");
                     errorSemantic = true;
                     RESULT = new SimbolMp();
                 }else{
-                    RESULT = new SimbolMp(f.getTsb(),f.getTipus(),ParserSym.DIV,"moderesult",f.getDreta());
+
+                    RESULT = new SimbolMp(f.getTsb(),f.getTipus(),ParserSym.DIV,"moderesult",f.getDreta(),f.getR());
                 }
             }else{ //M_1 té tipus subjacent i operació
 
@@ -1364,7 +1491,22 @@ M_1 ::= MULT:e F:f M_1:m {:System.out.println("M_1 -> MULT F M_1");
                         errorSemantic = true;
                         RESULT = new SimbolMp();
                     }else{
-                        RESULT = new SimbolMp(resultat,"id_nula",ParserSym.DIV,"moderesult",m.getDreta());
+                        //**************Intermedi******************
+                        Integer n = novavar(true);
+                        switch(m.getOperacio()){
+                            case ParserSym.MULT:
+                                taula_intermedi.genera(Operacio.producte,f.getR(),m.getR(),n);
+                                break;
+                            case ParserSym.DIV:
+                                taula_intermedi.genera(Operacio.divisio,f.getR(),m.getR(),n);
+                                break;
+                            case ParserSym.MOD:
+                                taula_intermedi.genera(Operacio.modul,f.getR(),m.getR(),n);
+                                break;
+                        }
+                        //*****************************************
+
+                        RESULT = new SimbolMp(resultat,"id_nula",ParserSym.DIV,"moderesult",m.getDreta(),n);
                     }
 
                 }
@@ -1384,7 +1526,7 @@ M_1 ::= MULT:e F:f M_1:m {:System.out.println("M_1 -> MULT F M_1");
                     errorSemantic = true;
                     RESULT = new SimbolMp();
                 }else{
-                    RESULT = new SimbolMp(f.getTsb(),f.getTipus(),ParserSym.MOD,"moderesult",f.getDreta());
+                    RESULT = new SimbolMp(f.getTsb(),f.getTipus(),ParserSym.MOD,"moderesult",f.getDreta(),f.getR());
                 }
             }else{ //M_1 té tipus subjacent i operació
 
@@ -1404,7 +1546,23 @@ M_1 ::= MULT:e F:f M_1:m {:System.out.println("M_1 -> MULT F M_1");
                         errorSemantic = true;
                         RESULT = new SimbolMp();
                     }else{
-                      RESULT = new SimbolMp(resultat,"id_nula",ParserSym.MOD,"moderesult",m.getDreta());  
+
+                        //**************Intermedi******************
+                        Integer n = novavar(true);
+                        switch(m.getOperacio()){
+                            case ParserSym.MULT:
+                                taula_intermedi.genera(Operacio.producte,f.getR(),m.getR(),n);
+                                break;
+                            case ParserSym.DIV:
+                                taula_intermedi.genera(Operacio.divisio,f.getR(),m.getR(),n);
+                                break;
+                            case ParserSym.MOD:
+                                taula_intermedi.genera(Operacio.modul,f.getR(),m.getR(),n);
+                                break;
+                        }
+                        //*****************************************
+
+                        RESULT = new SimbolMp(resultat,"id_nula",ParserSym.MOD,"moderesult",m.getDreta(),n);  
                     }
                 }
             }
@@ -1434,52 +1592,52 @@ F ::= LPAREN:l E:e RPAREN:r {:System.out.println("F -> LPAREN E RPAREN"); //pend
     | venter:v {:System.out.println("F -> venter");
                 Integer n = novavar(true);
                 taula_intermedi.genera(Operacio.copia_valor,(Integer)v.valor,null,n);
-                RESULT = new SimbolF("ts_enter","ent","modeconst",v.esquerre,v.dreta,n,null);
+                RESULT = new SimbolF("ts_enter","ent","modeconst",v.esquerre,v.dreta,n);
                 :} 
     | SUB:s venter:v {:System.out.println("F -> SUB venter");
                 Integer n = novavar(true);
                 taula_intermedi.genera(Operacio.copia_valor,(Integer)v.valor*-1,null,n);
-                RESULT = new SimbolF("ts_enter","ent","modeconst",s.esquerre,v.dreta,n,null);
+                RESULT = new SimbolF("ts_enter","ent","modeconst",s.esquerre,v.dreta,n);
                 :}
     | ADD:a venter:v {:System.out.println("F -> ADD venter");
                 Integer n = novavar(true);
                 taula_intermedi.genera(Operacio.copia_valor,(Integer)v.valor,null,n);
-                RESULT = new SimbolF("ts_enter","ent","modeconst",a.esquerre,v.dreta,n,null);
+                RESULT = new SimbolF("ts_enter","ent","modeconst",a.esquerre,v.dreta,n);
                 :}
     | vdecimal:v {:System.out.println("F -> vdecimal");
                 Integer n = novavar(true);
                 taula_intermedi.genera(Operacio.copia_valor,(Double)v.valor,null,n);
-                RESULT = new SimbolF("ts_decimal","decimal","modeconst",v.esquerre,v.dreta,n,null);
+                RESULT = new SimbolF("ts_decimal","decimal","modeconst",v.esquerre,v.dreta,n);
                 :}
     | ADD:a vdecimal:v {:System.out.println("F -> ADD vdecimal");
                 Integer n = novavar(true);
                 taula_intermedi.genera(Operacio.copia_valor,(Double)v.valor,null,n);
-                RESULT = new SimbolF("ts_decimal","decimal","modeconst",a.esquerre,a.dreta,n,null);
+                RESULT = new SimbolF("ts_decimal","decimal","modeconst",a.esquerre,a.dreta,n);
                 :}
     | SUB:s vdecimal:v {:System.out.println("F -> SUB vdecimal");
                 Integer n = novavar(true);
                 taula_intermedi.genera(Operacio.copia_valor,(Double)v.valor*-1,null,n);
-                RESULT = new SimbolF("ts_decimal","decimal","modeconst",s.esquerre,s.dreta,n,null);
+                RESULT = new SimbolF("ts_decimal","decimal","modeconst",s.esquerre,s.dreta,n);
                 :}
     | vcaracter:v {:System.out.println("F -> vcaracter");
                 Integer n = novavar(true);
                 taula_intermedi.genera(Operacio.copia_valor,(Character)v.valor,null,n);
-                RESULT = new SimbolF("ts_caracter","car","modeconst",v.esquerre,v.dreta,n,null);
+                RESULT = new SimbolF("ts_caracter","car","modeconst",v.esquerre,v.dreta,n);
                 :}
     | ADD:a vcaracter:v {:System.out.println("F -> ADD");
                 Integer n = novavar(true);
                 taula_intermedi.genera(Operacio.copia_valor,(Integer)v.valor,null,n); //revisar si passar a decimal o enter
-                RESULT = new SimbolF("ts_caracter","car","modeconst",a.esquerre,v.dreta,n,null); //assegurar que a car hi posam ts_caracter
+                RESULT = new SimbolF("ts_caracter","car","modeconst",a.esquerre,v.dreta,n); //assegurar que a car hi posam ts_caracter
                 :}
     | SUB:s vcaracter:v {:System.out.println("F -> SUB");
                 Integer n = novavar(true);
                 taula_intermedi.genera(Operacio.copia_valor,(Integer)v.valor*-1,null,n); //revisar si passar a decimal o enter
-                RESULT = new SimbolF("ts_caracter","car","modeconst",s.esquerre,v.dreta,n,null);
+                RESULT = new SimbolF("ts_caracter","car","modeconst",s.esquerre,v.dreta,n);
                 :}
     | vcadena:v {:System.out.println("F -> vcadena");
                 Integer n = novavar(true);
                 taula_intermedi.genera(Operacio.copia_valor,(String)v.valor,null,n); //revisar si passar a decimal o enter
-                RESULT = new SimbolF("ts_cadena","cad","modeconst",v.esquerre,v.dreta,n,null);
+                RESULT = new SimbolF("ts_cadena","cad","modeconst",v.esquerre,v.dreta,n);
                 :}
     | R: r {:System.out.println("F -> ID");
                 if(errorSemantic){
@@ -1491,9 +1649,27 @@ F ::= LPAREN:l E:e RPAREN:r {:System.out.println("F -> LPAREN E RPAREN"); //pend
                         RESULT  = new SimbolF();
                     }else{
                         if(r.getMvp() == "var"){
-                            RESULT = new SimbolF(r.getTsb(),r.getTipus(),"modevar",r.getEsquerre(),r.getDreta());
-                        }else if((r.getMvp() == "const")||(r.getMvp() == "procc")){
-                            RESULT = new SimbolF(r.getIdb(),r.getTsb(),r.getTipus(),"modeconst",r.getEsquerre(),r.getDreta());
+                            Integer n;
+                            if(r.getDpc()!=0){
+                                n = novavar(true);
+                                taula_intermedi.genera(Operacio.ind_param,r.getR(),r.getDpc(),n);
+                            }else{
+                                n = r.getR();
+                            }
+                            RESULT = new SimbolF(r.getTsb(),r.getTipus(),"modevar",r.getEsquerre(),r.getDreta(),n);
+                        }else if(r.getMvp() == "const"){
+
+                            Integer n;
+                            if(r.getDpc()!=0){
+                                n = novavar(true);
+                                taula_intermedi.genera(Operacio.ind_param,r.getR(),r.getDpc(),n);
+                            }else{
+                                n = r.getR();
+                            }
+
+                            RESULT = new SimbolF(r.getIdb(),r.getTsb(),r.getTipus(),"modeconst",r.getEsquerre(),r.getDreta(),n);
+                        }else if(r.getMvp() == "procc"){ //gestionar el return
+                            RESULT = new SimbolF(r.getIdb(),r.getTsb(),r.getTipus(),"modeconst",r.getEsquerre(),r.getDreta(),r.getR());
                         }
                     }  
                 }
@@ -1508,9 +1684,30 @@ F ::= LPAREN:l E:e RPAREN:r {:System.out.println("F -> LPAREN E RPAREN"); //pend
                         RESULT  = new SimbolF();
                     }else{
                         if(r.getMvp() == "var"){
-                            RESULT = new SimbolF(r.getTsb(),r.getTipus(),"modevar",r.getEsquerre(),r.getDreta());
+                            Integer n;
+                            if(r.getDpc()!=0){
+                                n = novavar(true);
+                                taula_intermedi.genera(Operacio.ind_param,r.getR(),r.getDpc(),n);
+                            }else{
+                                n = r.getR();
+                            }
+                            Integer n2 = novavar(true);
+                            taula_intermedi.genera(Operacio.menys,n,null,n2);
+
+                            RESULT = new SimbolF(r.getTsb(),r.getTipus(),"modevar",r.getEsquerre(),r.getDreta(),n2);
                         }else if((r.getMvp() == "const")||(r.getMvp() == "procc")){
-                            RESULT = new SimbolF(r.getTsb(),r.getTipus(),"modeconst",r.getEsquerre(),r.getDreta());
+
+                            Integer n;
+                            if(r.getDpc()!=0){
+                                n = novavar(true);
+                                taula_intermedi.genera(Operacio.ind_param,r.getR(),r.getDpc(),n);
+                            }else{
+                                n = r.getR();
+                            }
+                            Integer n2 = novavar(true);
+                            taula_intermedi.genera(Operacio.menys,n,null,n2);
+
+                            RESULT = new SimbolF(r.getTsb(),r.getTipus(),"modeconst",r.getEsquerre(),r.getDreta(),n2);
                         }
                     }  
                 }
@@ -1526,18 +1723,42 @@ F ::= LPAREN:l E:e RPAREN:r {:System.out.println("F -> LPAREN E RPAREN"); //pend
                         RESULT  = new SimbolF();
                     }else{
                         if(r.getMvp() == "var"){
-                            RESULT = new SimbolF(r.getTsb(),r.getTipus(),"modevar",r.getEsquerre(),r.getDreta());
+                            Integer n;
+                            if(r.getDpc()!=0){
+                                n = novavar(true);
+                                taula_intermedi.genera(Operacio.ind_param,r.getR(),r.getDpc(),n);
+                            }else{
+                                n = r.getR();
+                            }
+
+                            RESULT = new SimbolF(r.getTsb(),r.getTipus(),"modevar",r.getEsquerre(),r.getDreta(),n);
                         }else if((r.getMvp() == "const")||(r.getMvp() == "procc")){
-                            RESULT = new SimbolF(r.getTsb(),r.getTipus(),"modeconst",r.getEsquerre(),r.getDreta());
+                            Integer n;
+                            if(r.getDpc()!=0){
+                                n = novavar(true);
+                                taula_intermedi.genera(Operacio.ind_param,r.getR(),r.getDpc(),n);
+                            }else{
+                                n = r.getR();
+                            }
+
+                            RESULT = new SimbolF(r.getTsb(),r.getTipus(),"modeconst",r.getEsquerre(),r.getDreta(),n);
                         }
                     }  
                 }
                 :}
     | vlogic:v {:System.out.println("F -> vlogic");
                 Integer n = novavar(true);
-                taula_intermedi.genera(Operacio.copia_valor,(Boolean)v.valor,null,n); //revisar si passar a decimal o enter
-                RESULT = new SimbolF("ts_boolea","bool","modeconst",v.esquerre,v.dreta,n,null);
+                switch((String)v.valor){
+                    case "FALS":
+                        taula_intermedi.genera(Operacio.copia_valor,false,null,n); //revisar si passar a decimal o enter
+                        break;
+                    default:
+                        taula_intermedi.genera(Operacio.copia_valor,true,null,n); //revisar si passar a decimal o enter
+                        break;
+                }
+                RESULT = new SimbolF("ts_boolea","bool","modeconst",v.esquerre,v.dreta,n);
                 :} 
+
     | SUB:s LPAREN E:e RPAREN:r {:System.out.println("F -> SUB LPAREN E RPAREN"); //REVISAR
 
                 if(errorSemantic){ //si s'ha comés un error Semantic a E
@@ -1552,14 +1773,24 @@ F ::= LPAREN:l E:e RPAREN:r {:System.out.println("F -> LPAREN E RPAREN"); //pend
                         errorSemantic = true;
                         RESULT  = new SimbolF();
                     }else{
-                        RESULT = new SimbolF(e.getTsb(),e.getTipus(),"moderesult",s.esquerre,r.dreta);
+                        Integer n = novavar(true);
+                        taula_intermedi.genera(Operacio.menys,e.getR(),null,n);
+                        RESULT = new SimbolF(e.getTsb(),e.getTipus(),"moderesult",s.esquerre,r.dreta,n);
                     } 
                 }
                 :}
     | NOT:n vlogic:v {:System.out.println("F -> NOT vlogic");
                 Integer ni = novavar(true);
-                taula_intermedi.genera(Operacio.copia_valor,!(Boolean)v.valor,null,ni); //revisar si passar a decimal o enter
-                RESULT = new SimbolF("ts_boolea","bool","modeconst",n.esquerre,v.dreta,ni,null);
+                switch((String)v.valor){
+                    case "FALS":
+                        taula_intermedi.genera(Operacio.copia_valor,true,null,ni); //revisar si passar a decimal o enter
+                    break;
+                    default:
+                        taula_intermedi.genera(Operacio.copia_valor,false,null,ni); //revisar si passar a decimal o enter
+                    break;
+                }
+                
+                RESULT = new SimbolF("ts_boolea","bool","modeconst",n.esquerre,v.dreta,ni);
                 :}
     | NOT:n R:r {:System.out.println("F -> NOT ID");
                 if(errorSemantic){
@@ -1576,7 +1807,16 @@ F ::= LPAREN:l E:e RPAREN:r {:System.out.println("F -> LPAREN E RPAREN"); //pend
                                 errorSemantic = true;
                                 RESULT  = new SimbolF();
                             }else{
-                              RESULT = new SimbolF(r.getTsb(),r.getTipus(),"modevar",r.getEsquerre(),r.getDreta());  
+                                Integer n1;
+                                if(r.getDpc()!=0){
+                                    n1 = novavar(true);
+                                    taula_intermedi.genera(Operacio.ind_param,r.getR(),r.getDpc(),n1);
+                                }else{
+                                    n1 = r.getR();
+                                }
+                                Integer n2 = novavar(true);
+                                taula_intermedi.genera(Operacio.not,n1,null,n2);
+                                RESULT = new SimbolF(r.getTsb(),r.getTipus(),"modevar",r.getEsquerre(),r.getDreta(),n2);  
                             }
                             
                         }else if(r.getMvp() == "const"){
@@ -1585,7 +1825,17 @@ F ::= LPAREN:l E:e RPAREN:r {:System.out.println("F -> LPAREN E RPAREN"); //pend
                                 errorSemantic = true;
                              RESULT  = new SimbolF();
                             }else{
-                              RESULT = new SimbolF(r.getTsb(),r.getTipus(),"modeconst",r.getEsquerre(),r.getDreta());  
+                                Integer n1;
+                                if(r.getDpc()!=0){
+                                    n1 = novavar(true);
+                                    taula_intermedi.genera(Operacio.ind_param,r.getR(),r.getDpc(),n1);
+                                }else{
+                                    n1 = r.getR();
+                                }
+                                Integer n2 = novavar(true);
+                                taula_intermedi.genera(Operacio.not,n1,null,n2);
+
+                                RESULT = new SimbolF(r.getTsb(),r.getTipus(),"modeconst",r.getEsquerre(),r.getDreta());  
                             }
                         }
                     }  
@@ -1600,7 +1850,9 @@ F ::= LPAREN:l E:e RPAREN:r {:System.out.println("F -> LPAREN E RPAREN"); //pend
                         errorSemantic = true;
                         RESULT  = new SimbolF();
                     }else{
-                        RESULT = new SimbolF(e.getTsb(),e.getTipus(),"moderesult",n.esquerre,r.dreta);
+                        Integer n1 = novavar(true);
+                        taula_intermedi.genera(Operacio.not,e.getR(),null,n1);
+                        RESULT = new SimbolF(e.getTsb(),e.getTipus(),"moderesult",n.esquerre,r.dreta,n1);
                     }   
                 }
                 :}
