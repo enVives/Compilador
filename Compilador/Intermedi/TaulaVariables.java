@@ -10,7 +10,7 @@ public class TaulaVariables{
     }
 
     public Integer n(){
-        return files.size();
+        return files.size()-1;
     }
 
     public void afegeix_variable(String subprograma,Boolean parametre){

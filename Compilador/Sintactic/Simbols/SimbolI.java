@@ -27,20 +27,28 @@ public class SimbolI extends SimbolBase {
         return esquerre;
     }
 
+    private Integer r;
+
+    public Integer getR() {
+        return r;
+    }
+
+    public SimbolI(String operacio,String tipus,String tsb,Location esquerre,Location dreta,Integer r){
+        this.operacio = operacio;
+        this.tipus = tipus;
+        this.tsb = tsb;
+        this.esquerre = esquerre;
+        this.dreta = dreta;
+        this.r = r;
+    }
+
     public SimbolI(String operacio,String tipus,String tsb,Location esquerre,Location dreta){
         this.operacio = operacio;
         this.tipus = tipus;
         this.tsb = tsb;
         this.esquerre = esquerre;
         this.dreta = dreta;
-    }
-
-    public SimbolI(String operacio,String tipus,String tsb){
-        this.operacio = operacio;
-        this.tipus = tipus;
-        this.tsb = tsb;
-        this.esquerre = esquerre;
-        this.dreta = dreta;
+        r = null;
     }
 
     public SimbolI(){

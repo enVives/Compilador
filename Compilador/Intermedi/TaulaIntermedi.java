@@ -15,6 +15,10 @@ public class TaulaIntermedi {
         llista.add(new Sentencia(mnemonic, op1, op2, desti));
     }
 
+    public void clear(){
+        llista.clear();
+    }
+
     public ArrayList<Sentencia> get_Llista(){
         return llista;
     }

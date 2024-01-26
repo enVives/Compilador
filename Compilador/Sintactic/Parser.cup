@@ -200,6 +200,7 @@ non terminal M0;
 non terminal M1;
 non terminal M2;
 non terminal M3;
+non terminal SimbolEtiqueta ET;
 non terminal PROG;
 non terminal SimbolI I_1;
 non terminal SimbolA A;
@@ -290,7 +291,7 @@ PROCEDIMENT_1 ::= metode ID:i LPAREN ARGS:a RPAREN {:System.out.println("PROCEDI
                 String idparam = dada.idcamp();
                 Darg d = (Darg) dada.td();
 
-                Dargin arg = new Dargin((new Dvar()).nv(), d.td());
+                Dargin arg = new Dargin((new Dvar()).getMy_nv(), d.td());
                 taula_simbols.posar(idparam, arg);
                 dada = dada.next();
             }
@@ -320,7 +321,7 @@ PROCEDIMENT_2 ::= metode TIPUS:t ID:i LPAREN ARGS:a RPAREN{:System.out.println("
                             String idparam = dada.idcamp();
                             Darg d = (Darg) dada.td();
 
-                            Dargin arg = new Dargin((new Dvar()).nv(), d.td());
+                            Dargin arg = new Dargin((new Dvar()).getMy_nv(), d.td());
                             taula_simbols.posar(idparam, arg);
                             dada = dada.next();
                         }
@@ -430,7 +431,7 @@ MENTRE ::= mentres LPAREN E:e RPAREN fer LCLAUDAT SENTENCIES RCLAUDAT {:System.o
             }
             :} ;
 
-IF ::=  si LPAREN E:e RPAREN LCLAUDAT SENTENCIES RCLAUDAT IF_1 {:System.out.println("IF");
+IF ::=  si LPAREN E:e ET:t1 RPAREN LCLAUDAT SENTENCIES RCLAUDAT IF_1 {:System.out.println("IF");
                 if(!errorSemantic){
                     if(e.getTsb()!="ts_boolea"){
                         report_error_semantic("La expresió ha de ser de tipus booleà", e.getEsquerre(),e.getDreta());
@@ -438,7 +439,7 @@ IF ::=  si LPAREN E:e RPAREN LCLAUDAT SENTENCIES RCLAUDAT IF_1 {:System.out.prin
                     }
                 }
             :};
-IF_1 ::= sino si LPAREN E:e RPAREN LCLAUDAT SENTENCIES RCLAUDAT IF_1 {:System.out.println("IF_1");
+IF_1 ::= sino si LPAREN E:e ET:t RPAREN LCLAUDAT SENTENCIES RCLAUDAT IF_1 {:System.out.println("IF_1");
                 if(!errorSemantic){
                     if(e.getTsb()!="ts_boolea"){
                         report_error_semantic("La expresió ha de ser de tipus booleà", e.getEsquerre(),e.getDreta());
@@ -446,17 +447,15 @@ IF_1 ::= sino si LPAREN E:e RPAREN LCLAUDAT SENTENCIES RCLAUDAT IF_1 {:System.ou
                     }
                 }
             :}
-            | sino LCLAUDAT SENTENCIES RCLAUDAT {:System.out.println("IF_1");:}
+            | sino ET:t LCLAUDAT SENTENCIES RCLAUDAT {:System.out.println("IF_1");:}
 
             | {:System.out.println("@");:}
             ;
-//FMENTRE ::= fer LCLAUDAT SENTENCIES RCLAUDAT  mentres LPAREN L RPAREN PUNTICOMA {:System.out.println("FMENTRE");:} ;
 
-SWITCH ::= seleccio LPAREN E RPAREN LCLAUDAT SWITCH_1 DEF RCLAUDAT {:System.out.println("SWITCH");:};
-SWITCH_1 ::= cas E DOSPUNTS SENTENCIES acaba PUNTICOMA SWITCH_1 {:System.out.println("SWITCH_1");:}
-    | {:System.out.println("SWITCH_1 -> @");:};
-DEF  ::= pdefecte DOSPUNTS SENTENCIES acaba PUNTICOMA {:System.out.println("DEF");:};
-
+ET ::= {:System.out.println("ET");
+        RESULT = new SimbolEtiqueta(taula_intermedi.get_Llista());
+        taula_intermedi.clear();
+        :};
 
 FOR ::= per LPAREN INICI PUNTICOMA FOR_1 PUNTICOMA FOR_2 RPAREN LCLAUDAT SENTENCIES RCLAUDAT {:System.out.println("FOR");:}
     | per LPAREN PUNTICOMA FOR_1 PUNTICOMA FOR_2 RPAREN LCLAUDAT SENTENCIES RCLAUDAT {:System.out.println("FOR");:}
@@ -520,6 +519,11 @@ DECL_CONST ::= constant TIPUS:t ID:a ASSIGN E:e  {:System.out.println("DECL_CONS
                     if(!bol){
                         report_error_semantic("ja hi ha un identificador amb el nom: '"+(String)a.valor+"' dins el mateix àmbit", a.esquerre,a.dreta);
                         errorSemantic = true;
+                    }else{
+                        //*****************Intermedi********************
+                        Integer n = novavar(true);
+                        taula_intermedi.genera(Operacio.copia,e.getR(),null,(String)a.valor);
+                        //****************************************************
                     }
                 }
             }
@@ -540,6 +544,11 @@ DECL_CONST ::= constant TIPUS:t ID:a ASSIGN E:e  {:System.out.println("DECL_CONS
                     if(!bol){
                         report_error_semantic("ja hi ha un identificador amb el nom: '"+(String)a.valor+"' dins el mateix àmbit", a.esquerre,a.dreta);
                         errorSemantic = true;
+                    }else{
+                        //*****************Intermedi********************
+                        Integer n = novavar(true);
+                        taula_intermedi.genera(Operacio.copia,m.getR(),null,(String)a.valor);
+                        //****************************************************
                     }
                 }
             }    
@@ -567,10 +576,16 @@ DECL_TIPUS ::= TIPUS:t ID:a {:System.out.println("DECL_TIPUS -> TIPUS ID ");
                     RESULT = new SimbolDeclTipus();
                 }else{
                     String ti = t.getTipus(); //tipus que afegirem als identificadors
-                    Boolean bol = taula_simbols.posar((String) a.valor,new Dvar(ti));
+                    Dvar var = new Dvar(ti);
+                    Boolean bol = taula_simbols.posar((String) a.valor,var);
                     if(!bol){
                         report_error_semantic("ja hi ha un identificador amb el nom: '"+(String)a.valor+"' dins el mateix àmbit", a.esquerre,a.dreta);
                         errorSemantic = true;
+                    }else{
+                        //*****************Intermedi********************
+                        Integer n = novavar(false);
+                        taula_intermedi.genera(Operacio.copia,e.getR(),null,var.getMy_nv());
+                        //****************************************************
                     }
 
                 }
@@ -588,11 +603,16 @@ DECL_TIPUS ::= TIPUS:t ID:a {:System.out.println("DECL_TIPUS -> TIPUS ID ");
                     RESULT = new SimbolDeclTipus();
                 }else{
                     String ti = t.getTipus(); //tipus que afegirem als identificadors
-
-                    Boolean bol = taula_simbols.posar((String) a.valor,new Dvar(ti));
+                    Dvar var = new Dvar(ti);
+                    Boolean bol = taula_simbols.posar((String) a.valor,var);
                     if(!bol){
                         report_error_semantic("ja hi ha un identificador amb el nom: '"+(String)a.valor+"' dins el mateix àmbit", a.esquerre,a.dreta);
                         errorSemantic = true;
+                    }else{
+                        //****************************Intermedi**********************************
+                        Integer n = novavar(false);
+                        taula_intermedi.genera(Operacio.copia,m.getR(),null,var.getMy_nv());
+                        //***********************************************************************
                     }
 
                 }
@@ -621,28 +641,48 @@ MODIF_TIPUS ::= R:r I_1:i {:System.out.println("MODIF_TIPUS -> R I_1");
                             errorSemantic = true;
                             RESULT = new SimbolModifTipus();
                         }else{
-                            RESULT = new SimbolModifTipus(r.getTsb(),r.getTipus(),r.getEsquerre(),i.getDreta());
+                            //******************Intermedi******************
+                            Integer n = novavar(true);
+                            taula_intermedi.genera(Operacio.copia_valor,1,null,n);
+                            taula_intermedi.genera(Operacio.suma,r.getR(),n,r.getR()); //r.getR()++
+                            //********************************************
+                            RESULT = new SimbolModifTipus(r.getTsb(),r.getTipus(),r.getEsquerre(),i.getDreta(),r.getR());
                         }
                         break;
-                    case "ar":
+                    case "ar": //--
                         if((r.getTsb()!="ts_enter")&&(r.getTsb()!="ts_decimal")&&(r.getTsb()!="ts_caracter")){
                             report_error_semantic("Tipus equivocat per a la operació --", r.getEsquerre(),r.getDreta());
                             errorSemantic = true;
                             RESULT = new SimbolModifTipus();
                         }else{
-                            RESULT = new SimbolModifTipus(r.getTsb(),r.getTipus(),r.getEsquerre(),i.getDreta());
+                            //******************Intermedi******************
+                            Integer n = novavar(true);
+                            taula_intermedi.genera(Operacio.copia_valor,1,null,n);
+                            taula_intermedi.genera(Operacio.resta,r.getR(),n,r.getR()); //r.getR()--
+                            //********************************************
+                            RESULT = new SimbolModifTipus(r.getTsb(),r.getTipus(),r.getEsquerre(),i.getDreta(),r.getR());
                         }
                         break;
-                    case "si":
+                    case "si": //+=
                         if((i.getTsb()!="ts_enter")&&(i.getTsb()!="ts_caracter")&&(i.getTsb()!="ts_decimal")){
                             report_error_semantic("La Expresió té un tipus equivocat per l'operacio: +=", i.getEsquerre(),i.getDreta());
                             errorSemantic = true;
                             RESULT = new SimbolModifTipus();
                         }else{
-                            RESULT = new SimbolModifTipus(r.getTsb(),r.getTipus(),r.getEsquerre(),i.getDreta());
+                            if((r.getTsb()!="ts_enter")&&(r.getTsb()!="ts_caracter")&&(r.getTsb()!="ts_decimal")){
+                            report_error_semantic("La Referència te un tipus equivocat per l'operació: +=", r.getEsquerre(),r.getDreta());
+                            errorSemantic = true;
+                            RESULT = new SimbolModifTipus();
+                            }else{
+                                //******************Intermedi******************
+                                taula_intermedi.genera(Operacio.suma,r.getR(),i.getR(),r.getR()); //r.getR() += I
+                                //********************************************
+
+                                RESULT = new SimbolModifTipus(r.getTsb(),r.getTipus(),r.getEsquerre(),i.getDreta(),r.getR());  
+                            }
                         }
                         break;
-                    case "ri":
+                    case "ri": //-=
                         if((i.getTsb()!="ts_enter")&&(i.getTsb()!="ts_caracter")&&(i.getTsb()!="ts_decimal")){
                             report_error_semantic("La Expresió té un tipus equivocat per l'operacio: -=", r.getEsquerre(),i.getDreta());
                             errorSemantic = true;
@@ -653,7 +693,10 @@ MODIF_TIPUS ::= R:r I_1:i {:System.out.println("MODIF_TIPUS -> R I_1");
                             errorSemantic = true;
                             RESULT = new SimbolModifTipus();
                             }else{
-                             RESULT = new SimbolModifTipus(r.getTsb(),r.getTipus(),r.getEsquerre(),i.getDreta()); 
+                                //******************Intermedi******************
+                                taula_intermedi.genera(Operacio.resta,r.getR(),i.getR(),r.getR()); //r.getR() += I
+                                //********************************************
+                                RESULT = new SimbolModifTipus(r.getTsb(),r.getTipus(),r.getEsquerre(),i.getDreta(),r.getR()); 
                             }
                         }
                         break;
@@ -663,7 +706,10 @@ MODIF_TIPUS ::= R:r I_1:i {:System.out.println("MODIF_TIPUS -> R I_1");
                             errorSemantic = true;
                             RESULT = new SimbolModifTipus();
                         }else{
-                            RESULT = new SimbolModifTipus(r.getTsb(),r.getTipus(),r.getEsquerre(),i.getDreta());
+                            //******************Intermedi******************
+                                taula_intermedi.genera(Operacio.copia,i.getR(),null,r.getR()); //r.getR() += I
+                            //********************************************
+                            RESULT = new SimbolModifTipus(r.getTsb(),r.getTipus(),r.getEsquerre(),i.getDreta(),r.getR());
                         }
                         break;
                 }
@@ -682,7 +728,10 @@ MODIF_TIPUS ::= R:r I_1:i {:System.out.println("MODIF_TIPUS -> R I_1");
                     errorSemantic = true;
                     RESULT = new SimbolModifTipus();
                 }else{
-                    RESULT = new SimbolModifTipus(r.getTsb(),r.getTipus(),r.getEsquerre(),m.getDreta()); 
+                    //******************Intermedi******************
+                        taula_intermedi.genera(Operacio.copia,m.getR(),null,r.getR()); //r.getR() += I
+                    //********************************************
+                    RESULT = new SimbolModifTipus(r.getTsb(),r.getTipus(),r.getEsquerre(),m.getDreta(),r.getR()); 
                 }
             }
             
@@ -701,7 +750,7 @@ R ::= ID:d {:System.out.println("R -> ID ");
             if(descripcio instanceof Dvar){ //variable
                 Dvar var = (Dvar) descripcio;
                 Dtipus tipus = (Dtipus) taula_simbols.consulta(var.tipus()); //ALERTA EN NO TROBAR
-                RESULT = new SimbolR((String)d.valor,(String)d.valor,tipus.dt().tipus_subjacent(),var.tipus(),"var",var.nv(),0,var.tipus(),d.esquerre,d.dreta);
+                RESULT = new SimbolR((String)d.valor,(String)d.valor,tipus.dt().tipus_subjacent(),var.tipus(),"var",var.getMy_nv(),0,var.tipus(),d.esquerre,d.dreta);
             }else if(descripcio instanceof Dconst){ //variable o tupla
                 Dconst c = (Dconst) descripcio;
                 Dtipus tipus = (Dtipus) taula_simbols.consulta(c.tipus()); //ALERTA EN NO TROBAR
@@ -711,7 +760,7 @@ R ::= ID:d {:System.out.println("R -> ID ");
                 if(c.tipus()=="tupla"){
                     taula_intermedi.genera(Operacio.copia,(String)d.valor,null,n); // t1 = a = tupla a
                 }else{
-                    taula_intermedi.genera(Operacio.copia_valor,c.valor(),null,n); 
+                    taula_intermedi.genera(Operacio.copia,(String)d.valor,null,n); 
                 }
                 
                 RESULT = new SimbolR((String)d.valor,(String)d.valor,tipus.dt().tipus_subjacent(),c.tipus(),"const",n,0,c.tipus(),d.esquerre,d.dreta);
@@ -856,21 +905,21 @@ I_1 ::= AUTOSUM:a {:System.out.println("I_1 -> AUTOSUM");
         if(errorSemantic){
         RESULT = new SimbolI();
         }else{
-        RESULT = new SimbolI("si",e.getTipus(),e.getTsb(),s.esquerre,e.getDreta());   
+        RESULT = new SimbolI("si",e.getTipus(),e.getTsb(),s.esquerre,e.getDreta(),e.getR());   
         }
     :}
     | RESTAHI:r E:e {:System.out.println("I_1 -> RESTAHI E");
         if(errorSemantic){
             RESULT = new SimbolI();
         }else{
-            RESULT = new SimbolI("ri",e.getTipus(),e.getTsb(),r.esquerre,e.getDreta());   
+            RESULT = new SimbolI("ri",e.getTipus(),e.getTsb(),r.esquerre,e.getDreta(),e.getR());   
         }
     :}
     | ASSIGN:a E:e  {:System.out.println("I_1 -> ASSIGN E");
         if(errorSemantic){
             RESULT = new SimbolI();
         }else{
-            RESULT = new SimbolI("ig",e.getTipus(),e.getTsb(),a.esquerre,e.getDreta());   
+            RESULT = new SimbolI("ig",e.getTipus(),e.getTsb(),a.esquerre,e.getDreta(),e.getR());   
         }
     
     :}

@@ -3,10 +3,10 @@ import java_cup.runtime.ComplexSymbolFactory.Location;
 
 public class SimbolModifTipus extends SimbolBase {
     private String tsb;
+
     public String getTsb() {
         return tsb;
     }
-
 
     private String tipus;
     private Location esquerre;
@@ -28,11 +28,18 @@ public class SimbolModifTipus extends SimbolBase {
     }
 
 
-    public SimbolModifTipus(String tsb, String tipus,Location esquerre,Location dreta){
+    public SimbolModifTipus(String tsb, String tipus,Location esquerre,Location dreta,Integer r){
         this.tsb = tsb;
         this.tipus = tipus;
         this.esquerre = esquerre;
         this.dreta = dreta;
+        this.r = r;
+    }
+
+    private Integer r;
+
+    public Integer getR() {
+        return r;
     }
 
 

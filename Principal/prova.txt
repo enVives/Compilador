@@ -1,8 +1,11 @@
-tupla a() = (1,VER,3);
-tupla b() = (1,2,a);
-
+ent b = 10;
+ent c = 5;
 
 metode main (cad arguments []) {
-   bool c =  b.Item2.Item1 o FALS;
+   si(VER){
+      c += b;
+   }sino si(VER){
+      c+=b;
+   }
 }
     
