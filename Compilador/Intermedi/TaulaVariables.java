@@ -5,6 +5,10 @@ public class TaulaVariables{
 
     ArrayList<Entrada> files;
 
+    public ArrayList<Entrada> getFiles() {
+        return files;
+    }
+
     public TaulaVariables(){
         files = new ArrayList<>();
     }
@@ -13,21 +17,37 @@ public class TaulaVariables{
         return files.size()-1;
     }
 
-    public void afegeix_variable(String subprograma,Boolean parametre){
-        files.add(new Entrada(subprograma, parametre));
+    public void afegeix_variable(Integer subprograma,Boolean parametre,Integer ocupacio){
+        files.add(new Entrada(subprograma, parametre,ocupacio));
     }
 
     public Entrada cerca_varaible(Integer n){
         return files.get(n);
     }
 
+    public void set_ocupacio(Integer n,Integer ocupacio){
+        files.get(n).setOcupacio(ocupacio);
+    }
 
+    public Integer get_ocupacio(Integer n){
+        return files.get(n).ocupacio();
+    }
     public class Entrada{
-        private String subprograma;
-        public String getSubprograma() {
+        private Integer subprograma;
+        public Integer getSubprograma() {
             return subprograma;
         }
 
+        Integer ocupacio;
+
+        public void setOcupacio(Integer ocupacio) {
+            this.ocupacio = ocupacio;
+        }
+
+
+        public Integer ocupacio() {
+            return ocupacio;
+        }
 
         private Boolean parametre;
 
@@ -37,9 +57,10 @@ public class TaulaVariables{
         }
 
 
-        public Entrada(String subprograma,Boolean parametre){
+        public Entrada(Integer subprograma,Boolean parametre,Integer ocupacio){
             this.subprograma = subprograma;
             this.parametre = parametre;
+            this.ocupacio = ocupacio;
         }
     }
 }

@@ -19,6 +19,7 @@ import Compilador.TSimbols.DT.*;
 import Compilador.TSimbols.TD.*;
 import Compilador.Sintactic.Simbols.*;
 import Compilador.Sintactic.Simbols.SimbolValsTupla.KeyValue;
+import Compilador.Intermedi.TaulaVariables.*;
 import java.util.Iterator;
 import java.util.Stack;
 import java.util.ArrayList;
@@ -50,27 +51,57 @@ parser code {:
 
     //Pila de subprograma actual
 
-    Stack<String> pila_procediments = new Stack<>();
+    Stack<Integer> pila_procediments = new Stack<>();
     Integer etiquetes = 0; //anirà incrementant
     TaulaIntermedi taula_intermedi = new TaulaIntermedi();
     TaulaVariables taula_variables = new TaulaVariables();
     TaulaProcediments taula_procediments = new TaulaProcediments();
+    Stack<Integer> pila_pendents = new Stack<>();
+
+    public Integer novavar(Boolean temporal,Integer ocupacio){ //revisar lo des parametres
+        if(temporal){
+            new Dvar(); //incrementam n antes de afegir-ho
+        }
+        if(!pila_procediments.isEmpty()){
+            Integer procediment = pila_procediments.peek();
+            taula_variables.afegeix_variable(procediment,null,ocupacio);
+        }else{
+            taula_variables.afegeix_variable(null,null,ocupacio);
+        }
+        return taula_variables.n(); //darrer n
+    }
 
     public Integer novavar(Boolean temporal){ //revisar lo des parametres
         if(temporal){
             new Dvar(); //incrementam n antes de afegir-ho
         }
         if(!pila_procediments.isEmpty()){
-            String procediment = pila_procediments.peek();
-            taula_variables.afegeix_variable(procediment,null);
+            Integer procediment = pila_procediments.peek();
+            taula_variables.afegeix_variable(procediment,null,null);
         }else{
-            taula_variables.afegeix_variable(null,null);
+            taula_variables.afegeix_variable(null,null,null);
         }
         return taula_variables.n(); //darrer n
     }
 
-    public void nouproc(){
+    public void nouproc(Integer nivell, Integer parametres, Integer etiqueta, Integer np){
+        Integer ocupacio = ocupacio(np);
+        taula_procediments.afegeix_procediment(np,etiqueta,ocupacio,parametres);
+    }
 
+    public Integer ocupacio(Integer np){
+        ArrayList<Entrada> llista = taula_variables.getFiles();
+        Iterator <Entrada> it = llista.iterator();
+        Integer ocupacio =0;
+
+        while(it.hasNext()){
+            Entrada ent = (Entrada) it.next();
+            if(ent.getSubprograma() == np){
+                ocupacio += ent.ocupacio();
+            }
+        }
+
+        return ocupacio;
     }
 
     public void mostra_intermedi() throws IOException {
@@ -179,9 +210,9 @@ terminal decimal,enter,logic,cadena,caracter,tupla,si,sino,seleccio,cas,pdefecte
 
 non terminal PROGRAMA,DECL,PROCEDIMENT,MAIN,DECL_TAULA,MODIF,
     MODIF_TUPLA, REM_TUPLA, AFG_TUPLA, MODIF_TAULA, REDEF_TAULA, REDEF_TUPLA,
-    SENTENCIES, MENTRE, IF, SWITCH, FMENTRE, CRIDA_PROC, SENT,VAL_TUPLA,
-    L,IF_1,SWITCH_1, I, A_1,NOVA_TAULA, NOVA_TUPLA,
-    FOR,FOR_1,OP_CONDICIONAL,OP_CONDICIONAL_1,ENTRADAS,SORTIDAS,DECL_CONST;    
+    SENTENCIES, MENTRE, SWITCH, FMENTRE, CRIDA_PROC, SENT,VAL_TUPLA,
+    L,SWITCH_1, I, A_1,NOVA_TAULA, NOVA_TUPLA,
+    FOR,OP_CONDICIONAL,OP_CONDICIONAL_1,ENTRADAS,SORTIDAS,DECL_CONST;    
 
 non terminal SimbolF F;
 non terminal SimbolE E;
@@ -198,9 +229,13 @@ non terminal SimbolValors VALORS;
 non terminal SimbolDeclTupla DECL_TUPLA;
 non terminal M0;
 non terminal M1;
+non terminal IF;
 non terminal M2;
 non terminal M3;
-non terminal SimbolEtiqueta ET;
+non terminal M4;
+non terminal SimbolIf1 IF_1;
+non terminal SimbolCondicio CONDICIO;
+non terminal SimbolResta RESTA;
 non terminal PROG;
 non terminal SimbolI I_1;
 non terminal SimbolA A;
@@ -211,10 +246,11 @@ non terminal SimbolArg ARG;
 non terminal SimbolArgsp ARGS_1;
 non terminal SimbolArgs ARGS;
 non terminal SimbolReturn RETURN;
-non terminal INICI;
-non terminal FOR_2;
+non terminal SimbolResta INICI;
+non terminal SimbolResta FOR_2;
+non terminal SimbolCondicio FOR_1;
 non terminal DEF;
-non terminal PROCEDIMENT_1;
+non terminal SimbolProcediment2 PROCEDIMENT_1;
 non terminal SimbolProcediment2 PROCEDIMENT_2;
 
 precedence left  ADD, SUB;
@@ -273,7 +309,9 @@ PROCEDIMENT_1 ::= metode ID:i LPAREN ARGS:a RPAREN {:System.out.println("PROCEDI
                     String nom = (String) i.valor;
                     Stack<KeyValor> llista = a.getLlista();
 
-                   taula_simbols.posar(nom, new Dproc());
+                    Dproc procediment = new Dproc();
+                    taula_simbols.posar(nom, procediment);
+                    Integer par = 0;
                     
                     while(!llista.isEmpty()){
                             KeyValor k = llista.pop();
@@ -282,7 +320,14 @@ PROCEDIMENT_1 ::= metode ID:i LPAREN ARGS:a RPAREN {:System.out.println("PROCEDI
 
                             taula_simbols.posarparam(nom,id,new Darg(tipus,id));
                             nom += "_"+tipus;
+                            par++;
                     }
+
+                    Integer etiqueta = etiquetes++;
+                    taula_intermedi.genera(Operacio.skip,null,null,etiqueta);
+                    taula_intermedi.genera(Operacio.pmb,null,null,procediment.np());
+
+                    RESULT = new SimbolProcediment2(taula_simbols.getN(),etiqueta,par,procediment.np());
 
                     taula_simbols.entra_bloc();
 
@@ -296,16 +341,17 @@ PROCEDIMENT_1 ::= metode ID:i LPAREN ARGS:a RPAREN {:System.out.println("PROCEDI
                 dada = dada.next();
             }
 
-            pila_procediments.push(nom);
-
+            pila_procediments.push(procediment.np());
 :};
 
 PROCEDIMENT_2 ::= metode TIPUS:t ID:i LPAREN ARGS:a RPAREN{:System.out.println("PROCEDIMENT_2");
                         String nom = (String) i.valor;
                         Stack<KeyValor> llista = a.getLlista();
 
-                        taula_simbols.posar(nom, new Dproc(t.getTipus()));
-    
+                        Dproc procediment = new Dproc();
+                        taula_simbols.posar(nom, procediment);
+                        Integer par = 0;
+
                         while(!llista.isEmpty()){
                                 KeyValor k = llista.pop();
                                 String id = k.key; //nom del paràmetre
@@ -313,7 +359,14 @@ PROCEDIMENT_2 ::= metode TIPUS:t ID:i LPAREN ARGS:a RPAREN{:System.out.println("
 
                                 taula_simbols.posarparam(nom,id,new Darg(tipus,id));
                                 nom += "_"+tipus;
+                                par++;
                         }
+
+                        Integer etiqueta = etiquetes++;
+                        taula_intermedi.genera(Operacio.skip,null,null,etiqueta);
+                        taula_intermedi.genera(Operacio.pmb,null,null,procediment.np());
+                        Integer nivell = taula_simbols.getN();
+
                         taula_simbols.entra_bloc();
 
                         Dada2 dada = taula_simbols.primer_parametre(nom);
@@ -326,21 +379,38 @@ PROCEDIMENT_2 ::= metode TIPUS:t ID:i LPAREN ARGS:a RPAREN{:System.out.println("
                             dada = dada.next();
                         }
                         
-                        pila_procediments.push(nom);
-                        RESULT = new SimbolProcediment2(t.getTipus());
+                        pila_procediments.push(procediment.np());
+                        RESULT = new SimbolProcediment2(t.getTipus(),nivell,etiqueta,par,procediment.np());
 :}; 
 
-PROCEDIMENT ::= PROCEDIMENT_1 LCLAUDAT SENTENCIES RCLAUDAT {:System.out.println("PROC");
+PROCEDIMENT ::= PROCEDIMENT_1:p LCLAUDAT SENTENCIES RCLAUDAT {:System.out.println("PROC");
+
+                    Integer n = p.getNivell();
+                    Integer parametres = p.getParametres();
+                    Integer etiqueta = p.getEtiqueta();
+                    Integer np = p.getNp();
+
+                    taula_intermedi.genera(Operacio.retorn,null,null,np);
+
+                    nouproc(n,parametres,etiqueta,np);
                     taula_simbols.surtbloc();
                     pila_procediments.pop();
                 :}
-                | PROCEDIMENT_2:t LCLAUDAT SENTENCIES RETURN:r RCLAUDAT {:System.out.println("PROC");
-                    Dtipus ti = (Dtipus) taula_simbols.consulta(t.getTipus());
+                | PROCEDIMENT_2:p LCLAUDAT SENTENCIES RETURN:r RCLAUDAT {:System.out.println("PROC");
+                    Dtipus ti = (Dtipus) taula_simbols.consulta(p.getTipus());
                     if(ti.dt().tipus_subjacent()!=r.getExpresio().getTsb()){
                         report_error_semantic("El tipus de retorn es diferent del procediment", r.getEsquerre(),r.getDreta());
                         errorSemantic = true;
                     }
 
+                    Integer n = p.getNivell();
+                    Integer parametres = p.getParametres();
+                    Integer etiqueta = p.getEtiqueta();
+                    Integer np = p.getNp();
+
+
+                    taula_intermedi.genera(Operacio.retorn,r.getExpresio().getR(),null,np);
+                    nouproc(n,parametres,etiqueta,np);
                     taula_simbols.surtbloc();
                     pila_procediments.pop();
                 :}
@@ -379,10 +449,12 @@ MAIN ::= metode main LPAREN cadena ID M2 LCORCH RCORCH RPAREN LCLAUDAT SENTENCIE
         ;
 
 M2 ::= {:System.out.println("M2");
-    taula_simbols.entra_bloc();:};
+    taula_simbols.entra_bloc();
+    taula_intermedi.genera(Operacio.skip,null,null,-1);:};
 
 M3 ::= {:System.out.println("M3");
-    taula_simbols.surtbloc();:};
+    taula_simbols.surtbloc();
+    taula_intermedi.genera(Operacio.retorn,null,null,-1);:};
 
 TIPUS ::= decimal {:System.out.println("TIPUS -> decimal");
                 RESULT = new SimbolTipus("decimal");
@@ -422,66 +494,139 @@ ARG ::= TIPUS:t ID:d {:System.out.println("ARG -> TIPUS ID");
     RESULT = new SimbolArg((String)d.valor,t.getTipus());
     :};
 
-MENTRE ::= mentres LPAREN E:e RPAREN fer LCLAUDAT SENTENCIES RCLAUDAT {:System.out.println("MENTRE");
+MENTRE ::= mentres M4 CONDICIO:c fer RESTA:r {:System.out.println("MENTRE");
             if(!errorSemantic){
-                if(e.getTsb()!="ts_boolea"){
-                    report_error_semantic("La expresió ha de ser de tipus booleà", e.getEsquerre(),e.getDreta());
-                    errorSemantic = true;
-                }
+                Integer nostra = etiquetes++;
+                Integer fin = etiquetes++;
+                taula_intermedi.afegeix_Llista(c.getLlista());
+                Integer n = novavar(true);
+                taula_intermedi.genera(Operacio.copia_valor,0,null,n);
+                taula_intermedi.genera(Operacio.salt_condicional_igual,n,c.getR(),fin);
+                taula_intermedi.afegeix_Llista(r.getLlista());
+                taula_intermedi.genera(Operacio.salt_incondicional,null,null,nostra);
+                taula_intermedi.genera(Operacio.skip,null,null,fin);
+                taula_intermedi.canvia_etiqueta(nostra,pila_pendents.pop());
             }
             :} ;
 
-IF ::=  si LPAREN E:e ET:t1 RPAREN LCLAUDAT SENTENCIES RCLAUDAT IF_1 {:System.out.println("IF");
+M4 ::= {:System.out.println("M4");
+        taula_intermedi.genera(Operacio.skip,null,null,-1);
+        pila_pendents.push(taula_intermedi.size()-1);:};
+
+IF ::=  si CONDICIO:c RESTA:r IF_1:i {:System.out.println("IF");
                 if(!errorSemantic){
-                    if(e.getTsb()!="ts_boolea"){
-                        report_error_semantic("La expresió ha de ser de tipus booleà", e.getEsquerre(),e.getDreta());
-                        errorSemantic = true;
+                        if(i!=null){
+                            Integer et = i.getEtiqueta(); //etiqueta final
+                            Integer nostra = etiquetes++;
+                            ArrayList<Sentencia> llista1 = c.getLlista();
+                            ArrayList<Sentencia> llista2 = r.getLlista();
+                            ArrayList<Sentencia> llista3 = new ArrayList<>();
+                            llista3.addAll(taula_intermedi.get_Llista());
+                            taula_intermedi.clear();
+
+                            taula_intermedi.set_Llista(llista1);
+                            Integer n = novavar(true,1);
+                            taula_intermedi.genera(Operacio.copia_valor,0,null,n);
+                            taula_intermedi.genera(Operacio.salt_condicional_igual,n,c.getR(),nostra);
+                            taula_intermedi.afegeix_Llista(llista2);
+                            taula_intermedi.genera(Operacio.salt_incondicional,null,null,et);
+                            taula_intermedi.genera(Operacio.skip,null,null,nostra);
+
+                            taula_intermedi.afegeix_Llista(llista3);   
+                        }else{
+                            Integer nostra = etiquetes++;
+
+                            ArrayList<Sentencia> llista1 = c.getLlista();
+                            ArrayList<Sentencia> llista2 = r.getLlista();
+                            taula_intermedi.clear();
+
+                            taula_intermedi.set_Llista(llista1);
+                            Integer n = novavar(true,1);
+                            taula_intermedi.genera(Operacio.copia_valor,0,null,n);
+                            taula_intermedi.genera(Operacio.salt_condicional_igual,n,c.getR(),nostra);
+                            taula_intermedi.afegeix_Llista(llista2);
+                            taula_intermedi.genera(Operacio.skip,null,null,nostra);
+                        }
                     }
-                }
             :};
-IF_1 ::= sino si LPAREN E:e ET:t RPAREN LCLAUDAT SENTENCIES RCLAUDAT IF_1 {:System.out.println("IF_1");
+
+CONDICIO ::= LPAREN E:e RPAREN {:
+        System.out.println("CONDICIO");
+        if(e.getTsb()!="ts_boolea"){
+            report_error_semantic("La expresió ha de ser de tipus booleà", e.getEsquerre(),e.getDreta());
+            errorSemantic = true;
+        }else{ 
+            RESULT = new SimbolCondicio(taula_intermedi.get_Llista(),e.getR());
+            taula_intermedi.clear();
+        }
+    :};
+
+RESTA ::= LCLAUDAT SENTENCIES RCLAUDAT {:
+    System.out.println("RESTA");
+    RESULT = new SimbolResta(taula_intermedi.get_Llista());
+    taula_intermedi.clear();
+    :};
+            
+IF_1 ::= sino si CONDICIO:c  RESTA:r IF_1:i {:System.out.println("IF_1");
                 if(!errorSemantic){
-                    if(e.getTsb()!="ts_boolea"){
-                        report_error_semantic("La expresió ha de ser de tipus booleà", e.getEsquerre(),e.getDreta());
-                        errorSemantic = true;
-                    }
+                        if(i!=null){
+                            Integer et = i.getEtiqueta(); //etiqueta final
+                            Integer nostra = etiquetes++;
+                            
+                            ArrayList<Sentencia> llista1 = r.getLlista();
+                            ArrayList<Sentencia> llista2 = c.getLlista();
+                            ArrayList<Sentencia> llista3 = new ArrayList<>();
+                            llista3.addAll(taula_intermedi.get_Llista());
+                            taula_intermedi.clear();
+
+                            taula_intermedi.afegeix_Llista(llista2);
+                            Integer n = novavar(true,1);
+                            taula_intermedi.genera(Operacio.copia_valor,0,null,n);
+
+                            taula_intermedi.genera(Operacio.salt_condicional_igual,n,c.getR(),nostra);
+                            taula_intermedi.afegeix_Llista(llista1);
+                            taula_intermedi.genera(Operacio.salt_incondicional,null,null,et);
+                            taula_intermedi.genera(Operacio.skip,null,null,nostra);
+                            taula_intermedi.afegeix_Llista(llista3);
+                            RESULT = new SimbolIf1(et);  
+                        }else{
+                            Integer nostra = etiquetes++;
+                            ArrayList<Sentencia> llista1 = r.getLlista();
+                            ArrayList<Sentencia> llista2 = c.getLlista();
+                            taula_intermedi.clear();
+
+                            taula_intermedi.afegeix_Llista(llista2);
+                            Integer n = novavar(true,1);
+                            taula_intermedi.genera(Operacio.copia_valor,0,null,n);
+
+                            taula_intermedi.genera(Operacio.salt_condicional_igual,n,c.getR(),nostra);
+                            taula_intermedi.afegeix_Llista(llista1);
+                            taula_intermedi.genera(Operacio.skip,null,null,nostra);
+                            RESULT = new SimbolIf1(nostra);
+                        }
                 }
             :}
-            | sino ET:t LCLAUDAT SENTENCIES RCLAUDAT {:System.out.println("IF_1");:}
+            | sino LCLAUDAT SENTENCIES RCLAUDAT {:System.out.println("sino");
+                taula_intermedi.genera(Operacio.skip,null,null,etiquetes);
+                RESULT = new SimbolIf1(etiquetes++);
+            :}
 
-            | {:System.out.println("@");:}
+            | {:System.out.println("@");
+                RESULT = new SimbolIf1();
+                :}
             ;
 
-ET ::= {:System.out.println("ET");
-        RESULT = new SimbolEtiqueta(taula_intermedi.get_Llista());
-        taula_intermedi.clear();
+FMENTRE ::= fer M4 RESTA:r mentres CONDICIO:c PUNTICOMA {:System.out.println("FMENTRE");
+            if(!errorSemantic){
+                Integer nostra = etiquetes++;
+                taula_intermedi.afegeix_Llista(r.getLlista());
+                taula_intermedi.afegeix_Llista(c.getLlista());
+                Integer n = novavar(true,1);
+                taula_intermedi.genera(Operacio.copia_valor,-1,null,n);
+                taula_intermedi.genera(Operacio.salt_condicional_igual,n,c.getR(),nostra);
+                taula_intermedi.canvia_etiqueta(nostra,pila_pendents.pop());
+            }
         :};
-
-FOR ::= per LPAREN INICI PUNTICOMA FOR_1 PUNTICOMA FOR_2 RPAREN LCLAUDAT SENTENCIES RCLAUDAT {:System.out.println("FOR");:}
-    | per LPAREN PUNTICOMA FOR_1 PUNTICOMA FOR_2 RPAREN LCLAUDAT SENTENCIES RCLAUDAT {:System.out.println("FOR");:}
-    ;
-
-FOR_1 ::= E:e {:System.out.println("FOR_1 -> E");
-    if(!errorSemantic){
-                    if(e.getTsb()!="ts_boolea"){
-                        report_error_semantic("La expresió ha de ser de tipus booleà", e.getEsquerre(),e.getDreta());
-                        errorSemantic = true;
-                    }
-                }
-    :}
-    | {:System.out.println("FOR_1 -> NULL");:}
-    ;
-
-FOR_2 ::= MODIF_TIPUS M1{:System.out.println("FOR_2 -> E");
-    :}
-    | {:System.out.println("FOR_2 -> NULL");:}
-    ;
-
-INICI ::= DECL COMA INICI {:System.out.println("INICI -> DECL COMA INICI");:}
-        | DECL {:System.out.println("INICI -> DECL");:}
-        |MODIF {:System.out.println("INICI -> MODIF");:}
-        | MODIF COMA INICI {:System.out.println("INICI -> MODIF COMA INICI");:}
-;
 
 ENTRADAS ::= entradaS LPAREN TIPUS:t COMA R:r RPAREN {:System.out.println("ENTRADAS");
             if(!errorSemantic){
@@ -521,8 +666,8 @@ DECL_CONST ::= constant TIPUS:t ID:a ASSIGN E:e  {:System.out.println("DECL_CONS
                         errorSemantic = true;
                     }else{
                         //*****************Intermedi********************
-                        Integer n = novavar(true);
-                        taula_intermedi.genera(Operacio.copia,e.getR(),null,(String)a.valor);
+                        Integer n = novavar(true,taula_variables.get_ocupacio(e.getR()));
+                        taula_intermedi.genera(Operacio.copia,e.getR(),null,n);
                         //****************************************************
                     }
                 }
@@ -546,8 +691,8 @@ DECL_CONST ::= constant TIPUS:t ID:a ASSIGN E:e  {:System.out.println("DECL_CONS
                         errorSemantic = true;
                     }else{
                         //*****************Intermedi********************
-                        Integer n = novavar(true);
-                        taula_intermedi.genera(Operacio.copia,m.getR(),null,(String)a.valor);
+                        Integer n = novavar(true,taula_variables.get_ocupacio(m.getR()));
+                        taula_intermedi.genera(Operacio.copia,m.getR(),null,n);
                         //****************************************************
                     }
                 }
@@ -610,7 +755,7 @@ DECL_TIPUS ::= TIPUS:t ID:a {:System.out.println("DECL_TIPUS -> TIPUS ID ");
                         errorSemantic = true;
                     }else{
                         //****************************Intermedi**********************************
-                        Integer n = novavar(false);
+                        //Integer n = novavar(false);
                         taula_intermedi.genera(Operacio.copia,m.getR(),null,var.getMy_nv());
                         //***********************************************************************
                     }
@@ -642,7 +787,7 @@ MODIF_TIPUS ::= R:r I_1:i {:System.out.println("MODIF_TIPUS -> R I_1");
                             RESULT = new SimbolModifTipus();
                         }else{
                             //******************Intermedi******************
-                            Integer n = novavar(true);
+                            Integer n = novavar(true,4);
                             taula_intermedi.genera(Operacio.copia_valor,1,null,n);
                             taula_intermedi.genera(Operacio.suma,r.getR(),n,r.getR()); //r.getR()++
                             //********************************************
@@ -656,7 +801,7 @@ MODIF_TIPUS ::= R:r I_1:i {:System.out.println("MODIF_TIPUS -> R I_1");
                             RESULT = new SimbolModifTipus();
                         }else{
                             //******************Intermedi******************
-                            Integer n = novavar(true);
+                            Integer n = novavar(true,4);
                             taula_intermedi.genera(Operacio.copia_valor,1,null,n);
                             taula_intermedi.genera(Operacio.resta,r.getR(),n,r.getR()); //r.getR()--
                             //********************************************
@@ -1053,7 +1198,7 @@ E ::= T:t E_1:e {:System.out.println("E -> T E_1");
             }else{
                 e.setTs_heretat("ts_boolea");
                 //*********************Intermedi*********************************
-                    Integer n1 = novavar(true);
+                    Integer n1 = novavar(true,1);
                     switch(e.getOperacio()){
                         case ParserSym.AND:
                             taula_intermedi.genera(Operacio.and,t.getR(),e.getR(),n1);
@@ -1089,7 +1234,7 @@ E_1 ::= AND:op T:t E_1:e {:System.out.println("E_1 -> AND T E_1");
                 }else{ 
                     e.setTs_heretat("ts_boolea");
                     //*********************Intermedi*********************************
-                    Integer n1 = novavar(true);
+                    Integer n1 = novavar(true,1);
                     switch(e.getOperacio()){
                         case ParserSym.AND:
                             taula_intermedi.genera(Operacio.and,t.getR(),e.getR(),n1);
@@ -1124,7 +1269,7 @@ E_1 ::= AND:op T:t E_1:e {:System.out.println("E_1 -> AND T E_1");
                 }else{ 
                     e.setTs_heretat("ts_boolea");
                     //*********************Intermedi*********************************
-                    Integer n1 = novavar(true);
+                    Integer n1 = novavar(true,1);
                     switch(e.getOperacio()){
                         case ParserSym.AND:
                             taula_intermedi.genera(Operacio.and,t.getR(),e.getR(),n1);
@@ -1162,7 +1307,7 @@ T ::= N:n T_1:t {:System.out.println("T -> N T_1");
                 etiquetes++;
                 Integer e2 = etiquetes;
                 etiquetes++;
-                Integer n1 = novavar(true);
+                Integer n1 = novavar(true,1);
 
                 switch(t.getOperacio()){
                     case ParserSym.IGIG:
@@ -1304,7 +1449,7 @@ N ::= M:m N_1:n {:System.out.println("N -> M N_1");
                             RESULT = new SimbolN();
                     }else{
                         //**************Intermedi******************
-                            Integer n1 = novavar(true);
+                            Integer n1 = novavar(true,4);
                             switch(n.getOperacio()){
                                 case ParserSym.ADD:
                                     taula_intermedi.genera(Operacio.suma,m.getR(),n.getR(),n1);
@@ -1349,7 +1494,7 @@ N_1 ::= ADD M:m N_1:n {:System.out.println("N_1 -> ADD M N_1");
                             RESULT = new SimbolNp();
                         }else{
                             //**************Intermedi******************
-                            Integer n1 = novavar(true);
+                            Integer n1 = novavar(true,4);
                             switch(n.getOperacio()){
                                 case ParserSym.ADD:
                                     taula_intermedi.genera(Operacio.suma,m.getR(),n.getR(),n1);
@@ -1393,7 +1538,7 @@ N_1 ::= ADD M:m N_1:n {:System.out.println("N_1 -> ADD M N_1");
                             RESULT = new SimbolNp();
                         }else{
                             //**************Intermedi******************
-                            Integer n1 = novavar(true);
+                            Integer n1 = novavar(true,4);
                             switch(n.getOperacio()){
                                 case ParserSym.ADD:
                                     taula_intermedi.genera(Operacio.producte,m.getR(),n.getR(),n1);
@@ -1639,52 +1784,52 @@ F ::= LPAREN:l E:e RPAREN:r {:System.out.println("F -> LPAREN E RPAREN"); //pend
                     :}
 
     | venter:v {:System.out.println("F -> venter");
-                Integer n = novavar(true);
+                Integer n = novavar(true,4);
                 taula_intermedi.genera(Operacio.copia_valor,(Integer)v.valor,null,n);
                 RESULT = new SimbolF("ts_enter","ent","modeconst",v.esquerre,v.dreta,n);
                 :} 
     | SUB:s venter:v {:System.out.println("F -> SUB venter");
-                Integer n = novavar(true);
+                Integer n = novavar(true,4);
                 taula_intermedi.genera(Operacio.copia_valor,(Integer)v.valor*-1,null,n);
                 RESULT = new SimbolF("ts_enter","ent","modeconst",s.esquerre,v.dreta,n);
                 :}
     | ADD:a venter:v {:System.out.println("F -> ADD venter");
-                Integer n = novavar(true);
+                Integer n = novavar(true,4);
                 taula_intermedi.genera(Operacio.copia_valor,(Integer)v.valor,null,n);
                 RESULT = new SimbolF("ts_enter","ent","modeconst",a.esquerre,v.dreta,n);
                 :}
     | vdecimal:v {:System.out.println("F -> vdecimal");
-                Integer n = novavar(true);
+                Integer n = novavar(true,4);
                 taula_intermedi.genera(Operacio.copia_valor,(Double)v.valor,null,n);
                 RESULT = new SimbolF("ts_decimal","decimal","modeconst",v.esquerre,v.dreta,n);
                 :}
     | ADD:a vdecimal:v {:System.out.println("F -> ADD vdecimal");
-                Integer n = novavar(true);
+                Integer n = novavar(true,4);
                 taula_intermedi.genera(Operacio.copia_valor,(Double)v.valor,null,n);
                 RESULT = new SimbolF("ts_decimal","decimal","modeconst",a.esquerre,a.dreta,n);
                 :}
     | SUB:s vdecimal:v {:System.out.println("F -> SUB vdecimal");
-                Integer n = novavar(true);
+                Integer n = novavar(true,4);
                 taula_intermedi.genera(Operacio.copia_valor,(Double)v.valor*-1,null,n);
                 RESULT = new SimbolF("ts_decimal","decimal","modeconst",s.esquerre,s.dreta,n);
                 :}
     | vcaracter:v {:System.out.println("F -> vcaracter");
-                Integer n = novavar(true);
+                Integer n = novavar(true,2);
                 taula_intermedi.genera(Operacio.copia_valor,(Character)v.valor,null,n);
                 RESULT = new SimbolF("ts_caracter","car","modeconst",v.esquerre,v.dreta,n);
                 :}
     | ADD:a vcaracter:v {:System.out.println("F -> ADD");
-                Integer n = novavar(true);
+                Integer n = novavar(true,2);
                 taula_intermedi.genera(Operacio.copia_valor,(Integer)v.valor,null,n); //revisar si passar a decimal o enter
                 RESULT = new SimbolF("ts_caracter","car","modeconst",a.esquerre,v.dreta,n); //assegurar que a car hi posam ts_caracter
                 :}
     | SUB:s vcaracter:v {:System.out.println("F -> SUB");
-                Integer n = novavar(true);
+                Integer n = novavar(true,2);
                 taula_intermedi.genera(Operacio.copia_valor,(Integer)v.valor*-1,null,n); //revisar si passar a decimal o enter
                 RESULT = new SimbolF("ts_caracter","car","modeconst",s.esquerre,v.dreta,n);
                 :}
     | vcadena:v {:System.out.println("F -> vcadena");
-                Integer n = novavar(true);
+                Integer n = novavar(true,(((String)v.valor).length() * 2));
                 taula_intermedi.genera(Operacio.copia_valor,(String)v.valor,null,n); //revisar si passar a decimal o enter
                 RESULT = new SimbolF("ts_cadena","cad","modeconst",v.esquerre,v.dreta,n);
                 :}
@@ -1796,7 +1941,7 @@ F ::= LPAREN:l E:e RPAREN:r {:System.out.println("F -> LPAREN E RPAREN"); //pend
                 }
                 :}
     | vlogic:v {:System.out.println("F -> vlogic");
-                Integer n = novavar(true);
+                Integer n = novavar(true,1);
                 switch((String)v.valor){
                     case "FALS":
                         taula_intermedi.genera(Operacio.copia_valor,false,null,n); //revisar si passar a decimal o enter
@@ -1829,7 +1974,7 @@ F ::= LPAREN:l E:e RPAREN:r {:System.out.println("F -> LPAREN E RPAREN"); //pend
                 }
                 :}
     | NOT:n vlogic:v {:System.out.println("F -> NOT vlogic");
-                Integer ni = novavar(true);
+                Integer ni = novavar(true,1);
                 switch((String)v.valor){
                     case "FALS":
                         taula_intermedi.genera(Operacio.copia_valor,true,null,ni); //revisar si passar a decimal o enter

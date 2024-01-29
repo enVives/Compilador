@@ -14,9 +14,26 @@ public class TaulaIntermedi {
     public void genera(Integer mnemonic,Object op1, Integer op2,String desti){
         llista.add(new Sentencia(mnemonic, op1, op2, desti));
     }
+    
+    public void canvia_etiqueta(Integer etiqueta,Integer posicio){
+        Sentencia s = llista.get(posicio);
+        llista.set(posicio, new Sentencia(s.getOperacio(), s.getOp1(), s.getOp2(), etiqueta));
+    }
 
     public void clear(){
         llista.clear();
+    }
+
+    public Integer size(){
+        return llista.size();
+    }
+
+    public void afegeix_Llista(ArrayList<Sentencia> llista){
+        this.llista.addAll(llista);
+    }
+
+    public void set_Llista(ArrayList<Sentencia> llista1){
+        this.llista.addAll(llista1);
     }
 
     public ArrayList<Sentencia> get_Llista(){

@@ -1,8 +1,2 @@
-Operacio: 29 Op1: 10 Op2: null Desti: 0
+Operacio: 29 Op1: 4 Op2: null Desti: 0
 Operacio: 0 Op1: 0 Op2: null Desti: 1
-Operacio: 29 Op1: 5 Op2: null Desti: 2
-Operacio: 0 Op1: 2 Op2: null Desti: 3
-Operacio: 29 Op1: true Op2: null Desti: 4
-Operacio: 1 Op1: 3 Op2: 1 Desti: 3
-Operacio: 29 Op1: true Op2: null Desti: 5
-Operacio: 1 Op1: 3 Op2: 1 Desti: 3

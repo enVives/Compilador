@@ -9,7 +9,7 @@ public class TaulaProcediments {
         llista = new ArrayList<>();
     }
 
-    public void afegeix_procediment(Integer n, String etiqueta,Integer ocupacio,Integer parametres){
+    public void afegeix_procediment(Integer n, Integer etiqueta,Integer ocupacio,Integer parametres){
         llista.add(new InfoProcediment(n, etiqueta, ocupacio, parametres));
     }
 
@@ -25,8 +25,8 @@ public class TaulaProcediments {
         }
 
 
-        private String etiqueta;
-        public String getEtiqueta() {
+        private Integer etiqueta;
+        public Integer getEtiqueta() {
             return etiqueta;
         }
 
@@ -45,7 +45,7 @@ public class TaulaProcediments {
         }
 
 
-        public InfoProcediment(Integer n, String etiqueta, Integer ocupacio, Integer parametres){
+        public InfoProcediment(Integer n, Integer etiqueta, Integer ocupacio, Integer parametres){
             this.n = n;
             this.etiqueta = etiqueta;
             this.ocupacio = ocupacio;

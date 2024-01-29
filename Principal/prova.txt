@@ -1,11 +1,6 @@
-ent b = 10;
-ent c = 5;
+ent b = 4;
+
 
 metode main (cad arguments []) {
-   si(VER){
-      c += b;
-   }sino si(VER){
-      c+=b;
-   }
 }
     

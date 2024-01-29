@@ -13,6 +13,10 @@ public class Taula {
     // posaindex,first,next,last,consulta.
 
     private int n;
+    public int getN() {
+        return n;
+    }
+
     private ArrayList<Integer> ta; // taulad'ambits
 
     public ArrayList<Integer> getTa() {
