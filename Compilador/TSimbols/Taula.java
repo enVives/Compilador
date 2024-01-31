@@ -226,13 +226,12 @@ public class Taula {
         Dada2 dada = td.get(idpr).first();
         Dada2 idxe = null;
 
-        while ((dada != null) && dada.idcamp() != idparam) {
+        while ((dada != null) && (dada.idcamp().compareTo(idparam) != 0)) {
             idxe = dada;
             dada = dada.next();
         }
 
         if (dada != null) {
-            System.out.println("Error, ja hi ha un argument amb l'identificador '"+idparam+"'");
             return false;
         }
 
@@ -254,8 +253,18 @@ public class Taula {
 
         String nou_nom = idpr + "_" + tipus;
         Dada2 first = td.get(idpr).first();
+        Dproc proc = (Dproc) t; //suposam que no es null
+
+        String type = proc.getTipus();
+        Integer np = proc.np();
         td.remove(idpr);
-        posar(nou_nom, new Dproc());
+        
+        if(type == "id_nula"){
+            posar(nou_nom, new Dproc(true)); //creador que no puja el nombre np
+        }else{
+            posar(nou_nom, new Dproc(true,type)); //creador que no puja el nombre n
+        }
+        
         td.get(nou_nom).set_first(first);
 
         if (idxe == null) {

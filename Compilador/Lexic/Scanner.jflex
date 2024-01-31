@@ -44,7 +44,7 @@ import Compilador.Sintactic.ParserSym;
 ent = [e][n][t]
 decimals = [d][e][c][i][m][a][l]
 caracter = [c][a][r]
-cad = [c][a][d]
+//cad = [c][a][d]
 logic = [b][o][o][l]
 
 id		= [A-Za-z][A-Za-z0-9_]*
@@ -98,7 +98,7 @@ zerodigit = 0
 digit = [A-Za-z0-9]
 
 car = {comes1}{digit}{comes1}
-cadena = {comes2}{digit}*{comes2}
+//cadena = {comes2}{digit}*{comes2}
 
 veritat = [V][E][R]
 mentida = [F][A][L][S]
@@ -246,7 +246,7 @@ endline      = ['\r'|'\n'|"\r\n"]+
 {ent}                     { return symbol(ParserSym.enter);}
 {decimals}                { return symbol(ParserSym.decimal);}       
 {caracter}                { return symbol(ParserSym.caracter);}
-{cad}                     { return symbol(ParserSym.cadena);}
+//{cad}                     { return symbol(ParserSym.cadena);}
 {logic}                   { return symbol(ParserSym.logic);}
 {zerodigit}               { return symbol(ParserSym.venter,new Token(0));}
 
@@ -272,11 +272,10 @@ endline      = ['\r'|'\n'|"\r\n"]+
 {decimal}                 { return symbol(ParserSym.vdecimal,new Token(Double.parseDouble(this.yytext())));}
 {vlogic}                   { return symbol(ParserSym.vlogic,new Token(this.yytext()));}
 
-{cadena}         {return symbol(ParserSym.vcadena,new Token(tractar(this.yytext())));} //return symbol(ParserSym.vcadena,this.yytext());
+//{cadena}         {return symbol(ParserSym.vcadena,new Token(tractar(this.yytext())));} //return symbol(ParserSym.vcadena,this.yytext());
 {car}         {return symbol(ParserSym.vcaracter,new Token(tractar(this.yytext())));} //return symbol(ParserSym.vcaracter,this.yytext());
 
-//{cadena}    {System.out.println(tractar(this.yytext()));}
-//{car}     {System.out.println("Caracter " +tractar(this.yytext()));}
+
 
 
 {entradaS}    {return symbol(ParserSym.entradaS);}

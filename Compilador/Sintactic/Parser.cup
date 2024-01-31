@@ -97,7 +97,9 @@ parser code {:
         while(it.hasNext()){
             Entrada ent = (Entrada) it.next();
             if(ent.getSubprograma() == np){
-                ocupacio += ent.ocupacio();
+                if(ent.ocupacio()!=null){
+                  ocupacio += ent.ocupacio();  
+                } 
             }
         }
 
@@ -194,7 +196,6 @@ terminal Token ID; //String
 terminal Token vdecimal; //double
 terminal Token venter; //int
 terminal Token vlogic; //boolean
-terminal Token vcadena; //string
 terminal Token vcaracter; //char
 
 terminal  Token  ADD,SUB,MULT,DIV,MOD;
@@ -205,7 +206,7 @@ terminal DOSPUNTS,PUNTICOMA,INTERROG,LCORCH
 
 terminal Token DIF, IGIG, MENORI, MAJORI, MENOR, MAJOR, OR, AND , NOT;
 
-terminal decimal,enter,logic,cadena,caracter,tupla,si,sino,seleccio,cas,pdefecte,acaba
+terminal decimal,enter,logic,caracter,tupla,si,sino,seleccio,cas,pdefecte,acaba
     ,mentres,fer,per,metode,retorna,nou,constant,entradaS,sortidaS,main,borra,afegeix;
 
 non terminal PROGRAMA,DECL,PROCEDIMENT,MAIN,DECL_TAULA,MODIF,
@@ -232,6 +233,7 @@ non terminal M1;
 non terminal IF;
 non terminal M2;
 non terminal M3;
+non terminal SimbolValors VALS;
 non terminal M4;
 non terminal SimbolIf1 IF_1;
 non terminal SimbolCondicio CONDICIO;
@@ -266,11 +268,11 @@ PROGRAMA ::= DECL PUNTICOMA PROGRAMA {:System.out.println("PROGRAMA -> DECL PROG
             ;
 
 M0 ::= {:System.out.println("Inicialització");
-        taula_simbols.posar("ent", new Dtipus(new Escalar("ts_enter", Integer.MIN_VALUE, Integer.MAX_VALUE)));
-        taula_simbols.posar("decimal", new Dtipus(new Escalar("ts_decimal", (int)Double.MIN_VALUE, (int)Double.MAX_VALUE)));
-        taula_simbols.posar("cad", new Dtipus(new DefinicioTipus("ts_cadena")));
-        taula_simbols.posar("bool", new Dtipus(new Escalar("ts_boolea", -1, 0)));
-        taula_simbols.posar("car", new Dtipus(new Escalar("ts_enter", 0, 255)));
+        taula_simbols.posar("ent", new Dtipus(new Escalar("ts_enter", Integer.MIN_VALUE, Integer.MAX_VALUE,4)));
+        taula_simbols.posar("decimal", new Dtipus(new Escalar("ts_decimal", (int)Double.MIN_VALUE, (int)Double.MAX_VALUE,4)));
+        //taula_simbols.posar("cad", new Dtipus(new DefinicioTipus("ts_cadena")));
+        taula_simbols.posar("bool", new Dtipus(new Escalar("ts_boolea", -1, 0,1)));
+        taula_simbols.posar("car", new Dtipus(new Escalar("ts_enter", 0, 255,2)));
         taula_simbols.posar("tupla", new Dtipus(new Tupla()));
         taula_simbols.posar("VER", new Dconst(-1,"boolea"));
         taula_simbols.posar("FALS", new Dconst(0,"boolea"));
@@ -306,113 +308,152 @@ SENT ::= DECL PUNTICOMA {:System.out.println("SENT -> DECL");:}
             ;
 
 PROCEDIMENT_1 ::= metode ID:i LPAREN ARGS:a RPAREN {:System.out.println("PROCEDIMENT_1");
-                    String nom = (String) i.valor;
-                    Stack<KeyValor> llista = a.getLlista();
 
-                    Dproc procediment = new Dproc();
-                    taula_simbols.posar(nom, procediment);
-                    Integer par = 0;
-                    
-                    while(!llista.isEmpty()){
-                            KeyValor k = llista.pop();
-                            String id = k.key; //nom del paràmetre
-                            String tipus = k.tipus; //valor o variable a afegir
-
-                            taula_simbols.posarparam(nom,id,new Darg(tipus,id));
-                            nom += "_"+tipus;
-                            par++;
-                    }
-
-                    Integer etiqueta = etiquetes++;
-                    taula_intermedi.genera(Operacio.skip,null,null,etiqueta);
-                    taula_intermedi.genera(Operacio.pmb,null,null,procediment.np());
-
-                    RESULT = new SimbolProcediment2(taula_simbols.getN(),etiqueta,par,procediment.np());
-
-                    taula_simbols.entra_bloc();
-
-            Dada2 dada = taula_simbols.primer_parametre(nom);
-            while(dada!=null){
-                String idparam = dada.idcamp();
-                Darg d = (Darg) dada.td();
-
-                Dargin arg = new Dargin((new Dvar()).getMy_nv(), d.td());
-                taula_simbols.posar(idparam, arg);
-                dada = dada.next();
-            }
-
-            pila_procediments.push(procediment.np());
-:};
-
-PROCEDIMENT_2 ::= metode TIPUS:t ID:i LPAREN ARGS:a RPAREN{:System.out.println("PROCEDIMENT_2");
+                    if(!errorSemantic){
                         String nom = (String) i.valor;
                         Stack<KeyValor> llista = a.getLlista();
 
                         Dproc procediment = new Dproc();
-                        taula_simbols.posar(nom, procediment);
-                        Integer par = 0;
+                        Boolean bol = taula_simbols.posar(nom, procediment);
 
-                        while(!llista.isEmpty()){
-                                KeyValor k = llista.pop();
-                                String id = k.key; //nom del paràmetre
-                                String tipus = k.tipus; //valor o variable a afegir
+                        if(bol == false){
+                            report_error_semantic("No es pot crear el procediment amb nom "+(String)i.valor+" ja hi un altre component amb aquest nom", i.esquerre,i.dreta);
+                            errorSemantic = true;
+                        }else{
+                            Integer par = 0;
 
-                                taula_simbols.posarparam(nom,id,new Darg(tipus,id));
-                                nom += "_"+tipus;
-                                par++;
+                            Integer etiqueta = etiquetes++;
+                            taula_intermedi.genera(Operacio.skip,null,null,etiqueta);
+                            
+                            while(!llista.isEmpty()){
+                                    KeyValor k = llista.pop();
+                                    String id = k.key; //nom del paràmetre
+                                    String tipus = k.tipus; //valor o variable a afegir
+
+                                    Darg g = new Darg(tipus,id);
+                                    bol = taula_simbols.posarparam(nom,id,g);
+                                    if(bol == false){
+                                        report_error_semantic("Ja hi ha un argument amb el nom "+id+" al subprograma "+(String) i.valor, i.esquerre,i.dreta);
+                                        errorSemantic = true;
+                                        break;
+                                    }
+                                    nom += "_"+tipus;
+                                    par++;
+                            }
+
+                            RESULT = new SimbolProcediment2(taula_simbols.getN(),etiqueta,par,procediment.np());
+
+                            taula_simbols.entra_bloc();
+
+                            Dada2 dada = taula_simbols.primer_parametre(nom);
+                            while(dada!=null){
+                                String idparam = dada.idcamp();
+                                Darg d = (Darg) dada.td();
+
+                                Dvar var = new Dvar();
+                                Integer n = novavar(false);
+
+                                Dargin arg = new Dargin(var.getMy_nv(), d.tipus());
+                                taula_intermedi.genera(Operacio.pmb,null,null,var.getMy_nv());
+                                taula_simbols.posar(idparam, arg);
+                                dada = dada.next();
+                            }
+
+                            pila_procediments.push(procediment.np());
                         }
+                    }   
+:};
 
-                        Integer etiqueta = etiquetes++;
-                        taula_intermedi.genera(Operacio.skip,null,null,etiqueta);
-                        taula_intermedi.genera(Operacio.pmb,null,null,procediment.np());
-                        Integer nivell = taula_simbols.getN();
+PROCEDIMENT_2 ::= metode TIPUS:t ID:i LPAREN ARGS:a RPAREN{:System.out.println("PROCEDIMENT_2");
+                        if(!errorSemantic){
+                            String nom = (String) i.valor;
+                            Stack<KeyValor> llista = a.getLlista();
 
-                        taula_simbols.entra_bloc();
+                            Dproc procediment = new Dproc(t.getTipus());
+                            Boolean bol = taula_simbols.posar(nom, procediment);
 
-                        Dada2 dada = taula_simbols.primer_parametre(nom);
-                        while(dada!=null){
-                            String idparam = dada.idcamp();
-                            Darg d = (Darg) dada.td();
+                            if(bol == false){
+                                report_error_semantic("No es pot crear el procediment amb nom "+(String)i.valor+" ja hi un altre component amb aquest nom", i.esquerre,i.dreta);
+                                errorSemantic = true;
+                            }else{
+                                Integer par = 0;
 
-                            Dargin arg = new Dargin((new Dvar()).getMy_nv(), d.td());
-                            taula_simbols.posar(idparam, arg);
-                            dada = dada.next();
+                                Integer etiqueta = etiquetes++;
+                                taula_intermedi.genera(Operacio.skip,null,null,etiqueta);
+
+                                while(!llista.isEmpty()){
+                                        KeyValor k = llista.pop();
+                                        String id = k.key; //nom del paràmetre
+                                        String tipus = k.tipus; //valor o variable a afegir
+
+                                        Darg g = new Darg(tipus,id);
+                                        bol = taula_simbols.posarparam(nom,id,g);
+                                        if(false){
+                                            report_error_semantic("Ja hi ha un argument amb el nom "+id+" al subprograma "+(String) i.valor, i.esquerre,i.dreta);
+                                            errorSemantic = true;
+                                            break;
+                                        }
+                                        nom += "_"+tipus;
+                                        par++;
+                                }
+
+                                Integer nivell = taula_simbols.getN();
+
+                                taula_simbols.entra_bloc();
+
+                                Dada2 dada = taula_simbols.primer_parametre(nom);
+                                while(dada!=null){
+                                    String idparam = dada.idcamp();
+                                    Darg d = (Darg) dada.td();
+
+                                    Dvar var = new Dvar();
+                                    Integer n = novavar(false);
+                                    Dargin arg = new Dargin(var.getMy_nv(), d.tipus());
+                                    taula_intermedi.genera(Operacio.pmb,null,null,var.getMy_nv());
+                                    taula_simbols.posar(idparam, arg);
+                                    dada = dada.next();
+                                }
+                                
+                                pila_procediments.push(procediment.np());
+                                RESULT = new SimbolProcediment2(t.getTipus(),nivell,etiqueta,par,procediment.np());    
+                            }   
                         }
-                        
-                        pila_procediments.push(procediment.np());
-                        RESULT = new SimbolProcediment2(t.getTipus(),nivell,etiqueta,par,procediment.np());
+                                        
 :}; 
 
 PROCEDIMENT ::= PROCEDIMENT_1:p LCLAUDAT SENTENCIES RCLAUDAT {:System.out.println("PROC");
+                    if(!errorSemantic){
+                        Integer n = p.getNivell();
+                        Integer parametres = p.getParametres();
+                        Integer etiqueta = p.getEtiqueta();
+                        Integer np = p.getNp();
 
-                    Integer n = p.getNivell();
-                    Integer parametres = p.getParametres();
-                    Integer etiqueta = p.getEtiqueta();
-                    Integer np = p.getNp();
+                        taula_intermedi.genera(Operacio.retorn,null,null,np);
 
-                    taula_intermedi.genera(Operacio.retorn,null,null,np);
-
-                    nouproc(n,parametres,etiqueta,np);
-                    taula_simbols.surtbloc();
-                    pila_procediments.pop();
+                        nouproc(n,parametres,etiqueta,np);
+                        taula_simbols.surtbloc();
+                        pila_procediments.pop();  
+                    }
                 :}
                 | PROCEDIMENT_2:p LCLAUDAT SENTENCIES RETURN:r RCLAUDAT {:System.out.println("PROC");
-                    Dtipus ti = (Dtipus) taula_simbols.consulta(p.getTipus());
-                    if(ti.dt().tipus_subjacent()!=r.getExpresio().getTsb()){
-                        report_error_semantic("El tipus de retorn es diferent del procediment", r.getEsquerre(),r.getDreta());
-                        errorSemantic = true;
+                    if(!errorSemantic){
+                        Dtipus ti = (Dtipus) taula_simbols.consulta(p.getTipus());
+                        if(ti.dt().tipus_subjacent()!=r.getExpresio().getTsb()){
+                            report_error_semantic("El tipus de retorn es diferent del procediment", r.getEsquerre(),r.getDreta());
+                            errorSemantic = true;
+                        }
+
+                        Integer n = p.getNivell();
+                        Integer parametres = p.getParametres();
+                        Integer etiqueta = p.getEtiqueta();
+                        Integer np = p.getNp();
+
+
+                        taula_intermedi.genera(Operacio.retorn,r.getExpresio().getR(),null,np);
+                        nouproc(n,parametres,etiqueta,np);
+                        taula_simbols.surtbloc();
+                        pila_procediments.pop();  
                     }
-
-                    Integer n = p.getNivell();
-                    Integer parametres = p.getParametres();
-                    Integer etiqueta = p.getEtiqueta();
-                    Integer np = p.getNp();
-
-
-                    taula_intermedi.genera(Operacio.retorn,r.getExpresio().getR(),null,np);
-                    nouproc(n,parametres,etiqueta,np);
-                    taula_simbols.surtbloc();
-                    pila_procediments.pop();
                 :}
                 ;
 RETURN ::= retorna E:e PUNTICOMA {:System.out.println("RETURN -> retorna E");
@@ -429,23 +470,9 @@ CRIDA_PROC ::= R:r {:System.out.println("CRIDA_PROC");
                 }        
             }
             
-            :}
-            |
-            ID:i LPAREN RPAREN {:System.out.println("CRIDA_PROC -> ID LPAREN RPAREN");
-               Descripcio d = taula_simbols.consulta((String)i.valor);
-               if(d!=null){
-                    if(!(d instanceof Dproc)){
-                        report_error_semantic("L'identificador "+(String)i.valor+" no es un procediment", i.esquerre,i.dreta);
-                        errorSemantic = true;
-                }
-               }else{
-                    report_error_semantic("L'identificador "+(String)i.valor+" li falten parametres o no existeix", i.esquerre,i.dreta);
-                    errorSemantic = true;
-               }
-               
             :};
 
-MAIN ::= metode main LPAREN cadena ID M2 LCORCH RCORCH RPAREN LCLAUDAT SENTENCIES RCLAUDAT M3 {:System.out.println("MAIN");:}
+MAIN ::= metode main LPAREN M2 RPAREN LCLAUDAT SENTENCIES RCLAUDAT M3 {:System.out.println("MAIN");:}
         ;
 
 M2 ::= {:System.out.println("M2");
@@ -464,9 +491,6 @@ TIPUS ::= decimal {:System.out.println("TIPUS -> decimal");
             :}
             |logic {:System.out.println("TIPUS -> logic");
                 RESULT = new SimbolTipus("bool");
-                :}
-            |cadena{:System.out.println("TIPUS -> cadena");
-                RESULT = new SimbolTipus("cad");
                 :}
             |caracter {:System.out.println("TIPUS -> caracter");
                 RESULT = new SimbolTipus("car");
@@ -499,7 +523,7 @@ MENTRE ::= mentres M4 CONDICIO:c fer RESTA:r {:System.out.println("MENTRE");
                 Integer nostra = etiquetes++;
                 Integer fin = etiquetes++;
                 taula_intermedi.afegeix_Llista(c.getLlista());
-                Integer n = novavar(true);
+                Integer n = novavar(true,1);
                 taula_intermedi.genera(Operacio.copia_valor,0,null,n);
                 taula_intermedi.genera(Operacio.salt_condicional_igual,n,c.getR(),fin);
                 taula_intermedi.afegeix_Llista(r.getLlista());
@@ -703,7 +727,8 @@ DECL_CONST ::= constant TIPUS:t ID:a ASSIGN E:e  {:System.out.println("DECL_CONS
 
 DECL_TIPUS ::= TIPUS:t ID:a {:System.out.println("DECL_TIPUS -> TIPUS ID ");
             String tipus = t.getTipus(); //tipus que afegirem als identificadors
-            Boolean bol = taula_simbols.posar((String) a.valor,new Dvar(tipus));
+            Dvar d = new Dvar(tipus);
+            Boolean bol = taula_simbols.posar((String) a.valor,d);
             if(!bol){
                 report_error_semantic("ja hi ha un identificador amb el nom: '"+(String)a.valor+"' dins el mateix àmbit", a.esquerre,a.dreta);
                 errorSemantic = true;
@@ -891,7 +916,7 @@ R ::= ID:d {:System.out.println("R -> ID ");
             report_error_semantic("Undefined id \""+d.valor+"\"", d.esquerre,d.dreta);
             errorSemantic = true;
             RESULT  = new SimbolR();
-        }else{ //ja es troba a la taula de simbols.
+        }else{ //no hem considerat els DargIns
             if(descripcio instanceof Dvar){ //variable
                 Dvar var = (Dvar) descripcio;
                 Dtipus tipus = (Dtipus) taula_simbols.consulta(var.tipus()); //ALERTA EN NO TROBAR
@@ -912,6 +937,11 @@ R ::= ID:d {:System.out.println("R -> ID ");
                 //el tipus pot ser tupla També
                 //això es per quan ens interessa ficar una tupla dins una tupla o un subprograma
                 //id(a) on 'a' és una tupla.
+            }else if(descripcio instanceof Dargin){
+                Dargin var = (Dargin) descripcio;
+                Dtipus tipus = (Dtipus) taula_simbols.consulta(var.tipus()); //ALERTA EN NO TROBAR
+                RESULT = new SimbolR((String)d.valor,(String)d.valor,tipus.dt().tipus_subjacent(),var.tipus(),"var",var.nv(),0,var.tipus(),d.esquerre,d.dreta);
+
             }else{ //si no es tracta ni d'una variable, ni d'una constant, error
                 report_error_semantic("ID es un procediment \""+d.valor+"\"", d.esquerre,d.dreta);
                 errorSemantic = true;
@@ -926,8 +956,7 @@ R ::= ID:d {:System.out.println("R -> ID ");
         //2: comprovar si el subprograma te un tipus subjacent
         //si en té l'afegim a R amb la resta de informació
 
-        ArrayList<SimbolE> llista = v.getLlista(); //llista amb els paràmetres
-        if(llista.isEmpty()){ //crida a un subprograma fora paràmetres
+        if(v == null){ //crida a un subprograma fora paràmetres
            Descripcio descripcio = taula_simbols.consulta((String)id.valor);
            if(descripcio == null){
             report_error_semantic("Undefined id \""+id.valor+"\"", id.esquerre,id.dreta);
@@ -938,12 +967,19 @@ R ::= ID:d {:System.out.println("R -> ID ");
                     Dproc proc = (Dproc) descripcio;
                     String tipus = proc.getTipus(); //miram si el procediment té algun tipus de retorn
                     if(tipus == "id_nula"){
-                      RESULT = new SimbolR((String)id.valor,"ts_nul","id_nula","procc",id.esquerre,id.dreta);  
+                      RESULT = new SimbolR((String)id.valor,"ts_nul","id_nula","procc",id.esquerre,id.dreta);
+                      taula_intermedi.genera(Operacio.crida,null,null,proc.np());  
                     }else{
                         Descripcio t = taula_simbols.consulta(proc.getTipus());
                         if(t instanceof Dtipus){ //no fa falta crec
                             Dtipus t1 = (Dtipus) t;
-                            RESULT = new SimbolR((String)id.valor,t1.dt().tipus_subjacent(),tipus,"procc",id.esquerre,id.dreta); 
+
+                            //**********************Intermedi*************************
+                            Integer nova = novavar(true);
+                            taula_intermedi.genera(Operacio.crida,nova,null,proc.np());
+                            //******************************************************** 
+
+                            RESULT = new SimbolR((String)id.valor,t1.dt().tipus_subjacent(),tipus,"procc",nova,0,tipus,id.esquerre,id.dreta);
                         }else{
                             report_error_semantic("El tipus del subprograma \""+id.valor+"\" es erroni", id.esquerre,id.dreta);
                             errorSemantic = true;
@@ -958,6 +994,7 @@ R ::= ID:d {:System.out.println("R -> ID ");
                 }
             } 
         }else{
+            ArrayList<SimbolE> llista = v.getLlista(); //llista amb els paràmetres
             Iterator <SimbolE> it = llista.iterator();
             String nom = (String)id.valor;
             while(it.hasNext()){
@@ -987,6 +1024,7 @@ R ::= ID:d {:System.out.println("R -> ID ");
                                 nom+= "_"+"tupla";
                                 break;
                     }
+                    taula_intermedi.genera(Operacio.param_simple,null,null,e.getR());
                 }
             }
             Descripcio descripcio = taula_simbols.consulta(nom);
@@ -999,9 +1037,15 @@ R ::= ID:d {:System.out.println("R -> ID ");
                     Dproc proc = (Dproc) descripcio;
                     if(proc.getTipus() == "id_nula"){
                         RESULT = new SimbolR(nom,"ts_nul","id_nula","procc",id.esquerre,r.dreta);
+                        taula_intermedi.genera(Operacio.crida,null,null,proc.np());
                     }else{
                       Dtipus tipus = (Dtipus) taula_simbols.consulta(proc.getTipus()); //alerta
-                      RESULT = new SimbolR(nom,tipus.dt().tipus_subjacent(),proc.getTipus(),"procc",id.esquerre,r.dreta); 
+                        //**********************Intermedi*************************
+                            Integer nova = novavar(true);
+                            taula_intermedi.genera(Operacio.crida,nova,null,proc.np());
+                        //******************************************************** 
+                        
+                        RESULT = new SimbolR(nom,tipus.dt().tipus_subjacent(),proc.getTipus(),"procc",nova,0,proc.getTipus(),id.esquerre,r.dreta);
                     }
                 }else{ //per si acàs
                     report_error_semantic("Id no és un subprograma", id.esquerre,r.dreta);
@@ -1072,7 +1116,12 @@ I_1 ::= AUTOSUM:a {:System.out.println("I_1 -> AUTOSUM");
 
 //REVISAR que ens pot arribar per E
 
-VALORS ::= E:e {:System.out.println("VALORS -> E");
+VALORS ::= VALS:v {:System.out.println("VALORS -> VALS");
+        RESULT = v;:}
+        |   {:System.out.println("VALORS -> @");
+            RESULT = new SimbolValors();:};
+
+VALS ::= E:e {:System.out.println("VALORS -> E");
         if(errorSemantic){ //error a E
             RESULT = new SimbolValors();
         }else{
@@ -1081,7 +1130,7 @@ VALORS ::= E:e {:System.out.println("VALORS -> E");
             RESULT = v;
         }
         :}
-        | E:e COMA VALORS:v {:System.out.println("VALORS -> E  COMA VALORS");
+        | E:e COMA VALS:v {:System.out.println("VALORS -> E  COMA VALORS");
             if(errorSemantic){
                 RESULT = new SimbolValors();
             }else{
@@ -1155,16 +1204,16 @@ DECL_TUPLA ::= tupla ID:i LPAREN RPAREN ASSIGN LPAREN:r VALS_TUPLA:v RPAREN {:Sy
 
                             if(simbol.getTsb()=="ts_record"){
 
-                                taula_intermedi.genera(Operacio.param_simple,1,n2,(String)i.valor);
+                                taula_intermedi.genera(Operacio.param_compost,1,n2,(String)i.valor);
                                 n2++;
                                 taula_intermedi.genera(Operacio.param_compost,simbol.getR(),n2,(String)i.valor); //op,1,2,3 -> 3[2] = 1
                                 n2++;
 
                                 bol = taula_simbols.posarcamp((String)i.valor,nom,new Dcamp(simbol.getIdb(),simbol.getTipus(),n,simbol.getTsb()));
                             }else{
-                                taula_intermedi.genera(Operacio.param_simple,0,n2,(String)i.valor);
+                                taula_intermedi.genera(Operacio.param_compost,0,n2,(String)i.valor);
                                 n2++;
-                                taula_intermedi.genera(Operacio.param_simple,simbol.getR(),n2,(String)i.valor); //op,1,2,3 -> 3[2] = 1
+                                taula_intermedi.genera(Operacio.param_compost,simbol.getR(),n2,(String)i.valor); //op,1,2,3 -> 3[2] = 1
                                 n2++;
 
                                 bol = taula_simbols.posarcamp((String)i.valor,nom,new Dcamp(simbol.getTipus(),n,simbol.getTsb()));
@@ -1296,7 +1345,7 @@ T ::= N:n T_1:t {:System.out.println("T -> N T_1");
         if((t==null)||(t.getTsb() == "ts_nul")){ //venim de Tp -> @
             RESULT = new SimbolT(n.getIdb(),n.getTsb(),n.getTipus(),n.getMode(),n.getEsquerre(),n.getDreta(),n.getR());
         }else{
-            if((n.getTsb() == "ts_nul")||(n.getTsb() == "ts_cadena")||(n.getTsb()=="ts_boolea")){
+            if((n.getTsb() == "ts_nul")||(n.getTsb()=="ts_boolea")){
                 report_error_semantic("El terminal no es adequat per una operació lògica", n.getEsquerre(),n.getDreta()); //arreglar
                 errorSemantic = true;
                 RESULT = new SimbolT();
@@ -1348,7 +1397,7 @@ T_1 ::= IGIG N:n {:System.out.println("T_1 -> IGIG N T_1");
     if(errorSemantic){
             RESULT = new SimbolTp();
         }else{
-            if((n.getTsb() == "ts_nul")||(n.getTsb() == "ts_cadena")||(n.getTsb()=="ts_boolea")){
+            if((n.getTsb() == "ts_nul")||(n.getTsb()=="ts_boolea")){
                         report_error_semantic("El terminal no es adequat per una operació de comparacio", n.getEsquerre(),n.getDreta());
                         errorSemantic = true;
                         RESULT = new SimbolTp();
@@ -1361,7 +1410,7 @@ T_1 ::= IGIG N:n {:System.out.println("T_1 -> IGIG N T_1");
         if(errorSemantic){
             RESULT = new SimbolTp();
         }else{
-            if((n.getTsb() == "ts_nul")||(n.getTsb() == "ts_cadena")||(n.getTsb()=="ts_boolea")){
+            if((n.getTsb() == "ts_nul")||(n.getTsb()=="ts_boolea")){
                         report_error_semantic("El terminal no es adequat per una operació de DIF", n.getEsquerre(),n.getDreta());
                         errorSemantic = true;
                         RESULT = new SimbolTp();
@@ -1374,7 +1423,7 @@ T_1 ::= IGIG N:n {:System.out.println("T_1 -> IGIG N T_1");
         if(errorSemantic){
             RESULT = new SimbolTp();
         }else{
-            if((n.getTsb() == "ts_nul")||(n.getTsb() == "ts_cadena")||(n.getTsb()=="ts_boolea")){
+            if((n.getTsb() == "ts_nul")||(n.getTsb()=="ts_boolea")){
                         report_error_semantic("El terminal no es adequat per una operació de MENOR", n.getEsquerre(),n.getDreta());
                         errorSemantic = true;
                         RESULT = new SimbolTp();
@@ -1387,7 +1436,7 @@ T_1 ::= IGIG N:n {:System.out.println("T_1 -> IGIG N T_1");
         if(errorSemantic){
             RESULT = new SimbolTp();
         }else{
-            if((n.getTsb() == "ts_nul")||(n.getTsb() == "ts_cadena")||(n.getTsb()=="ts_boolea")){
+            if((n.getTsb() == "ts_nul")||(n.getTsb()=="ts_boolea")){
                         report_error_semantic("El terminal no es adequat per una operació de MAJOR", n.getEsquerre(),n.getDreta());
                         errorSemantic = true;
                         RESULT = new SimbolTp();
@@ -1400,7 +1449,7 @@ T_1 ::= IGIG N:n {:System.out.println("T_1 -> IGIG N T_1");
         if(errorSemantic){
             RESULT = new SimbolTp();
         }else{
-            if((n.getTsb() == "ts_nul")||(n.getTsb() == "ts_cadena")||(n.getTsb()=="ts_boolea")){
+            if((n.getTsb() == "ts_nul")||(n.getTsb()=="ts_boolea")){
                         report_error_semantic("El terminal no es adequat per una operació de MENORI", n.getEsquerre(),n.getDreta());
                         errorSemantic = true;
                         RESULT = new SimbolTp();
@@ -1413,7 +1462,7 @@ T_1 ::= IGIG N:n {:System.out.println("T_1 -> IGIG N T_1");
         if(errorSemantic){
             RESULT = new SimbolTp();
         }else{
-            if((n.getTsb() == "ts_nul")||(n.getTsb() == "ts_cadena")||(n.getTsb()=="ts_boolea")){
+            if((n.getTsb() == "ts_nul")||(n.getTsb()=="ts_boolea")){
                         report_error_semantic("El terminal no es adequat per una operació de MAJORI", n.getEsquerre(),n.getDreta());
                         errorSemantic = true;
                         RESULT = new SimbolTp();
@@ -1435,7 +1484,7 @@ N ::= M:m N_1:n {:System.out.println("N -> M N_1");
                 RESULT = new SimbolN(m.getIdb(),m.getTsb(),m.getTipus(),m.getMode(),m.getEsquerre(),m.getDreta(),m.getR()); //pot ser tupla
             }else{ //M_1 ha fet qualque operació, hem de passar el tsb de f
 
-                if((m.getTsb() == "ts_nul")||(m.getTsb() == "ts_cadena")||(m.getTsb()=="ts_boolea")){
+                if((m.getTsb() == "ts_nul")||(m.getTsb()=="ts_boolea")){
                    report_error_semantic("El terminal no té un tipus adequat", m.getEsquerre(),m.getDreta());
                     errorSemantic = true;
                     RESULT = new SimbolN(); 
@@ -1472,7 +1521,7 @@ N_1 ::= ADD M:m N_1:n {:System.out.println("N_1 -> ADD M N_1");
             RESULT = new SimbolNp();
         }else{
             if((n==null)||(n.getTsb()=="ts_nul")){ //vol dir que N_1 -> @
-                if((m.getTsb() == "ts_nul")||(m.getTsb() == "ts_cadena")||(m.getTsb()=="ts_boolea")){
+                if((m.getTsb() == "ts_nul")||(m.getTsb()=="ts_boolea")){
                     report_error_semantic("El terminal no es adequat per una operació de suma", m.getEsquerre(),m.getDreta());
                     errorSemantic = true;
                     RESULT = new SimbolNp();
@@ -1480,7 +1529,7 @@ N_1 ::= ADD M:m N_1:n {:System.out.println("N_1 -> ADD M N_1");
                     RESULT = new SimbolNp(m.getTsb(),m.getTipus(),ParserSym.ADD,"moderesult",m.getDreta(),m.getR());
                 }
             }else{ // N_1 té tsb i una operació associada
-                if((m.getTsb() == "ts_nul")||(m.getTsb() == "ts_cadena")||(m.getTsb()=="ts_boolea")){
+                if((m.getTsb() == "ts_nul")||(m.getTsb()=="ts_boolea")){
                         report_error_semantic("El terminal no es adequat per una operació de suma", m.getEsquerre(),m.getDreta());
                         errorSemantic = true;
                         RESULT = new SimbolNp();
@@ -1568,7 +1617,7 @@ M ::= F:f M_1:m {:System.out.println("M -> F M_1");
                 RESULT = new SimbolM(f.getIdb(),f.getTsb(),f.getTipus(),f.getMode(),f.getEsquerre(),f.getDreta(),f.getR()); //pot ser tupla
             }else{ //M_1 ha fet qualque operació, hem de passar el tsb de f
 
-                if((f.getTsb() == "ts_nul")||(f.getTsb() == "ts_cadena")||(f.getTsb()=="ts_boolea")){
+                if((f.getTsb() == "ts_nul")||(f.getTsb()=="ts_boolea")){
                     report_error_semantic("El terminal no es adequat per una operació de suma/resta/multiplicació", f.getEsquerre(),f.getDreta());
                     errorSemantic = true;
                     RESULT = new SimbolM();
@@ -1610,7 +1659,7 @@ M_1 ::= MULT:e F:f M_1:m {:System.out.println("M_1 -> MULT F M_1");
         }else{
             if((m==null)||(m.getTsb() == "ts_nul")){ //la producció M_1 -> @, comprovar el tipus de f
 
-                if((f.getTsb() == "ts_nul")||(f.getTsb() == "ts_cadena")||(f.getTsb()=="ts_boolea")){ //es tracta d'un tsb que no volem per operacions, error
+                if((f.getTsb() == "ts_nul")||(f.getTsb()=="ts_boolea")){ //es tracta d'un tsb que no volem per operacions, error
                     report_error_semantic("El terminal no es adequat per una operació de multiplicació", f.getEsquerre(),f.getDreta());
                     errorSemantic = true;
                     RESULT = new SimbolMp();
@@ -1619,7 +1668,7 @@ M_1 ::= MULT:e F:f M_1:m {:System.out.println("M_1 -> MULT F M_1");
                 }
             }else{ //M_1 té tipus subjacent i operació
 
-                if((f.getTsb() == "ts_nul")||(f.getTsb() == "ts_cadena")||(f.getTsb()=="ts_boolea")){
+                if((f.getTsb() == "ts_nul")||(f.getTsb()=="ts_boolea")){
                     report_error_semantic("El terminal no es adequat per una operació de multiplicació", f.getEsquerre(),f.getDreta());
                     errorSemantic = true;
                     RESULT = new SimbolMp();
@@ -1827,11 +1876,6 @@ F ::= LPAREN:l E:e RPAREN:r {:System.out.println("F -> LPAREN E RPAREN"); //pend
                 Integer n = novavar(true,2);
                 taula_intermedi.genera(Operacio.copia_valor,(Integer)v.valor*-1,null,n); //revisar si passar a decimal o enter
                 RESULT = new SimbolF("ts_caracter","car","modeconst",s.esquerre,v.dreta,n);
-                :}
-    | vcadena:v {:System.out.println("F -> vcadena");
-                Integer n = novavar(true,(((String)v.valor).length() * 2));
-                taula_intermedi.genera(Operacio.copia_valor,(String)v.valor,null,n); //revisar si passar a decimal o enter
-                RESULT = new SimbolF("ts_cadena","cad","modeconst",v.esquerre,v.dreta,n);
                 :}
     | R: r {:System.out.println("F -> ID");
                 if(errorSemantic){

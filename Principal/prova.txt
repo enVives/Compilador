@@ -1,5 +1,7 @@
-ent b = 4;
+tupla a() = (1,2,3);
 
+metode b (){
+}
 
 metode main (cad arguments []) {
 }
