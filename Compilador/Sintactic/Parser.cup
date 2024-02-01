@@ -139,7 +139,6 @@ parser code {:
      **********************************************************************/
 
     private boolean errorSemantic = false;
-    private boolean errorGlobal = false;
 
     @Override
     public void unrecovered_syntax_error(Symbol cur_token) throws Exception {
@@ -170,12 +169,12 @@ parser code {:
         msg.append(": ").append(message);
         
         System.err.println(msg);
-        errorGlobal = true;
+
     }
 
     public void report_error_semantic(String message,Location left, Location right){
         System.err.println("ERROR "+message+" desde: "+left.getLine()+"/"+left.getColumn()+" fins: "+right.getLine()+"/"+right.getColumn());
-        errorGlobal = true;
+
     }
 
     @Override
@@ -260,7 +259,10 @@ precedence left  MULT, DIV, MOD;
 
 start with PROG;
 
-PROG ::= M0 PROGRAMA {:System.out.println("PROG -> M0 PROGRAMA");:};
+PROG ::= M0 PROGRAMA {:System.out.println("PROG -> M0 PROGRAMA");
+        if(errorSemantic){
+            taula_intermedi.clear();
+        }:};
 
 PROGRAMA ::= DECL PUNTICOMA PROGRAMA {:System.out.println("PROGRAMA -> DECL PROGRAMA");:}
             | PROCEDIMENT PROGRAMA {:System.out.println("PROGRAMA -> PROCEDIMENT PROGRAMA");:}
@@ -278,9 +280,9 @@ M0 ::= {:System.out.println("Inicialització");
         taula_simbols.posar("FALS", new Dconst(0,"boolea"));
         :};
 
-DECL ::= DECL_TUPLA M1  {:System.out.println("DECL -> DECL TUPLA");:} 
-        |DECL_TIPUS M1  {:System.out.println("DECL -> DECL_TIPUS");:}
-        |DECL_CONST M1  {::}
+DECL ::= DECL_TUPLA  {:System.out.println("DECL -> DECL TUPLA");:} 
+        |DECL_TIPUS  {:System.out.println("DECL -> DECL_TIPUS");:}
+        |DECL_CONST {::}
         |error PUNTICOMA {::}
         ;
 
@@ -288,8 +290,8 @@ M1 ::= {:System.out.println("Reiniciar Error Semantic");
         errorSemantic = false;
         :};
 
-MODIF ::= REDEF_TUPLA M1 {:System.out.println("MODIF -> REDEF_TUPLA PUNTICOMA");:}
-        | MODIF_TIPUS M1 {:System.out.println("MODIF -> MODIF_TIPUS PUNTICOMA");:}
+MODIF ::= REDEF_TUPLA  {:System.out.println("MODIF -> REDEF_TUPLA PUNTICOMA");:}
+        | MODIF_TIPUS  {:System.out.println("MODIF -> MODIF_TIPUS PUNTICOMA");:}
         ;
 
 SENTENCIES ::= SENT SENTENCIES {:System.out.println("SENTENCIES -> SENT SENTENCIES");:}
@@ -479,9 +481,7 @@ ARGS_1 ::= ARG:a COMA ARGS_1:b {:System.out.println("ARGS_1 -> ARG COMA ARGS_1")
             ;
 ARG ::= TIPUS:t ID:d {:System.out.println("ARG -> TIPUS ID");
     RESULT = new SimbolArg((String)d.valor,t.getTipus());
-    :} |
-    /*tupla ID:d {:System.out.println("ARG -> TUPLA ID");
-    RESULT = new SimbolArg((String)d.valor,"tupla");:}*/;
+    :};
 
 CRIDA_PROC ::= R:r {:System.out.println("CRIDA_PROC");
             if(!errorSemantic){

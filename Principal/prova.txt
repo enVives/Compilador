@@ -1,8 +1,5 @@
 tupla a() = (1,2,3);
-
-metode b(){
-}
-
+constant ent b = 3;
 metode main () {
 }
     
