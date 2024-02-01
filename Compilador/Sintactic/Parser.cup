@@ -460,6 +460,29 @@ RETURN ::= retorna E:e PUNTICOMA {:System.out.println("RETURN -> retorna E");
         RESULT = new SimbolReturn(e,e.getEsquerre(),e.getDreta());
         :};
 
+ARGS ::= ARGS_1:a {:System.out.println("ARGS -> ARGS_1");
+                RESULT = new SimbolArgs(a.getLlista());
+            :}
+            | {:System.out.println("@");
+                RESULT = new SimbolArgs();
+            :}
+            ;
+ARGS_1 ::= ARG:a COMA ARGS_1:b {:System.out.println("ARGS_1 -> ARG COMA ARGS_1");
+                b.afegeix(a.getId(),a.getTipus());
+                RESULT = b;
+            :}
+            | ARG:a {:System.out.println("ARGS_1 -> ARG");
+                SimbolArgsp p = new SimbolArgsp();
+                p.afegeix(a.getId(),a.getTipus());
+                RESULT = p;
+            :}
+            ;
+ARG ::= TIPUS:t ID:d {:System.out.println("ARG -> TIPUS ID");
+    RESULT = new SimbolArg((String)d.valor,t.getTipus());
+    :} |
+    /*tupla ID:d {:System.out.println("ARG -> TUPLA ID");
+    RESULT = new SimbolArg((String)d.valor,"tupla");:}*/;
+
 CRIDA_PROC ::= R:r {:System.out.println("CRIDA_PROC");
             if(!errorSemantic){
                 if(r.getMvp() =="procc"){
@@ -497,26 +520,6 @@ TIPUS ::= decimal {:System.out.println("TIPUS -> decimal");
                 :}
             ;
 
-ARGS ::= ARGS_1:a {:System.out.println("ARGS -> ARGS_1");
-                RESULT = new SimbolArgs(a.getLlista());
-            :}
-            | {:System.out.println("@");
-                RESULT = new SimbolArgs();
-            :}
-            ;
-ARGS_1 ::= ARG:a COMA ARGS_1:b {:System.out.println("ARGS_1 -> ARG COMA ARGS_1");
-                b.afegeix(a.getId(),a.getTipus());
-                RESULT = b;
-            :}
-            | ARG:a {:System.out.println("ARGS_1 -> ARG");
-                SimbolArgsp p = new SimbolArgsp();
-                p.afegeix(a.getId(),a.getTipus());
-                RESULT = p;
-            :}
-            ;
-ARG ::= TIPUS:t ID:d {:System.out.println("ARG -> TIPUS ID");
-    RESULT = new SimbolArg((String)d.valor,t.getTipus());
-    :};
 
 MENTRE ::= mentres M4 CONDICIO:c fer RESTA:r {:System.out.println("MENTRE");
             if(!errorSemantic){
@@ -684,13 +687,13 @@ DECL_CONST ::= constant TIPUS:t ID:a ASSIGN E:e  {:System.out.println("DECL_CONS
                     errorSemantic = true;
                 }else{
                     String ti = t.getTipus(); //tipus que afegirem als identificadors
-                    Boolean bol = taula_simbols.posar((String)a.valor,new Dconst(ti));
+                    Integer n = novavar(true,taula_variables.get_ocupacio(e.getR()));
+                    Boolean bol = taula_simbols.posar((String)a.valor,new Dconst(ti,n));
                     if(!bol){
                         report_error_semantic("ja hi ha un identificador amb el nom: '"+(String)a.valor+"' dins el mateix àmbit", a.esquerre,a.dreta);
                         errorSemantic = true;
                     }else{
                         //*****************Intermedi********************
-                        Integer n = novavar(true,taula_variables.get_ocupacio(e.getR()));
                         taula_intermedi.genera(Operacio.copia,e.getR(),null,n);
                         //****************************************************
                     }
@@ -709,13 +712,13 @@ DECL_CONST ::= constant TIPUS:t ID:a ASSIGN E:e  {:System.out.println("DECL_CONS
                     RESULT = new SimbolDeclTipus();
                 }else{
                     String ti = t.getTipus(); //tipus que afegirem als identificador
-                    Boolean bol = taula_simbols.posar((String)a.valor,new Dconst(ti));
+                    Integer n = novavar(true,taula_variables.get_ocupacio(m.getR()));
+                    Boolean bol = taula_simbols.posar((String)a.valor,new Dconst(ti,n));
                     if(!bol){
                         report_error_semantic("ja hi ha un identificador amb el nom: '"+(String)a.valor+"' dins el mateix àmbit", a.esquerre,a.dreta);
                         errorSemantic = true;
                     }else{
                         //*****************Intermedi********************
-                        Integer n = novavar(true,taula_variables.get_ocupacio(m.getR()));
                         taula_intermedi.genera(Operacio.copia,m.getR(),null,n);
                         //****************************************************
                     }
@@ -925,15 +928,17 @@ R ::= ID:d {:System.out.println("R -> ID ");
                 Dconst c = (Dconst) descripcio;
                 Dtipus tipus = (Dtipus) taula_simbols.consulta(c.tipus()); //ALERTA EN NO TROBAR
 
+                
                 //novavar i afegir valor de la constant
+                /*
                 Integer n = novavar(true);
                 if(c.tipus()=="tupla"){
                     taula_intermedi.genera(Operacio.copia,(String)d.valor,null,n); // t1 = a = tupla a
                 }else{
                     taula_intermedi.genera(Operacio.copia,(String)d.valor,null,n); 
-                }
+                }*/
                 
-                RESULT = new SimbolR((String)d.valor,(String)d.valor,tipus.dt().tipus_subjacent(),c.tipus(),"const",n,0,c.tipus(),d.esquerre,d.dreta);
+                RESULT = new SimbolR((String)d.valor,(String)d.valor,tipus.dt().tipus_subjacent(),c.tipus(),"const",c.getTemporal(),0,c.tipus(),d.esquerre,d.dreta);
                 //el tipus pot ser tupla També
                 //això es per quan ens interessa ficar una tupla dins una tupla o un subprograma
                 //id(a) on 'a' és una tupla.
@@ -1184,7 +1189,8 @@ DECL_TUPLA ::= tupla ID:i LPAREN RPAREN ASSIGN LPAREN:r VALS_TUPLA:v RPAREN {:Sy
                     //Gestió
                     int n =0;
                     Stack<KeyValue> llista = v.getLlista();
-                    Boolean bol = taula_simbols.posar((String)i.valor,new Dconst("tupla")); //mirar si posar es true o false
+                    Integer nv = novavar(true); //per guardar els elements de la tupla
+                    Boolean bol = taula_simbols.posar((String)i.valor,new Dconst("tupla",nv)); //mirar si posar es true o false
                     if(bol){
                         //*********Gestió Intermedi************
                         //Integer nv = novavar(true); //per guardar els elements de la tupla
@@ -1204,16 +1210,16 @@ DECL_TUPLA ::= tupla ID:i LPAREN RPAREN ASSIGN LPAREN:r VALS_TUPLA:v RPAREN {:Sy
 
                             if(simbol.getTsb()=="ts_record"){
 
-                                taula_intermedi.genera(Operacio.param_compost,1,n2,(String)i.valor);
+                                taula_intermedi.genera(Operacio.param_compost,1,n2,nv);
                                 n2++;
-                                taula_intermedi.genera(Operacio.param_compost,simbol.getR(),n2,(String)i.valor); //op,1,2,3 -> 3[2] = 1
+                                taula_intermedi.genera(Operacio.param_compost,simbol.getR(),n2,nv); //op,1,2,3 -> 3[2] = 1
                                 n2++;
 
                                 bol = taula_simbols.posarcamp((String)i.valor,nom,new Dcamp(simbol.getIdb(),simbol.getTipus(),n,simbol.getTsb()));
                             }else{
-                                taula_intermedi.genera(Operacio.param_compost,0,n2,(String)i.valor);
+                                taula_intermedi.genera(Operacio.param_compost,0,n2,nv);
                                 n2++;
-                                taula_intermedi.genera(Operacio.param_compost,simbol.getR(),n2,(String)i.valor); //op,1,2,3 -> 3[2] = 1
+                                taula_intermedi.genera(Operacio.param_compost,simbol.getR(),n2,nv); //op,1,2,3 -> 3[2] = 1
                                 n2++;
 
                                 bol = taula_simbols.posarcamp((String)i.valor,nom,new Dcamp(simbol.getTipus(),n,simbol.getTsb()));

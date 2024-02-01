@@ -1,7 +1,9 @@
 {
+    "java.home": "C:\\Program Files (x86)\\Java\\jdk1.8.0_202",
     "java.project.referencedLibraries": [
         "lib/**/*.jar",
-        "/home/perejoan/Escritorio/jflex-full-1.8.2.jar",
-        "/home/perejoan/Escritorio/java-cup-11b-runtime.jar"
+        "c:\\Users\\perej\\Desktop\\java-cup-11b-runtime.jar",
+        "c:\\Users\\perej\\Desktop\\jflex-full-1.8.2.jar",
+        "c:\\Users\\perej\\Desktop\\java-cup-11b.jar"
     ]
 }

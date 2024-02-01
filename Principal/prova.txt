@@ -1,8 +1,8 @@
 tupla a() = (1,2,3);
 
-metode b (){
+metode b(){
 }
 
-metode main (cad arguments []) {
+metode main () {
 }
     
