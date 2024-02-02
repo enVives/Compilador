@@ -20,6 +20,7 @@ public class Principal {
      */
     public static void main(String[] args) {
         Reader fitxer;
+        int a;
         try {
             fitxer = new FileReader("c:\\Users\\perej\\Documents\\GitHub\\Compilador\\Principal\\prova.txt");
             Scanner scanner = new Scanner(fitxer);

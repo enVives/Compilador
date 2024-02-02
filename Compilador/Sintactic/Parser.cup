@@ -29,6 +29,9 @@ import Compilador.Sintactic.Simbols.SimbolArgsp.KeyValor;
 import java.util.Stack;
 import java.io.IOException;
 
+import java.io.DataOutputStream;
+import java.io.FileOutputStream;
+
 class Parser;
 
 
@@ -39,6 +42,38 @@ parser code {:
         this.scanner = scanner;
     }
 ***/
+    /*********************************************************************
+    *                       Generacio Ensamblador                        *
+    **********************************************************************/
+    public void genera_ensablador(){
+        if(taula_intermedi.size() > 0){ //si no hi ha hagut fallos
+            ArrayList<Sentencia> llista = taula_intermedi.get_Llista();
+            String filename = "executable.X68";
+
+            try {
+                FileOutputStream fileOutputStream = new FileOutputStream(filename);
+                DataOutputStream dataOutputStream = new DataOutputStream(fileOutputStream);
+
+                String s = "*-----------------------------------------------------------\n" +
+                        "* Title      : Compilador\n" +
+                        "* Written by : Pere Joan Vives Morey\n" +
+                        "* Date       : 2/02/2024\n" +
+                        "* Description: \n" +
+                        "*-----------------------------------------------------------\n" +
+                        "          ORG    $1000";
+
+                dataOutputStream.writeBytes(s);
+
+                
+
+                dataOutputStream.close();
+                fileOutputStream.close();
+            } catch (IOException e) {
+                System.out.println(e.toString());
+            }
+        }
+    }
+
     /**********************************************************************
      *             Creació i Gestió de la Taula de Simbols                *
      **********************************************************************/
@@ -114,25 +149,25 @@ parser code {:
       sortida = new BufferedWriter(sortidap);
     
 
-    ArrayList<Sentencia> llista = taula_intermedi.get_Llista();
-    Iterator<Sentencia> iterator = llista.iterator();
-    while (iterator.hasNext()) {
-      Sentencia s = iterator.next();
-      try {
-        sortida.write(
-            "Operacio: " + s.getOperacio() + " Op1: " + s.getOp1() + " Op2: " + s.getOp2() + " Desti: " + s.getDesti());
-            sortida.write("\n");
-      } catch (IOException error) {
-        System.out.println(error.toString());
-      }
-    }
+        ArrayList<Sentencia> llista = taula_intermedi.get_Llista();
+        Iterator<Sentencia> iterator = llista.iterator();
+        while (iterator.hasNext()) {
+        Sentencia s = iterator.next();
+        try {
+            sortida.write(
+                "Operacio: " + s.getOperacio() + " Op1: " + s.getOp1() + " Op2: " + s.getOp2() + " Desti: " + s.getDesti());
+                sortida.write("\n");
+        } catch (IOException error) {
+            System.out.println(error.toString());
+        }
+        }
 
-    try {
-      sortida.close();
-    } catch (IOException error) {
-      System.out.println(error.toString());
+        try {
+        sortida.close();
+        } catch (IOException error) {
+        System.out.println(error.toString());
+        }
     }
-  }
 
     /**********************************************************************
      * sobrecàrrega de mètodes per gestionar els errors que es localitzin *
@@ -669,6 +704,8 @@ SORTIDAS ::= sortidaS LPAREN E:e RPAREN {:System.out.println("SORTIDAS");
             if((e.getTsb()=="ts_nul")&&(e.getTsb()=="ts_record")){
                 report_error_semantic("Tipus erroni de sortida de teclat", e.getEsquerre(),e.getDreta());
                 errorSemantic = true;
+            }else{
+                taula_intermedi.genera(Operacio.console_write,null,null,e.getR());
             } 
         }
         :};

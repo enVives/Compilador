@@ -1,0 +1,3 @@
+Operacio: 10 Op1: null Op2: null Desti: -1
+Operacio: 0 Op1: 0 Op2: null Desti: 1
+Operacio: 26 Op1: null Op2: null Desti: -1

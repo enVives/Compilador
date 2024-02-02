@@ -1633,6 +1633,8 @@ class CUP$Parser$actions {
             if((e.getTsb()=="ts_nul")&&(e.getTsb()=="ts_record")){
                 report_error_semantic("Tipus erroni de sortida de teclat", e.getEsquerre(),e.getDreta());
                 errorSemantic = true;
+            }else{
+                taula_intermedi.genera(Operacio.console_write,null,null,e.getR());
             } 
         }
         

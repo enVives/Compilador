@@ -39,6 +39,7 @@ public class Operacio {
     public static final int ind_param = 30;
     public static final int pmb = 31;
     public static final int console_read = 32;
+    public static final int console_write = 33;
 
     public static final String[] mnemonic = new String[] {
             "copia",
@@ -73,7 +74,8 @@ public class Operacio {
             "copia_valor",
             "ind_param",
             "pmb",
-            "console_read"
+            "console_read",
+            "console_write"
     };
 
 }
