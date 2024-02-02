@@ -1182,7 +1182,7 @@ public class Scanner implements java_cup.runtime.Scanner {
             // fall through
           case 118: break;
           case 58:
-            { return symbol(ParserSym.entradaS);
+            { return symbol(ParserSym.entradaS,new Token());
             }
             // fall through
           case 119: break;

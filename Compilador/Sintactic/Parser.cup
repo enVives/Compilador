@@ -196,6 +196,7 @@ terminal Token vdecimal; //double
 terminal Token venter; //int
 terminal Token vlogic; //boolean
 terminal Token vcaracter; //char
+terminal Token entradaS;
 
 terminal  Token  ADD,SUB,MULT,DIV,MOD;
 terminal Token LPAREN,RPAREN;
@@ -206,13 +207,13 @@ terminal DOSPUNTS,PUNTICOMA,INTERROG,LCORCH
 terminal Token DIF, IGIG, MENORI, MAJORI, MENOR, MAJOR, OR, AND , NOT;
 
 terminal decimal,enter,logic,caracter,tupla,si,sino,seleccio,cas,pdefecte,acaba
-    ,mentres,fer,per,metode,retorna,nou,constant,entradaS,sortidaS,main,borra,afegeix;
+    ,mentres,fer,per,metode,retorna,nou,constant,sortidaS,main,borra,afegeix;
 
 non terminal PROGRAMA,DECL,PROCEDIMENT,MAIN,DECL_TAULA,MODIF,
     MODIF_TUPLA, REM_TUPLA, AFG_TUPLA, MODIF_TAULA, REDEF_TAULA, REDEF_TUPLA,
     SENTENCIES, MENTRE, SWITCH, FMENTRE, CRIDA_PROC, SENT,VAL_TUPLA,
     L,SWITCH_1, I, A_1,NOVA_TAULA, NOVA_TUPLA,
-    FOR,OP_CONDICIONAL,OP_CONDICIONAL_1,ENTRADAS,SORTIDAS,DECL_CONST;    
+    FOR,OP_CONDICIONAL,OP_CONDICIONAL_1,SORTIDAS,DECL_CONST;    
 
 non terminal SimbolF F;
 non terminal SimbolE E;
@@ -232,6 +233,7 @@ non terminal M1;
 non terminal IF;
 non terminal M2;
 non terminal M3;
+non terminal SimbolEntrada ENTRADAS;
 non terminal SimbolValors VALS;
 non terminal M4;
 non terminal SimbolIf1 IF_1;
@@ -305,7 +307,6 @@ SENT ::= DECL PUNTICOMA {:System.out.println("SENT -> DECL");:}
             |IF {:System.out.println("SENT -> IF");:}
             |CRIDA_PROC PUNTICOMA{:System.out.println("SENT -> CRIDA_PROC");:}
             |FOR {:System.out.println("SENT -> FOR");:}
-            |ENTRADAS PUNTICOMA {:System.out.println("SENT -> ENTRADAS");:}
             |SORTIDAS PUNTICOMA {:System.out.println("SENT -> SORTIDAS");:}
             ;
 
@@ -655,17 +656,12 @@ FMENTRE ::= fer M4 RESTA:r mentres CONDICIO:c PUNTICOMA {:System.out.println("FM
             }
         :};
 
-ENTRADAS ::= entradaS LPAREN TIPUS:t COMA R:r RPAREN {:System.out.println("ENTRADAS");
+ENTRADAS ::= entradaS:s LPAREN TIPUS:t RPAREN:r {:System.out.println("ENTRADAS");
             if(!errorSemantic){
-                if(r.getTsb()!="ts_record"){
-                    if(t.getTipus()!=r.getTipus()){
-                        report_error_semantic("Els tipus no coincideixen", r.getEsquerre(),r.getDreta());
-                        errorSemantic = true;
-                    } 
-                }else{
-                    report_error_semantic("No es pot posar la entrada dins una tupla", r.getEsquerre(),r.getDreta());
-                    errorSemantic = true;
-                }
+                Dtipus d = (Dtipus) taula_simbols.consulta(t.getTipus());
+                Escalar e = (Escalar) d.dt();
+                Integer n = novavar(true,e.getBytes());
+                RESULT = new SimbolEntrada(t.getTipus(),d.dt().tipus_subjacent(),n,s.esquerre,r.dreta);
             }
             :} ;
 SORTIDAS ::= sortidaS LPAREN E:e RPAREN {:System.out.println("SORTIDAS");
@@ -1843,6 +1839,10 @@ F ::= LPAREN:l E:e RPAREN:r {:System.out.println("F -> LPAREN E RPAREN"); //pend
                 taula_intermedi.genera(Operacio.copia_valor,(Integer)v.valor,null,n);
                 RESULT = new SimbolF("ts_enter","ent","modeconst",v.esquerre,v.dreta,n);
                 :} 
+    | ENTRADAS:s {:System.out.println("F -> ENTRADAS");
+                taula_intermedi.genera(Operacio.console_read,null,null,s.getR());
+                RESULT = new SimbolF(s.getTsb(),s.getTipus(),"modeconst",s.getEsquerre(),s.getDreta(),s.getR());
+                :}
     | SUB:s venter:v {:System.out.println("F -> SUB venter");
                 Integer n = novavar(true,4);
                 taula_intermedi.genera(Operacio.copia_valor,(Integer)v.valor*-1,null,n);

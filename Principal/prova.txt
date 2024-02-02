@@ -1,5 +1,4 @@
-tupla a() = (1,2,3);
-constant ent b = 3;
+
 metode main () {
 }
     

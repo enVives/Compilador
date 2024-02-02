@@ -278,7 +278,7 @@ endline      = ['\r'|'\n'|"\r\n"]+
 
 
 
-{entradaS}    {return symbol(ParserSym.entradaS);}
+{entradaS}    {return symbol(ParserSym.entradaS,new Token());}
 {sortidaS}    { return symbol(ParserSym.sortidaS);}
 {main}        { return symbol(ParserSym.main);}
 
