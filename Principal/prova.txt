@@ -1,5 +1,12 @@
+tupla a() = (1,2,3,4,5,6);
 
+metode b(){
+
+}
+
+ent c = 88;
 
 metode main () {
+    ent d = 44;
 }
     

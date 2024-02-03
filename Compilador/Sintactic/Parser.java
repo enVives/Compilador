@@ -14,6 +14,7 @@ import Compilador.Intermedi.TaulaIntermedi.Sentencia;
 import Compilador.Intermedi.Operacio;
 import Compilador.Intermedi.TaulaVariables;
 import Compilador.Intermedi.TaulaProcediments;
+import Compilador.Intermedi.TaulaProcediments.*;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.PrintStream;
@@ -32,6 +33,8 @@ import Compilador.TSimbols.Dada2;
 import Compilador.Sintactic.Simbols.SimbolArgsp.KeyValor;
 import java.util.Stack;
 import java.io.IOException;
+import java.io.DataOutputStream;
+import java.io.FileOutputStream;
 import java_cup.runtime.XMLElement;
 
 /** CUP v0.11b 20160615 (GIT 4ac7450) generated parser.
@@ -582,6 +585,91 @@ public class Parser extends java_cup.runtime.lr_parser {
         this.scanner = scanner;
     }
 ***/
+    /*********************************************************************
+    *                       Generacio Ensamblador                        *
+    **********************************************************************/
+
+    String cEnsamblador = "";
+
+    public void genera_ensablador(){
+        if(taula_intermedi.size() > 0){ //si no hi ha hagut fallos
+            ArrayList<Sentencia> llista_intermedi = taula_intermedi.get_Llista();
+            ArrayList<Entrada> llista_variables = taula_variables.getFiles();
+            ArrayList<InfoProcediment> llista_procediments = taula_procediments.getLlista();
+
+            String filename = "executable.X68";
+
+            try {
+                FileOutputStream fileOutputStream = new FileOutputStream(filename);
+                DataOutputStream dataOutputStream = new DataOutputStream(fileOutputStream);
+
+                cEnsamblador = "*-----------------------------------------------------------\n" +
+                        "* Title      : Compilador\n" +
+                        "* Written by : Pere Joan Vives Morey\n" +
+                        "* Date       : 2/02/2024\n" +
+                        "* Description: \n" +
+                        "*-----------------------------------------------------------\n" +
+                        "          ORG    $1000\n";
+
+                Iterator<Entrada> it = llista_variables.iterator();
+                Integer n = 0;
+                while(it.hasNext()){
+                    Entrada variable = (Entrada) it.next();
+                    if(variable.getSubprograma() == null){
+                        switch(variable.ocupacio()){
+                            case 1:
+                                cEnsamblador += "V"+n+" DS.B 1\n";
+                                break;
+                            case  2:
+                                cEnsamblador += "V"+n+" DS.W 1\n";
+                                break;
+                            case 4:
+                                cEnsamblador += "V"+n+" DS.L 1\n";
+                                break;
+                            default:
+                                Integer nwords = variable.ocupacio()/4;
+                                cEnsamblador += "V"+n+" DS.W "+nwords+"\n";
+                                break;
+                        }
+                    }
+                    n++;
+                }
+
+                cEnsamblador += "START:\n";
+
+                Iterator<Sentencia> it1 = llista_intermedi.iterator();
+                Boolean dins_procediment = false;
+
+
+                while(it1.hasNext()){
+                    Sentencia sent = (Sentencia) it1.next();
+
+                    if(sent.getOperacio() == 10){ //etiqueta
+                        if(taula_procediments.conte_etiqueta((Integer)sent.getDesti())){
+                            dins_procediment = true;
+                        }
+                    }
+
+                    if(!dins_procediment){ //generar sentencia
+
+                    }
+
+                    if (sent.getOperacio() == 26) {
+                        //sortim de subrutines
+                        dins_procediment = false;
+                    }
+                }
+
+                dataOutputStream.writeBytes(cEnsamblador);
+                dataOutputStream.close();
+                fileOutputStream.close();
+                
+            } catch (IOException e) {
+                System.out.println(e.toString());
+            }
+        }
+    }
+
     /**********************************************************************
      *             Creació i Gestió de la Taula de Simbols                *
      **********************************************************************/
@@ -607,9 +695,9 @@ public class Parser extends java_cup.runtime.lr_parser {
         }
         if(!pila_procediments.isEmpty()){
             Integer procediment = pila_procediments.peek();
-            taula_variables.afegeix_variable(procediment,null,ocupacio);
+            taula_variables.afegeix_variable(procediment,null,ocupacio,null);
         }else{
-            taula_variables.afegeix_variable(null,null,ocupacio);
+            taula_variables.afegeix_variable(null,null,ocupacio,null);
         }
         return taula_variables.n(); //darrer n
     }
@@ -620,9 +708,9 @@ public class Parser extends java_cup.runtime.lr_parser {
         }
         if(!pila_procediments.isEmpty()){
             Integer procediment = pila_procediments.peek();
-            taula_variables.afegeix_variable(procediment,null,null);
+            taula_variables.afegeix_variable(procediment,null,null,null);
         }else{
-            taula_variables.afegeix_variable(null,null,null);
+            taula_variables.afegeix_variable(null,null,null,null);
         }
         return taula_variables.n(); //darrer n
     }
@@ -657,25 +745,25 @@ public class Parser extends java_cup.runtime.lr_parser {
       sortida = new BufferedWriter(sortidap);
     
 
-    ArrayList<Sentencia> llista = taula_intermedi.get_Llista();
-    Iterator<Sentencia> iterator = llista.iterator();
-    while (iterator.hasNext()) {
-      Sentencia s = iterator.next();
-      try {
-        sortida.write(
-            "Operacio: " + s.getOperacio() + " Op1: " + s.getOp1() + " Op2: " + s.getOp2() + " Desti: " + s.getDesti());
-            sortida.write("\n");
-      } catch (IOException error) {
-        System.out.println(error.toString());
-      }
-    }
+        ArrayList<Sentencia> llista = taula_intermedi.get_Llista();
+        Iterator<Sentencia> iterator = llista.iterator();
+        while (iterator.hasNext()) {
+        Sentencia s = iterator.next();
+        try {
+            sortida.write(
+                "Operacio: " + s.getOperacio() + " Op1: " + s.getOp1() + " Op2: " + s.getOp2() + " Desti: " + s.getDesti());
+                sortida.write("\n");
+        } catch (IOException error) {
+            System.out.println(error.toString());
+        }
+        }
 
-    try {
-      sortida.close();
-    } catch (IOException error) {
-      System.out.println(error.toString());
+        try {
+        sortida.close();
+        } catch (IOException error) {
+        System.out.println(error.toString());
+        }
     }
-  }
 
     /**********************************************************************
      * sobrecàrrega de mètodes per gestionar els errors que es localitzin *
@@ -1307,6 +1395,7 @@ class CUP$Parser$actions {
 		System.out.println("M2");
     taula_simbols.entra_bloc();
     taula_intermedi.genera(Operacio.skip,null,null,-1);
+    pila_procediments.push(-1);
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("M2",46, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1316,6 +1405,7 @@ class CUP$Parser$actions {
             {
               Object RESULT =null;
 		System.out.println("M3");
+    nouproc(1,0,-1,-1);
     taula_simbols.surtbloc();
     taula_intermedi.genera(Operacio.retorn,null,null,-1);
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("M3",47, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
@@ -1780,7 +1870,7 @@ class CUP$Parser$actions {
                         errorSemantic = true;
                     }else{
                         //*****************Intermedi********************
-                        Integer n = novavar(false);
+                        Integer n = novavar(false,((Escalar) tipus.dt()).getBytes());
                         taula_intermedi.genera(Operacio.copia,e.getR(),null,var.getMy_nv());
                         //****************************************************
                     }
@@ -1824,7 +1914,7 @@ class CUP$Parser$actions {
                         errorSemantic = true;
                     }else{
                         //****************************Intermedi**********************************
-                        //Integer n = novavar(false);
+                        Integer n = novavar(false,((Escalar) tipus.dt()).getBytes());
                         taula_intermedi.genera(Operacio.copia,m.getR(),null,var.getMy_nv());
                         //***********************************************************************
                     }
@@ -1997,29 +2087,19 @@ class CUP$Parser$actions {
             if(descripcio instanceof Dvar){ //variable
                 Dvar var = (Dvar) descripcio;
                 Dtipus tipus = (Dtipus) taula_simbols.consulta(var.tipus()); //ALERTA EN NO TROBAR
-                RESULT = new SimbolR((String)d.valor,(String)d.valor,tipus.dt().tipus_subjacent(),var.tipus(),"var",var.getMy_nv(),0,var.tipus(),d.esquerre,d.dreta);
+                RESULT = new SimbolR((String)d.valor,(String)d.valor,tipus.dt().tipus_subjacent(),var.tipus(),"var",var.getMy_nv(),-1,var.tipus(),d.esquerre,d.dreta);
             }else if(descripcio instanceof Dconst){ //variable o tupla
                 Dconst c = (Dconst) descripcio;
                 Dtipus tipus = (Dtipus) taula_simbols.consulta(c.tipus()); //ALERTA EN NO TROBAR
 
-                
-                //novavar i afegir valor de la constant
-                /*
-                Integer n = novavar(true);
-                if(c.tipus()=="tupla"){
-                    taula_intermedi.genera(Operacio.copia,(String)d.valor,null,n); // t1 = a = tupla a
-                }else{
-                    taula_intermedi.genera(Operacio.copia,(String)d.valor,null,n); 
-                }*/
-                
-                RESULT = new SimbolR((String)d.valor,(String)d.valor,tipus.dt().tipus_subjacent(),c.tipus(),"const",c.getTemporal(),0,c.tipus(),d.esquerre,d.dreta);
+                RESULT = new SimbolR((String)d.valor,(String)d.valor,tipus.dt().tipus_subjacent(),c.tipus(),"const",c.getTemporal(),-1,c.tipus(),d.esquerre,d.dreta);
                 //el tipus pot ser tupla També
                 //això es per quan ens interessa ficar una tupla dins una tupla o un subprograma
                 //id(a) on 'a' és una tupla.
             }else if(descripcio instanceof Dargin){
                 Dargin var = (Dargin) descripcio;
                 Dtipus tipus = (Dtipus) taula_simbols.consulta(var.tipus()); //ALERTA EN NO TROBAR
-                RESULT = new SimbolR((String)d.valor,(String)d.valor,tipus.dt().tipus_subjacent(),var.tipus(),"var",var.nv(),0,var.tipus(),d.esquerre,d.dreta);
+                RESULT = new SimbolR((String)d.valor,(String)d.valor,tipus.dt().tipus_subjacent(),var.tipus(),"var",var.nv(),-1,var.tipus(),d.esquerre,d.dreta);
 
             }else{ //si no es tracta ni d'una variable, ni d'una constant, error
                 report_error_semantic("ID es un procediment \""+d.valor+"\"", d.esquerre,d.dreta);
@@ -2073,7 +2153,7 @@ class CUP$Parser$actions {
                             taula_intermedi.genera(Operacio.crida,nova,null,proc.np());
                             //******************************************************** 
 
-                            RESULT = new SimbolR((String)id.valor,t1.dt().tipus_subjacent(),tipus,"procc",nova,0,tipus,id.esquerre,id.dreta);
+                            RESULT = new SimbolR((String)id.valor,t1.dt().tipus_subjacent(),tipus,"procc",nova,-1,tipus,id.esquerre,id.dreta);
                         }else{
                             report_error_semantic("El tipus del subprograma \""+id.valor+"\" es erroni", id.esquerre,id.dreta);
                             errorSemantic = true;
@@ -2139,7 +2219,7 @@ class CUP$Parser$actions {
                             taula_intermedi.genera(Operacio.crida,nova,null,proc.np());
                         //******************************************************** 
                         
-                        RESULT = new SimbolR(nom,tipus.dt().tipus_subjacent(),proc.getTipus(),"procc",nova,0,proc.getTipus(),id.esquerre,r.dreta);
+                        RESULT = new SimbolR(nom,tipus.dt().tipus_subjacent(),proc.getTipus(),"procc",nova,-1,proc.getTipus(),id.esquerre,r.dreta);
                     }
                 }else{ //per si acàs
                     report_error_semantic("Id no és un subprograma", id.esquerre,r.dreta);
@@ -2172,10 +2252,11 @@ class CUP$Parser$actions {
                 if(c!=null){
                     Dtipus tipus = (Dtipus) taula_simbols.consulta(c.tipus());
                     Integer despl = c.getDespl();
-                    despl += r.getDpc();
+                    //despl += r.getDpc();
                     
                     if(c.tipus()=="tupla"){ //comprovar cas pel intermedi
-                        RESULT = new SimbolR(r.getIdb(),c.getIdb(),tipus.dt().tipus_subjacent(),c.tipus(),"const",r.getR(),despl,c.tipus(),r.getEsquerre(),i.dreta);
+                        Dconst cons = (Dconst) taula_simbols.consulta(c.getIdb());
+                        RESULT = new SimbolR(r.getIdb_dreta(),c.getIdb(),tipus.dt().tipus_subjacent(),c.tipus(),"const",cons.getTemporal(),0,c.tipus(),r.getEsquerre(),i.dreta);
                     }else{
                         RESULT = new SimbolR(r.getIdb(),(String)i.valor,tipus.dt().tipus_subjacent(),c.tipus(),"var",r.getR(),despl,c.tipus(),r.getEsquerre(),i.dreta);
                     }
@@ -2462,11 +2543,13 @@ class CUP$Parser$actions {
                     //Gestió
                     int n =0;
                     Stack<KeyValue> llista = v.getLlista();
-                    Integer nv = novavar(true); //per guardar els elements de la tupla
+                    Integer nv = novavar(true,0); //per guardar els elements de la tupla
+                    Entrada ent = taula_variables.cerca_variable(nv);
+
                     Boolean bol = taula_simbols.posar((String)i.valor,new Dconst("tupla",nv)); //mirar si posar es true o false
                     if(bol){
                         //*********Gestió Intermedi************
-                        //Integer nv = novavar(true); //per guardar els elements de la tupla
+                        //Integer nv = novavar(true,0); //per guardar els elements de la tupla
                         Integer n2 =0;
                         //*************************************
 
@@ -2476,27 +2559,20 @@ class CUP$Parser$actions {
                             SimbolE simbol = k.value; //valor o variable a afegir
                             if(nom == "buit"){ //no té identificador
                                 nom = "Item"+n; //nom que li posam als camps que no tenen id
-                                n++;
-                            }else{
-                                n++; 
                             }
 
+                            ent.afegeixOcupacio(taula_variables.get_ocupacio(simbol.getR()));
                             if(simbol.getTsb()=="ts_record"){
 
-                                taula_intermedi.genera(Operacio.param_compost,1,n2,nv);
-                                n2++;
-                                taula_intermedi.genera(Operacio.param_compost,simbol.getR(),n2,nv); //op,1,2,3 -> 3[2] = 1
-                                n2++;
-
-                                bol = taula_simbols.posarcamp((String)i.valor,nom,new Dcamp(simbol.getIdb(),simbol.getTipus(),n,simbol.getTsb()));
+                                taula_intermedi.genera(Operacio.ind_assign,simbol.getR(),n,nv); //op,1,2,3 -> 3[2] = 1
+                                bol = taula_simbols.posarcamp((String)i.valor,nom,new Dcamp(simbol.getIdb(),simbol.getTipus(),n++,simbol.getTsb()));
                             }else{
-                                taula_intermedi.genera(Operacio.param_compost,0,n2,nv);
-                                n2++;
-                                taula_intermedi.genera(Operacio.param_compost,simbol.getR(),n2,nv); //op,1,2,3 -> 3[2] = 1
-                                n2++;
 
-                                bol = taula_simbols.posarcamp((String)i.valor,nom,new Dcamp(simbol.getTipus(),n,simbol.getTsb()));
+                                taula_intermedi.genera(Operacio.ind_assign,simbol.getR(),n,nv); //op,1,2,3 -> 3[2] = 1
+                                bol = taula_simbols.posarcamp((String)i.valor,nom,new Dcamp(simbol.getTipus(),n++,simbol.getTsb()));
                             }
+
+
                             if(bol == false){
                                 report_error_semantic("El camp amb nom \""+nom+"\" ja existeix", simbol.getEsquerre(),simbol.getDreta());
                                 errorSemantic = true;
@@ -2689,7 +2765,7 @@ class CUP$Parser$actions {
         if((t==null)||(t.getTsb() == "ts_nul")){ //venim de Tp -> @
             RESULT = new SimbolT(n.getIdb(),n.getTsb(),n.getTipus(),n.getMode(),n.getEsquerre(),n.getDreta(),n.getR());
         }else{
-            if((n.getTsb() == "ts_nul")||(n.getTsb()=="ts_boolea")){
+            if((n.getTsb() == "ts_nul")){
                 report_error_semantic("El terminal no es adequat per una operació lògica", n.getEsquerre(),n.getDreta()); //arreglar
                 errorSemantic = true;
                 RESULT = new SimbolT();
@@ -2710,27 +2786,55 @@ class CUP$Parser$actions {
                         taula_intermedi.genera(Operacio.salt_condicional_diferent,n.getR(),t.getR(),e1);
                     break;
                     case ParserSym.MENOR:
-                        taula_intermedi.genera(Operacio.salt_condicional_menor,n.getR(),t.getR(),e1);
+                        if((n.getTsb() != "ts_boolea")){
+                            taula_intermedi.genera(Operacio.salt_condicional_menor,n.getR(),t.getR(),e1);
+                        }else{
+                            report_error_semantic("El terminal no es adequat per una operació lògica", n.getEsquerre(),n.getDreta()); //arreglar
+                            errorSemantic = true;
+                            RESULT = new SimbolT();
+                        }
                     break;
                     case ParserSym.MENORI:
-                        taula_intermedi.genera(Operacio.salt_condicional_menorigual,n.getR(),t.getR(),e1);
+                            if((n.getTsb() != "ts_boolea")){
+                                taula_intermedi.genera(Operacio.salt_condicional_menorigual,n.getR(),t.getR(),e1);
+                            }else{
+                                report_error_semantic("El terminal no es adequat per una operació lògica", n.getEsquerre(),n.getDreta()); //arreglar
+                                errorSemantic = true;
+                                RESULT = new SimbolT();
+                            }
                     break;
                     case ParserSym.MAJOR:
-                        taula_intermedi.genera(Operacio.salt_condicional_major,n.getR(),t.getR(),e1);
+                            if((n.getTsb() != "ts_boolea")){
+                                taula_intermedi.genera(Operacio.salt_condicional_major,n.getR(),t.getR(),e1);
+                            }else{
+                                report_error_semantic("El terminal no es adequat per una operació lògica", n.getEsquerre(),n.getDreta()); //arreglar
+                                errorSemantic = true;
+                                RESULT = new SimbolT();
+                            }
                     break;
                     case ParserSym.MAJORI:
-                        taula_intermedi.genera(Operacio.salt_condicional_majorigual,n.getR(),t.getR(),e1);
+                            if((n.getTsb() != "ts_boolea")){
+                                taula_intermedi.genera(Operacio.salt_condicional_majorigual,n.getR(),t.getR(),e1);
+                            }else{
+                                report_error_semantic("El terminal no es adequat per una operació lògica", n.getEsquerre(),n.getDreta()); //arreglar
+                                errorSemantic = true;
+                                RESULT = new SimbolT();
+                            }
                     break;
                 }
-                taula_intermedi.genera(Operacio.copia_valor,0,null,n1);
-                taula_intermedi.genera(Operacio.salt_incondicional,null,null,e2);
-                taula_intermedi.genera(Operacio.skip,null,null,e1);
-                taula_intermedi.genera(Operacio.copia_valor,-1,null,n1);
-                taula_intermedi.genera(Operacio.skip,null,null,e2);
 
-                //***************************************************************************
+                if(!errorSemantic){
+                    taula_intermedi.genera(Operacio.copia_valor,0,null,n1);
+                    taula_intermedi.genera(Operacio.salt_incondicional,null,null,e2);
+                    taula_intermedi.genera(Operacio.skip,null,null,e1);
+                    taula_intermedi.genera(Operacio.copia_valor,-1,null,n1);
+                    taula_intermedi.genera(Operacio.skip,null,null,e2);
 
-                RESULT = new SimbolT("ts_boolea","id_nula","moderesult",n.getEsquerre(),t.getDreta(),n1);
+                    //***************************************************************************
+
+                    RESULT = new SimbolT("ts_boolea","id_nula","moderesult",n.getEsquerre(),t.getDreta(),n1); 
+                }
+                
             }   
         }
     }
@@ -2751,7 +2855,7 @@ class CUP$Parser$actions {
     if(errorSemantic){
             RESULT = new SimbolTp();
         }else{
-            if((n.getTsb() == "ts_nul")||(n.getTsb()=="ts_boolea")){
+            if((n.getTsb() == "ts_nul")){
                         report_error_semantic("El terminal no es adequat per una operació de comparacio", n.getEsquerre(),n.getDreta());
                         errorSemantic = true;
                         RESULT = new SimbolTp();
@@ -2775,7 +2879,7 @@ class CUP$Parser$actions {
         if(errorSemantic){
             RESULT = new SimbolTp();
         }else{
-            if((n.getTsb() == "ts_nul")||(n.getTsb()=="ts_boolea")){
+            if((n.getTsb() == "ts_nul")){
                         report_error_semantic("El terminal no es adequat per una operació de DIF", n.getEsquerre(),n.getDreta());
                         errorSemantic = true;
                         RESULT = new SimbolTp();
@@ -3513,7 +3617,7 @@ class CUP$Parser$actions {
 		System.out.println("F -> vcaracter");
                 Integer n = novavar(true,2);
                 taula_intermedi.genera(Operacio.copia_valor,(Character)v.valor,null,n);
-                RESULT = new SimbolF("ts_caracter","car","modeconst",v.esquerre,v.dreta,n);
+                RESULT = new SimbolF("ts_enter","car","modeconst",v.esquerre,v.dreta,n);
                 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("F",30, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
@@ -3532,7 +3636,7 @@ class CUP$Parser$actions {
 		System.out.println("F -> ADD");
                 Integer n = novavar(true,2);
                 taula_intermedi.genera(Operacio.copia_valor,(Integer)v.valor,null,n); //revisar si passar a decimal o enter
-                RESULT = new SimbolF("ts_caracter","car","modeconst",a.esquerre,v.dreta,n); //assegurar que a car hi posam ts_caracter
+                RESULT = new SimbolF("ts_enter","car","modeconst",a.esquerre,v.dreta,n); //assegurar que a car hi posam ts_caracter
                 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("F",30, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
@@ -3551,7 +3655,7 @@ class CUP$Parser$actions {
 		System.out.println("F -> SUB");
                 Integer n = novavar(true,2);
                 taula_intermedi.genera(Operacio.copia_valor,(Integer)v.valor*-1,null,n); //revisar si passar a decimal o enter
-                RESULT = new SimbolF("ts_caracter","car","modeconst",s.esquerre,v.dreta,n);
+                RESULT = new SimbolF("ts_enter","car","modeconst",s.esquerre,v.dreta,n);
                 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("F",30, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
@@ -3575,7 +3679,7 @@ class CUP$Parser$actions {
                     }else{
                         if(r.getMvp() == "var"){
                             Integer n;
-                            if(r.getDpc()!=0){
+                            if(r.getDpc()!=-1){
                                 n = novavar(true);
                                 taula_intermedi.genera(Operacio.ind_param,r.getR(),r.getDpc(),n);
                             }else{
@@ -3585,7 +3689,7 @@ class CUP$Parser$actions {
                         }else if(r.getMvp() == "const"){
 
                             Integer n;
-                            if(r.getDpc()!=0){
+                            if(r.getDpc()!=-1){
                                 n = novavar(true);
                                 taula_intermedi.genera(Operacio.ind_param,r.getR(),r.getDpc(),n);
                             }else{

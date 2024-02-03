@@ -1,7 +1,8 @@
 package Compilador.Intermedi;
+
 import java.util.ArrayList;
 
-public class TaulaVariables{
+public class TaulaVariables {
 
     ArrayList<Entrada> files;
 
@@ -9,31 +10,33 @@ public class TaulaVariables{
         return files;
     }
 
-    public TaulaVariables(){
+    public TaulaVariables() {
         files = new ArrayList<>();
     }
 
-    public Integer n(){
-        return files.size()-1;
+    public Integer n() {
+        return files.size() - 1;
     }
 
-    public void afegeix_variable(Integer subprograma,Boolean parametre,Integer ocupacio){
-        files.add(new Entrada(subprograma, parametre,ocupacio));
+    public void afegeix_variable(Integer subprograma, Boolean parametre, Integer ocupacio, Integer posicio) {
+        files.add(new Entrada(subprograma, parametre, ocupacio, posicio));
     }
 
-    public Entrada cerca_varaible(Integer n){
+    public Entrada cerca_variable(Integer n) {
         return files.get(n);
     }
 
-    public void set_ocupacio(Integer n,Integer ocupacio){
+    public void set_ocupacio(Integer n, Integer ocupacio) {
         files.get(n).setOcupacio(ocupacio);
     }
 
-    public Integer get_ocupacio(Integer n){
+    public Integer get_ocupacio(Integer n) {
         return files.get(n).ocupacio();
     }
-    public class Entrada{
+
+    public class Entrada {
         private Integer subprograma;
+
         public Integer getSubprograma() {
             return subprograma;
         }
@@ -44,6 +47,9 @@ public class TaulaVariables{
             this.ocupacio = ocupacio;
         }
 
+        public void afegeixOcupacio(Integer ocupacio) {
+            this.ocupacio += ocupacio;
+        }
 
         public Integer ocupacio() {
             return ocupacio;
@@ -51,16 +57,21 @@ public class TaulaVariables{
 
         private Boolean parametre;
 
-
         public Boolean getParametre() {
             return parametre;
         }
 
+        private Integer posicio_pila;
 
-        public Entrada(Integer subprograma,Boolean parametre,Integer ocupacio){
+        public Integer getPosicio_pila() {
+            return posicio_pila;
+        }
+
+        public Entrada(Integer subprograma, Boolean parametre, Integer ocupacio, Integer posicio_pila) {
             this.subprograma = subprograma;
             this.parametre = parametre;
             this.ocupacio = ocupacio;
+            this.posicio_pila = posicio_pila;
         }
     }
 }

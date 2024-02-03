@@ -199,6 +199,18 @@ endline      = ['\r'|'\n'|"\r\n"]+
       return str;
     }
 
+    private Character tractar1(String entrada){
+      String str = "";
+      char [] caracters = entrada.toCharArray();
+
+      int i =0;
+      while(caracters[i]!='·'){
+        i++;
+      }
+
+      return caracters[i+1];
+    }
+
 %}
 
 
@@ -273,7 +285,7 @@ endline      = ['\r'|'\n'|"\r\n"]+
 {vlogic}                   { return symbol(ParserSym.vlogic,new Token(this.yytext()));}
 
 //{cadena}         {return symbol(ParserSym.vcadena,new Token(tractar(this.yytext())));} //return symbol(ParserSym.vcadena,this.yytext());
-{car}         {return symbol(ParserSym.vcaracter,new Token(tractar(this.yytext())));} //return symbol(ParserSym.vcaracter,this.yytext());
+{car}         {return symbol(ParserSym.vcaracter,new Token(tractar1(this.yytext())));} //return symbol(ParserSym.vcaracter,this.yytext());
 
 
 

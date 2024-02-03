@@ -500,6 +500,18 @@ public class Scanner implements java_cup.runtime.Scanner {
       return str;
     }
 
+    private Character tractar1(String entrada){
+      String str = "";
+      char [] caracters = entrada.toCharArray();
+
+      int i =0;
+      while(caracters[i]!='·'){
+        i++;
+      }
+
+      return caracters[i+1];
+    }
+
 
 
   /**
@@ -1147,7 +1159,7 @@ public class Scanner implements java_cup.runtime.Scanner {
             // fall through
           case 111: break;
           case 51:
-            { return symbol(ParserSym.vcaracter,new Token(tractar(this.yytext())));
+            { return symbol(ParserSym.vcaracter,new Token(tractar1(this.yytext())));
             }
             // fall through
           case 112: break;

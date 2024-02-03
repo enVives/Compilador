@@ -40,9 +40,11 @@ public class SimbolR {
         this.esquerre = esquerre;
         this.dreta = dreta;
         this.idb_dreta = idb;
+        this.dpc = -1;
     }
 
-    public SimbolR(String idb, String idb_dreta, String tsb, String tipus, String mvp,Integer r, Integer dpc,String tp, Location esquerre,
+    public SimbolR(String idb, String idb_dreta, String tsb, String tipus, String mvp, Integer r, Integer dpc,
+            String tp, Location esquerre,
             Location dreta) {
         this.mvp = mvp;
         this.tsb = tsb;
@@ -56,7 +58,7 @@ public class SimbolR {
         this.tp = tp;
     }
 
-    public SimbolR(String idb,String tsb, String tipus, String mvp, Integer r, Integer dpc,
+    public SimbolR(String idb, String tsb, String tipus, String mvp, Integer r, Integer dpc,
             String tp, Location esquerre, Location dreta) {
         this.mvp = mvp;
         this.tsb = tsb;
