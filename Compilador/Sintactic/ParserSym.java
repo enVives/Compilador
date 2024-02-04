@@ -8,71 +8,51 @@ package Compilador.Sintactic;
 /** CUP generated class containing symbol constants. */
 public class ParserSym {
   /* terminals */
-  public static final int INTERROG = 22;
-  public static final int DOSPUNTS = 20;
-  public static final int fer = 50;
-  public static final int tupla = 42;
-  public static final int MULT = 10;
-  public static final int main = 57;
-  public static final int seleccio = 45;
-  public static final int retorna = 53;
-  public static final int IGIG = 30;
-  public static final int LPAREN = 13;
-  public static final int LCORCH = 23;
-  public static final int MENORI = 31;
-  public static final int vdecimal = 3;
-  public static final int RPAREN = 14;
-  public static final int afegeix = 59;
-  public static final int pdefecte = 47;
-  public static final int NOT = 37;
-  public static final int AND = 36;
-  public static final int RCORCH = 24;
-  public static final int caracter = 41;
-  public static final int borra = 58;
-  public static final int AUTOSUM = 15;
-  public static final int sortidaS = 56;
-  public static final int OR = 35;
-  public static final int si = 43;
-  public static final int SUMAHI = 17;
-  public static final int DIV = 11;
-  public static final int MAJOR = 34;
-  public static final int ASSIGN = 19;
-  public static final int AUTOSUB = 16;
+  public static final int DOSPUNTS = 17;
+  public static final int fer = 35;
+  public static final int tupla = 31;
+  public static final int MULT = 9;
+  public static final int main = 40;
+  public static final int retorna = 37;
+  public static final int IGIG = 24;
+  public static final int LPAREN = 12;
+  public static final int RPAREN = 13;
+  public static final int NOT = 27;
+  public static final int AND = 26;
+  public static final int caracter = 30;
+  public static final int sortidaS = 39;
+  public static final int OR = 25;
+  public static final int si = 32;
+  public static final int SUMAHI = 14;
+  public static final int DIV = 10;
+  public static final int ASSIGN = 16;
   public static final int ID = 2;
-  public static final int LCLAUDAT = 25;
+  public static final int LCLAUDAT = 19;
   public static final int EOF = 0;
   public static final int error = 1;
-  public static final int mentres = 49;
-  public static final int COMA = 28;
-  public static final int DIF = 29;
-  public static final int ADD = 8;
-  public static final int entradaS = 7;
-  public static final int MENOR = 33;
-  public static final int constant = 55;
-  public static final int MOD = 12;
-  public static final int vcaracter = 6;
-  public static final int PUNT = 27;
-  public static final int MAJORI = 32;
-  public static final int cas = 46;
-  public static final int vlogic = 5;
-  public static final int metode = 52;
-  public static final int logic = 40;
-  public static final int RESTAHI = 18;
-  public static final int nou = 54;
-  public static final int venter = 4;
-  public static final int acaba = 48;
-  public static final int PUNTICOMA = 21;
-  public static final int per = 51;
-  public static final int enter = 39;
-  public static final int RCLAUDAT = 26;
-  public static final int SUB = 9;
-  public static final int decimal = 38;
-  public static final int sino = 44;
+  public static final int mentres = 34;
+  public static final int COMA = 22;
+  public static final int DIF = 23;
+  public static final int ADD = 7;
+  public static final int entradaS = 6;
+  public static final int constant = 38;
+  public static final int MOD = 11;
+  public static final int vcaracter = 5;
+  public static final int PUNT = 21;
+  public static final int vlogic = 4;
+  public static final int metode = 36;
+  public static final int logic = 29;
+  public static final int RESTAHI = 15;
+  public static final int venter = 3;
+  public static final int PUNTICOMA = 18;
+  public static final int enter = 28;
+  public static final int RCLAUDAT = 20;
+  public static final int SUB = 8;
+  public static final int sino = 33;
   public static final String[] terminalNames = new String[] {
   "EOF",
   "error",
   "ID",
-  "vdecimal",
   "venter",
   "vlogic",
   "vcaracter",
@@ -84,51 +64,33 @@ public class ParserSym {
   "MOD",
   "LPAREN",
   "RPAREN",
-  "AUTOSUM",
-  "AUTOSUB",
   "SUMAHI",
   "RESTAHI",
   "ASSIGN",
   "DOSPUNTS",
   "PUNTICOMA",
-  "INTERROG",
-  "LCORCH",
-  "RCORCH",
   "LCLAUDAT",
   "RCLAUDAT",
   "PUNT",
   "COMA",
   "DIF",
   "IGIG",
-  "MENORI",
-  "MAJORI",
-  "MENOR",
-  "MAJOR",
   "OR",
   "AND",
   "NOT",
-  "decimal",
   "enter",
   "logic",
   "caracter",
   "tupla",
   "si",
   "sino",
-  "seleccio",
-  "cas",
-  "pdefecte",
-  "acaba",
   "mentres",
   "fer",
-  "per",
   "metode",
   "retorna",
-  "nou",
   "constant",
   "sortidaS",
-  "main",
-  "borra",
-  "afegeix"
+  "main"
   };
 }
 

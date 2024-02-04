@@ -16,31 +16,19 @@ public class Operacio {
 
     public static final int skip = 10;
     public static final int salt_incondicional = 11;
-    public static final int salt_condicional_menor = 12;
-    public static final int salt_condicional_menorigual = 13;
-    public static final int salt_condicional_igual = 14;
-    public static final int salt_condicional_diferent = 15;
-    public static final int salt_condicional_majorigual = 16;
-    public static final int salt_condicional_major = 17;
+    public static final int salt_condicional_igual = 12;
+    public static final int salt_condicional_diferent = 13;
 
-    public static final int menor = 18;
-    public static final int menorigual = 19;
-    public static final int igual = 20;
-    public static final int diferent = 21;
-    public static final int majorigual = 22;
-    public static final int major = 23;
-
-    public static final int inicialitzacio = 24;
-    public static final int crida = 25;
-    public static final int retorn = 26;
-    public static final int param_simple = 27;
-    public static final int param_compost = 28; // per tuples
-    public static final int copia_valor = 29;
-    public static final int ind_param = 30;
-    public static final int pmb = 31;
-    public static final int console_read = 32;
-    public static final int console_write = 33;
-    public static final int ind_assign = 34;
+    public static final int crida = 14;
+    public static final int retorn = 15;
+    public static final int param_simple = 16;
+    public static final int param_compost = 17; // per tuples
+    public static final int copia_valor = 18;
+    public static final int ind_param = 19;
+    public static final int pmb = 20;
+    public static final int console_read = 21;
+    public static final int console_write = 22;
+    public static final int ind_assign = 23;
 
     public static final String[] mnemonic = new String[] {
             "copia",
@@ -55,19 +43,8 @@ public class Operacio {
             "not",
             "skip",
             "salt_incondicional",
-            "salt_condicional_menor",
-            "salt_condicional_menorigual",
             "salt_condicional_igual",
             "salt_condicional_diferent",
-            "salt_condicional_majorigual",
-            "salt_condicional_major",
-            "menor",
-            "menorigual",
-            "igual",
-            "diferent",
-            "majorigual",
-            "major",
-            "inicialitzacio",
             "crida",
             "retorn",
             "param_simple",

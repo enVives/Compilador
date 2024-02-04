@@ -1,12 +1,12 @@
-tupla a() = (1,2,3,4,5,6);
+tupla a () = (1,2,3);
 
-metode b(){
-
+metode ent c (){
+    retorna 0;
 }
 
-ent c = 88;
+ent b = 1 + c();
 
 metode main () {
-    ent d = 44;
+    
 }
     

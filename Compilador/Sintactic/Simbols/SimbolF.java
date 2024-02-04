@@ -7,24 +7,24 @@ public class SimbolF extends SimbolBase {
     private String tsb;
     private String mode;
     private String idb;
+
     public String getIdb() {
         return idb;
     }
 
     private Location esquerre;
-    
+
     public Location getEsquerre() {
         return esquerre;
     }
 
     private Location dreta;
 
-
     public Location getDreta() {
         return dreta;
     }
 
-    public SimbolF(String tsb, String tipus, String mode,Location esquerre,Location dreta,Integer r) {
+    public SimbolF(String tsb, String tipus, String mode, Location esquerre, Location dreta, Integer r) {
         super();
         this.tsb = tsb;
         this.tipus = tipus;
@@ -35,17 +35,7 @@ public class SimbolF extends SimbolBase {
         this.r = r;
     }
 
-    public SimbolF(String tsb, String tipus, String mode,Location esquerre,Location dreta) {
-        super();
-        this.tsb = tsb;
-        this.tipus = tipus;
-        this.mode = mode;
-        this.esquerre = esquerre;
-        this.dreta = dreta;
-        this.idb = null;
-    }
-
-    public SimbolF(String idb,String tsb, String tipus, String mode,Location esquerre,Location dreta,Integer r) {
+    public SimbolF(String idb, String tsb, String tipus, String mode, Location esquerre, Location dreta, Integer r) {
         super();
         this.tsb = tsb;
         this.tipus = tipus;
@@ -56,24 +46,24 @@ public class SimbolF extends SimbolBase {
         this.r = r;
     }
 
-    //Atributs codi Intermedi
+    // Atributs codi Intermedi
 
     private Integer r;
+
     public Integer getR() {
         return r;
     }
 
     private Integer d;
-    
 
     public Integer getD() {
         return d;
     }
 
-    public SimbolF(){
+    public SimbolF() {
         super();
         tsb = "ts_nul";
-        tipus = "id_nula";
+        tipus = "id_nul";
     }
 
     public String getTsb() {

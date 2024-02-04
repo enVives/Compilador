@@ -3,7 +3,7 @@ package Compilador.Sintactic.Simbols;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
 public class SimbolN extends SimbolBase {
-    private String ts_heretat; // el tipus que heretam del F esquerre o la operació esquerre
+
     private String tsb;
     private String tipus;
     private String mode;
@@ -24,7 +24,9 @@ public class SimbolN extends SimbolBase {
         return dreta;
     }
 
-    public SimbolN(String tsb, String tipus, String mode,Location esquerre,Location dreta,Integer r) { // alerta amb no afegir el tsb
+    public SimbolN(String tsb, String tipus, String mode, Location esquerre, Location dreta, Integer r) { // alerta amb
+                                                                                                          // no afegir
+                                                                                                          // el tsb
         super();
         this.tsb = tsb;
         this.tipus = tipus;
@@ -35,7 +37,12 @@ public class SimbolN extends SimbolBase {
         this.r = r;
     }
 
-    public SimbolN(String idb,String tsb, String tipus, String mode,Location esquerre,Location dreta,Integer r) { // alerta amb no afegir el tsb
+    public SimbolN(String idb, String tsb, String tipus, String mode, Location esquerre, Location dreta, Integer r) { // alerta
+                                                                                                                      // amb
+                                                                                                                      // no
+                                                                                                                      // afegir
+                                                                                                                      // el
+                                                                                                                      // tsb
         super();
         this.tsb = tsb;
         this.tipus = tipus;
@@ -47,7 +54,6 @@ public class SimbolN extends SimbolBase {
     }
 
     private Integer r;
-    
 
     public Integer getR() {
         return r;
@@ -56,14 +62,6 @@ public class SimbolN extends SimbolBase {
     public SimbolN() {
         tsb = "ts_nul";
         tipus = "id_nula";
-    }
-
-    public String getTs_heretat() {
-        return ts_heretat;
-    }
-
-    public void setTs_heretat(String ts_heretat) {
-        this.ts_heretat = ts_heretat;
     }
 
     public String getTsb() {

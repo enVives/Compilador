@@ -23,7 +23,10 @@ public class TaulaVariables {
     }
 
     public Entrada cerca_variable(Integer n) {
-        return files.get(n);
+        if (n != null) {
+            return files.get(n);
+        }
+        return null;
     }
 
     public void set_ocupacio(Integer n, Integer ocupacio) {
@@ -62,6 +65,10 @@ public class TaulaVariables {
         }
 
         private Integer posicio_pila;
+
+        public void setPosicio_pila(Integer posicio_pila) {
+            this.posicio_pila = posicio_pila;
+        }
 
         public Integer getPosicio_pila() {
             return posicio_pila;

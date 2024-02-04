@@ -31,7 +31,14 @@ public class Prova {
         }
     }
 
+    public Integer prova() {
+        return 0;
+    }
+
+    Integer a = 5 + prova();
+
     public static void main(String[] args) {
-        new Prova().inici();
+        int a = 3;
+        System.out.println(a);
     }
 }
