@@ -1,7 +1,8 @@
-tupla a () = (1,2,3);
-tupla b() = a;
+metode ent a(ent b, ent c){
+    retorna 0;
+}
 
 metode main () {
-    
+    ent c = a(0,0);
 }
     

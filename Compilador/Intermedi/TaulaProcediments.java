@@ -17,8 +17,9 @@ public class TaulaProcediments {
         llista = new ArrayList<>();
     }
 
-    public void afegeix_procediment(Integer n, Integer etiqueta, Integer ocupacio, Integer parametres) {
-        llista.add(new InfoProcediment(n, etiqueta, ocupacio, parametres));
+    public void afegeix_procediment(Integer n, Integer etiqueta, Integer ocupacio, Integer parametres,
+            Integer ocuapcio_retorn) {
+        llista.add(new InfoProcediment(n, etiqueta, ocupacio, parametres, ocuapcio_retorn));
     }
 
     public InfoProcediment get_procediment(Integer n) {
@@ -62,11 +63,19 @@ public class TaulaProcediments {
             return parametres;
         }
 
-        public InfoProcediment(Integer n, Integer etiqueta, Integer ocupacio, Integer parametres) {
+        private Integer lloc_retorn;
+
+        public Integer getLloc_retorn() {
+            return lloc_retorn;
+        }
+
+        public InfoProcediment(Integer n, Integer etiqueta, Integer ocupacio, Integer parametres,
+                Integer lloc_retorn) {
             this.n = n;
             this.etiqueta = etiqueta;
             this.ocupacio = ocupacio;
             this.parametres = parametres;
+            this.lloc_retorn = lloc_retorn;
         }
     }
 }

@@ -912,14 +912,424 @@ public class Parser extends java_cup.runtime.lr_parser {
                 break;
             //And
             case 5:
+                e1 = taula_variables.cerca_variable((Integer)t1);
+                e2 = taula_variables.cerca_variable((Integer)t2);
+                e3 = taula_variables.cerca_variable((Integer)t3);
+                posicioOperand1 = e1.getPosicio_pila();
+                posicioOperand2 = e2.getPosicio_pila();
+                posicioDesti = e3.getPosicio_pila();
+                ocupacioOperand1 = e1.ocupacio();
+                ocupacioOperand2 = e2.ocupacio();
+                ocupacioDesti = e3.ocupacio();
+                llargOperand1 = llargaria(ocupacioOperand1);
+                llargOperand2 = llargaria(ocupacioOperand2);
+                llargDesti = llargaria(ocupacioDesti);
+
+                if(posicioOperand1 != null) {
+                    if(posicioOperand2 != null) {
+                        if(posicioDesti != null){
+                            str += "\tMOVE.B "+posicioOperand1+"(A7),D0\n";
+                            str += "\tAND.B "+posicioOperand2+"(A7),D0\n";
+                            str += "\tMOVE.B D0,"+posicioDesti+"(A7)\n";
+                        }else{
+                            str += "\tMOVE.B "+posicioOperand1+"(A7),D0\n";
+                            str += "\tAND.B "+posicioOperand2+"(A7),D0\n";
+                            str += "\tMOVE.B D0,V"+(Integer)t3+"\n";
+                        }
+                    } else {
+                        if(posicioDesti != null){
+                            str += "\tMOVE.B "+posicioOperand1+"(A7),D0\n";
+                            str += "\tAND.B V"+(Integer)t2+"(A7),D0\n";
+                            str += "\tMOVE.B D0,"+posicioDesti+"(A7)\n";
+                        }else{
+                            str += "\tMOVE.B "+posicioOperand1+"(A7),D0\n";
+                            str += "\tAND.B V"+(Integer)t2+"(A7),D0\n";
+                            str += "\tMOVE.B D0,V"+(Integer)t3+"\n";
+                        }
+                    }
+                } else {
+                    if (posicioOperand2 != null) {
+                        if(posicioDesti != null){
+                            str += "\tMOVE.B V"+(Integer)t1+",D0\n";
+                            str += "\tAND.B "+posicioOperand2+"(A7),D0\n";
+                            str += "\tMOVE.B D0,"+posicioDesti+"(A7)\n";
+                        }else{
+                            str += "\tMOVE.B V"+(Integer)t1+",D0\n";
+                            str += "\tAND.B "+posicioOperand2+"(A7),D0\n";
+                            str += "\tMOVE.B D0,V"+(Integer)t3+"\n";
+                        }
+                    } else {
+                        if(posicioDesti != null){
+                            str += "\tMOVE.B V"+(Integer)t1+",D0\n";
+                            str += "\tAND.B V"+(Integer)t2+"(A7),D0\n";
+                            str += "\tMOVE.B D0,"+posicioDesti+"(A7)\n";
+                        }else{
+                            str += "\tMOVE.B V"+(Integer)t1+",D0\n";
+                            str += "\tAND.B V"+(Integer)t2+"(A7),D0\n";
+                            str += "\tMOVE.B D0,V"+(Integer)t3+"\n";
+                        }
+                    }
+                }
+                str += "\tCLR.L D0\n";
                 break;
             //Or
             case 6:
+                e1 = taula_variables.cerca_variable((Integer)t1);
+                e2 = taula_variables.cerca_variable((Integer)t2);
+                e3 = taula_variables.cerca_variable((Integer)t3);
+                posicioOperand1 = e1.getPosicio_pila();
+                posicioOperand2 = e2.getPosicio_pila();
+                posicioDesti = e3.getPosicio_pila();
+                ocupacioOperand1 = e1.ocupacio();
+                ocupacioOperand2 = e2.ocupacio();
+                ocupacioDesti = e3.ocupacio();
+                llargOperand1 = llargaria(ocupacioOperand1);
+                llargOperand2 = llargaria(ocupacioOperand2);
+                llargDesti = llargaria(ocupacioDesti);
+
+                if(posicioOperand1 != null) {
+                    if(posicioOperand2 != null) {
+                        if(posicioDesti != null){
+                            str += "\tMOVE.B "+posicioOperand1+"(A7),D0\n";
+                            str += "\tOR.B "+posicioOperand2+"(A7),D0\n";
+                            str += "\tMOVE.B D0,"+posicioDesti+"(A7)\n";
+                        }else{
+                            str += "\tMOVE.B "+posicioOperand1+"(A7),D0\n";
+                            str += "\tAND.B "+posicioOperand2+"(A7),D0\n";
+                            str += "\tMOVE.B D0,V"+(Integer)t3+"\n";
+                        }
+                    } else {
+                        if(posicioDesti != null){
+                            str += "\tMOVE.B "+posicioOperand1+"(A7),D0\n";
+                            str += "\tOR.B V"+(Integer)t2+"(A7),D0\n";
+                            str += "\tMOVE.B D0,"+posicioDesti+"(A7)\n";
+                        }else{
+                            str += "\tMOVE.B "+posicioOperand1+"(A7),D0\n";
+                            str += "\tOR.B V"+(Integer)t2+"(A7),D0\n";
+                            str += "\tMOVE.B D0,V"+(Integer)t3+"\n";
+                        }
+                    }
+                } else {
+                    if (posicioOperand2 != null) {
+                        if(posicioDesti != null){
+                            str += "\tMOVE.B V"+(Integer)t1+",D0\n";
+                            str += "\tOR.B "+posicioOperand2+"(A7),D0\n";
+                            str += "\tMOVE.B D0,"+posicioDesti+"(A7)\n";
+                        }else{
+                            str += "\tMOVE.B V"+(Integer)t1+",D0\n";
+                            str += "\tOR.B "+posicioOperand2+"(A7),D0\n";
+                            str += "\tMOVE.B D0,V"+(Integer)t3+"\n";
+                        }
+                    } else {
+                        if(posicioDesti != null){
+                            str += "\tMOVE.B V"+(Integer)t1+",D0\n";
+                            str += "\tOR.B V"+(Integer)t2+"(A7),D0\n";
+                            str += "\tMOVE.B D0,"+posicioDesti+"(A7)\n";
+                        }else{
+                            str += "\tMOVE.B V"+(Integer)t1+",D0\n";
+                            str += "\tOR.B.B V"+(Integer)t2+"(A7),D0\n";
+                            str += "\tMOVE.B D0,V"+(Integer)t3+"\n";
+                        }
+                    }
+                }
+                str += "\tCLR.L D0\n";
                 break;
             //Not
             case 7:
+                e1 = taula_variables.cerca_variable((Integer)t1);
+                e3 = taula_variables.cerca_variable((Integer)t3);
+                posicioOperand1 = e1.getPosicio_pila();
+                posicioDesti = e3.getPosicio_pila();
+                ocupacioOperand1 = e1.ocupacio();
+                ocupacioDesti = e3.ocupacio();
+                llargOperand1 = llargaria(ocupacioOperand1);
+                llargDesti = llargaria(ocupacioDesti);
+                
+                if(posicioOperand1!=null){ //variable local
+                    if(posicioDesti!=null){ //variable local
+                        str += "\tMOVE."+llargOperand1+" "+posicioOperand1+"(A7),D0";
+                        str += "\tNOT.B D0\n";
+                        str += "\tMOVE."+llargOperand1+" D0,"+posicioDesti+"(A7)\n";
+                    }else{
+                        str += "\tMOVE."+llargOperand1+" "+posicioOperand1+"(A7),D0\n";
+                        str += "\tNOT.B D0\n";
+                        str += "\tMOVE."+llargOperand1+" D0,V"+(Integer)t3+"\n";
+                    }
+                }else{
+                    if(posicioDesti!=null){ //variable local
+                        //global local
+                        str += "\tMOVE."+llargOperand1+" "+"V"+(Integer)t1+",D0\n";
+                        str += "\tNOT.B D0\n";
+                        str += "\tMOVE."+llargOperand1+" D0,"+(Integer)t3+"(A7)\n";
+                    }else{
+                        //global global
+                        str += "\tMOVE."+llargOperand1+" "+"V"+(Integer)t1+",D0\n";
+                        str += "\tNOT.B D0\n";
+                        str += "\tMOVE."+llargOperand1+" D0,V"+(Integer)t3+"\n";
+                    }
+                }
                 break;
-            //Copia_valor
+            //skip
+            case 8:
+                //(Integer)t3
+                str += "E"+(Integer)t3+":\n";
+            break;
+            //salt_incondicional
+            case 9:
+                str += "\tJPM E"+(Integer)t3+"\n";
+            break;
+            //salt_condicional_igual
+            case 10:
+                e1 = taula_variables.cerca_variable((Integer)t1);
+                e2 = taula_variables.cerca_variable((Integer)t2);
+                posicioOperand1 = e1.getPosicio_pila();
+                posicioOperand2 = e2.getPosicio_pila();
+                ocupacioOperand1 = e1.ocupacio();
+                ocupacioOperand2 = e2.ocupacio();
+                llargOperand1 = llargaria(ocupacioOperand1);
+                llargOperand2 = llargaria(ocupacioOperand2);
+
+                if(llargOperand1 == 'B'){
+                    if(llargOperand2 == 'B'){ //tots dos bytes
+                        if(posicioOperand1 != null){
+                            if(posicioOperand2 != null){
+                                str += "\tCMP.B "+posicioOperand1+"(A7),"+posicioOperand2+"(A7)\n";
+                                str += "\t BEQ E"+(Integer)t3+"\n";
+                            }else{
+                                str += "\tCMP.B "+posicioOperand1+"(A7),V"+(Integer)t2+"\n";
+                                str += "\t BEQ E"+(Integer)t3+"\n";
+                            }
+                        }else{
+                            if(posicioOperand2 != null){
+                                str += "\tCMP.B V"+(Integer)t1+","+posicioOperand2+"(A7)\n";
+                                str += "\t BEQ E"+(Integer)t3+"\n";
+                            }else{
+                                str += "\tCMP.B V"+(Integer)t1+",V"+(Integer)t2+"\n";
+                                str += "\t BEQ E"+(Integer)t3+"\n";
+                            }
+                        }
+                    }else{ // Operand2 -> byte long
+                        if(posicioOperand1 != null){
+                            if(posicioOperand2 != null){
+                                str += "\tMOVE.B "+posicioOperand1+"(A7),D0\n";
+                                str += "\tEXT.W D0\n";
+                                str += "\tEXT.L D0\n";
+                                str += "\tCMP.L D0,"+posicioOperand2+"(A7)\n";
+                                str += "\t BEQ E"+(Integer)t3+"\n";
+                            }else{
+                                str += "\tMOVE.B "+posicioOperand1+"(A7),D0\n";
+                                str += "\tEXT.W D0\n";
+                                str += "\tEXT.L D0\n";
+                                str += "\tCMP.B D0,V"+(Integer)t2+"\n";
+                                str += "\t BEQ E"+(Integer)t3+"\n";
+                            }
+                        }else{
+                            if(posicioOperand2 != null){
+                                str += "\tMOVE.B V"+(Integer)t1+",D0\n";
+                                str += "\tEXT.W D0\n";
+                                str += "\tEXT.L D0\n";
+                                str += "\tCMP.L D0,"+posicioOperand2+"(A7)\n";
+                                str += "\t BEQ E"+(Integer)t3+"\n";
+                            }else{
+                                str += "\tMOVE.B V"+(Integer)t1+",D0\n";
+                                str += "\tEXT.W D0\n";
+                                str += "\tEXT.L D0\n";
+                                str += "\tCMP.L D0,V"+(Integer)t2+"\n";
+                                str += "\t BEQ E"+(Integer)t3+"\n";
+                            }
+                        }
+                    }
+                }else{ 
+                    if(llargOperand2 == 'B'){ //long byte
+                        if(posicioOperand1 !=null){
+                            if(posicioOperand2 != null){
+                                str += "\tMOVE.B "+posicioOperand2+"(A7),D0\n";
+                                str += "\tEXT.W D0\n";
+                                str += "\tEXT.L D0\n";
+                                str += "\tCMP.L D0,"+posicioOperand1+"(A7)\n";
+                                str += "\t BEQ E"+(Integer)t3+"\n";
+                            }else{
+                                str += "\tMOVE.B "+posicioOperand2+"(A7),D0\n";
+                                str += "\tEXT.W D0\n";
+                                str += "\tEXT.L D0\n";
+                                str += "\tCMP.B D0,V"+(Integer)t1+"\n";
+                                str += "\t BEQ E"+(Integer)t3+"\n";
+                            }
+                        }else{
+                            if(posicioOperand2 != null){
+                                str += "\tMOVE.B V"+(Integer)t2+",D0\n";
+                                str += "\tEXT.W D0\n";
+                                str += "\tEXT.L D0\n";
+                                str += "\tCMP.L D0,"+posicioOperand1+"(A7)\n";
+                                str += "\t BEQ E"+(Integer)t3+"\n";
+                            }else{
+                                str += "\tMOVE.B V"+(Integer)t2+",D0\n";
+                                str += "\tEXT.W D0\n";
+                                str += "\tEXT.L D0\n";
+                                str += "\tCMP.L D0,V"+(Integer)t1+"\n";
+                                str += "\t BEQ E"+(Integer)t3+"\n";
+                            }
+                        }
+                    }else{ //long long
+                        if(posicioOperand1 != null){
+                            if(posicioOperand2 != null){
+                                str += "\tCMP.L "+posicioOperand1+"(A7),"+posicioOperand2+"(A7)\n";
+                                str += "\t BEQ E"+(Integer)t3+"\n";
+                            }else{
+                                str += "\tCMP.L "+posicioOperand1+"(A7),V"+(Integer)t2+"\n";
+                                str += "\t BEQ E"+(Integer)t3+"\n";
+                            }
+                        }else{
+                            if(posicioOperand2 != null){
+                                str += "\tCMP.L V"+(Integer)t1+","+posicioOperand2+"(A7)\n";
+                                str += "\t BEQ E"+(Integer)t3+"\n";
+                            }else{
+                                str += "\tCMP.L V"+(Integer)t1+",V"+(Integer)t2+"\n";
+                                str += "\t BEQ E"+(Integer)t3+"\n";
+                            }
+                        }
+                    }
+                }
+            break;
+            //salt_condicional_diferent
+            case 11:
+                e1 = taula_variables.cerca_variable((Integer)t1);
+                e2 = taula_variables.cerca_variable((Integer)t2);
+                posicioOperand1 = e1.getPosicio_pila();
+                posicioOperand2 = e2.getPosicio_pila();
+                ocupacioOperand1 = e1.ocupacio();
+                ocupacioOperand2 = e2.ocupacio();
+                llargOperand1 = llargaria(ocupacioOperand1);
+                llargOperand2 = llargaria(ocupacioOperand2);
+
+                if(llargOperand1 == 'B'){
+                    if(llargOperand2 == 'B'){ //tots dos bytes
+                        if(posicioOperand1 != null){
+                            if(posicioOperand2 != null){
+                                str += "\tCMP.B "+posicioOperand1+"(A7),"+posicioOperand2+"(A7)\n";
+                                str += "\t BNE E"+(Integer)t3+"\n";
+                            }else{
+                                str += "\tCMP.B "+posicioOperand1+"(A7),V"+(Integer)t2+"\n";
+                                str += "\t BNE E"+(Integer)t3+"\n";
+                            }
+                        }else{
+                            if(posicioOperand2 != null){
+                                str += "\tCMP.B V"+(Integer)t1+","+posicioOperand2+"(A7)\n";
+                                str += "\t BNE E"+(Integer)t3+"\n";
+                            }else{
+                                str += "\tCMP.B V"+(Integer)t1+",V"+(Integer)t2+"\n";
+                                str += "\t BNE E"+(Integer)t3+"\n";
+                            }
+                        }
+                    }else{ // Operand2 -> byte long
+                        if(posicioOperand1 != null){
+                            if(posicioOperand2 != null){
+                                str += "\tMOVE.B "+posicioOperand1+"(A7),D0\n";
+                                str += "\tEXT.W D0\n";
+                                str += "\tEXT.L D0\n";
+                                str += "\tCMP.L D0,"+posicioOperand2+"(A7)\n";
+                                str += "\t BNE E"+(Integer)t3+"\n";
+                            }else{
+                                str += "\tMOVE.B "+posicioOperand1+"(A7),D0\n";
+                                str += "\tEXT.W D0\n";
+                                str += "\tEXT.L D0\n";
+                                str += "\tCMP.B D0,V"+(Integer)t2+"\n";
+                                str += "\t BNE E"+(Integer)t3+"\n";
+                            }
+                        }else{
+                            if(posicioOperand2 != null){
+                                str += "\tMOVE.B V"+(Integer)t1+",D0\n";
+                                str += "\tEXT.W D0\n";
+                                str += "\tEXT.L D0\n";
+                                str += "\tCMP.L D0,"+posicioOperand2+"(A7)\n";
+                                str += "\t BNE E"+(Integer)t3+"\n";
+                            }else{
+                                str += "\tMOVE.B V"+(Integer)t1+",D0\n";
+                                str += "\tEXT.W D0\n";
+                                str += "\tEXT.L D0\n";
+                                str += "\tCMP.L D0,V"+(Integer)t2+"\n";
+                                str += "\t BNE E"+(Integer)t3+"\n";
+                            }
+                        }
+                    }
+                }else{ 
+                    if(llargOperand2 == 'B'){ //long byte
+                        if(posicioOperand1 !=null){
+                            if(posicioOperand2 != null){
+                                str += "\tMOVE.B "+posicioOperand2+"(A7),D0\n";
+                                str += "\tEXT.W D0\n";
+                                str += "\tEXT.L D0\n";
+                                str += "\tCMP.L D0,"+posicioOperand1+"(A7)\n";
+                                str += "\t BNE E"+(Integer)t3+"\n";
+                            }else{
+                                str += "\tMOVE.B "+posicioOperand2+"(A7),D0\n";
+                                str += "\tEXT.W D0\n";
+                                str += "\tEXT.L D0\n";
+                                str += "\tCMP.B D0,V"+(Integer)t1+"\n";
+                                str += "\t BNE E"+(Integer)t3+"\n";
+                            }
+                        }else{
+                            if(posicioOperand2 != null){
+                                str += "\tMOVE.B V"+(Integer)t2+",D0\n";
+                                str += "\tEXT.W D0\n";
+                                str += "\tEXT.L D0\n";
+                                str += "\tCMP.L D0,"+posicioOperand1+"(A7)\n";
+                                str += "\t BNE E"+(Integer)t3+"\n";
+                            }else{
+                                str += "\tMOVE.B V"+(Integer)t2+",D0\n";
+                                str += "\tEXT.W D0\n";
+                                str += "\tEXT.L D0\n";
+                                str += "\tCMP.L D0,V"+(Integer)t1+"\n";
+                                str += "\t BNE E"+(Integer)t3+"\n";
+                            }
+                        }
+                    }else{ //long long
+                        if(posicioOperand1 != null){
+                            if(posicioOperand2 != null){
+                                str += "\tCMP.L "+posicioOperand1+"(A7),"+posicioOperand2+"(A7)\n";
+                                str += "\t BNE E"+(Integer)t3+"\n";
+                            }else{
+                                str += "\tCMP.L "+posicioOperand1+"(A7),V"+(Integer)t2+"\n";
+                                str += "\t BNE E"+(Integer)t3+"\n";
+                            }
+                        }else{
+                            if(posicioOperand2 != null){
+                                str += "\tCMP.L V"+(Integer)t1+","+posicioOperand2+"(A7)\n";
+                                str += "\t BNE E"+(Integer)t3+"\n";
+                            }else{
+                                str += "\tCMP.L V"+(Integer)t1+",V"+(Integer)t2+"\n";
+                                str += "\t BNE E"+(Integer)t3+"\n";
+                            }
+                        }
+                    }
+                }
+            break;
+            //crida
+            case 12:
+            e1 = taula_variables.cerca_variable((Integer)t1);
+            if(e1!=null){
+                posicioOperand1 = e1.getPosicio_pila();
+                ocupacioOperand1 = e1.ocupacio();
+                llargOperand1 = llargaria(ocupacioOperand1);
+                str += "\tSUBQ.B "+ocupacioOperand1+",A7\n";
+            }
+        
+            str += "\t JSR E"+(Integer)t3;
+
+            if(e1!=null){
+                str += "\tMOVE."+llargOperand1+" (A7)+,";
+            }
+            break;
+            //retorn
+            case 13:
+
+            break;
+            //param_simple
+            case 14:
+            break;
+            //param_compost
+            case 15:
+            break;
             case 16: //-> copia_valor, #t1, null, tdesti -> copia_valor,objecte,null,objecte
                 e3 = taula_variables.cerca_variable((Integer)t3);
                 posicioDesti = e3.getPosicio_pila();
@@ -941,6 +1351,16 @@ public class Parser extends java_cup.runtime.lr_parser {
                 }
                 
                 break;
+            case 17:
+            break;
+            case 18:
+            break;
+            case 19:
+            break;
+            case 20:
+            break;
+            case 21:
+            break;
         }
         cEnsamblador += str;
     }
@@ -990,16 +1410,19 @@ public class Parser extends java_cup.runtime.lr_parser {
         return taula_variables.n(); //darrer n
     }
 
-    public void nouproc(Integer nivell, Integer parametres, Integer etiqueta, Integer np){
-        Integer ocupacio = ocupacio(np);
-        taula_procediments.afegeix_procediment(np,etiqueta,ocupacio,parametres);
+    public void nouproc(Integer nivell, Integer parametres, Integer etiqueta, Integer np,Integer lloc_retorn){
+        Integer ocupacio1 = ocupacio_locals(np);
+        Integer ocupacio2 = ocupacio_parametres(ocupacio1,np);
+        if(lloc_retorn!=null){
+            lloc_retorn = ocupacio1+ocupacio2;
+        }
+        taula_procediments.afegeix_procediment(np,etiqueta,ocupacio,parametres,lloc_retorn);
     }
 
-    public Integer ocupacio(Integer np){
+    public Integer ocupacio_locals(Integer np){
         ArrayList<Entrada> llista = taula_variables.getFiles();
         Iterator <Entrada> it = llista.iterator();
         Integer ocupacio =0;
-        Integer inici_parametres = 4; //ocupació de Pc
         
         while(it.hasNext()){
             Entrada ent = (Entrada) it.next();
@@ -1012,9 +1435,14 @@ public class Parser extends java_cup.runtime.lr_parser {
                 } 
             }
         }
-        Integer ocupacio_parametres = 0;
+        return ocupacio;
+    }
 
-        it = llista.iterator();
+    public Integer ocupacio_parametres(Integer ocupacio,Integer np){
+        Integer ocupacio_parametres = 0;
+        ArrayList<Entrada> llista = taula_variables.getFiles();
+        Iterator <Entrada> it = llista.iterator();
+
         while(it.hasNext()){
             Entrada ent = (Entrada) it.next();
             if(ent.getSubprograma() == np){
@@ -1026,8 +1454,7 @@ public class Parser extends java_cup.runtime.lr_parser {
                 }
             }
         }
-
-        return ocupacio;
+        return ocupacio_parametres;
     }
 
     public void mostra_intermedi() throws IOException {
@@ -1501,7 +1928,7 @@ class CUP$Parser$actions {
 
                         taula_intermedi.genera(Operacio.retorn,null,null,np);
 
-                        nouproc(n,parametres,etiqueta,np);
+                        nouproc(n,parametres,etiqueta,np,null);
                         taula_simbols.surtbloc();
                         pila_procediments.pop();  
                     }
@@ -1533,9 +1960,18 @@ class CUP$Parser$actions {
                         Integer etiqueta = p.getEtiqueta();
                         Integer np = p.getNp();
 
+                        Integer ocupacio_retorn = null;
+                        switch(p.getTipus()){
+                            case "ent":
+                                ocupacio_retorn = 4;
+                            break;
+                            default:
+                                ocupacio_retorn = 1;
+                            break;
+                        }
 
                         taula_intermedi.genera(Operacio.retorn,r.getExpresio().getR(),null,np);
-                        nouproc(n,parametres,etiqueta,np);
+                        nouproc(n,parametres,etiqueta,np,ocupacio_retorn);
                         taula_simbols.surtbloc();
                         pila_procediments.pop();  
                     }
@@ -1682,7 +2118,7 @@ class CUP$Parser$actions {
             {
               Object RESULT =null;
 		System.out.println("M3");
-    nouproc(1,0,-1,-1);
+    nouproc(1,0,-1,-1,null);
     taula_simbols.surtbloc();
     taula_intermedi.genera(Operacio.retorn,null,null,-1);
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("M3",27, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
@@ -2373,6 +2809,7 @@ class CUP$Parser$actions {
         }else{
             if(v == null){ //crida a un subprograma fora paràmetres
             Descripcio descripcio = taula_simbols.consulta((String)id.valor);
+            taula_intermedi.genera(Operacio.espai_retorn,null,null,null);
             if(descripcio == null){
                 report_error_semantic("Undefined id \""+id.valor+"\"", id.esquerre,id.dreta);
                 errorSemantic = true;
@@ -2472,6 +2909,7 @@ class CUP$Parser$actions {
                                     break;
                                 }
                                 Integer nova = novavar(true,ocupacio);
+
                                 taula_intermedi.genera(Operacio.crida,nova,null,proc.np());
                             //******************************************************** 
                             

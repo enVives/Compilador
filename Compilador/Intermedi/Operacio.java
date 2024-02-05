@@ -27,6 +27,7 @@ public class Operacio {
     public static final int console_read = 19;
     public static final int console_write = 20;
     public static final int ind_assign = 21;
+    public static final int espai_retorn = 22;
 
     public static final String[] mnemonic = new String[] {
             "copia",
@@ -50,7 +51,8 @@ public class Operacio {
             "pmb",
             "console_read",
             "console_write",
-            "ind_assign"
+            "ind_assign",
+            "espai_retorn"
     };
 
 }
