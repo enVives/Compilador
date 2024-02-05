@@ -1,10 +1,5 @@
 tupla a () = (1,2,3);
-
-metode ent c (){
-    retorna 0;
-}
-
-ent b = 1 + c();
+tupla b() = a;
 
 metode main () {
     

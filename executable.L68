@@ -1,0 +1,35 @@
+00001000 Starting Address
+Assembler used: EASy68K Editor/Assembler v5.16.01
+Created On: 05/02/2024 1:09:44
+
+00000000                             1  *-----------------------------------------------------------
+00000000                             2  * Title      : Compilador
+00000000                             3  * Written by : Pere Joan Vives Morey
+00000000                             4  * Date       : 2/02/2024
+00000000                             5  * Description: 
+00000000                             6  *-----------------------------------------------------------
+00001000                             7            ORG    $1000
+00001000                             8  
+00001000                             9  
+00001000                            10  START:
+00001000  72F6                      11      MOVE.L #-10,D1
+00001002  4481                      12      NEG.L D1
+00001004                            13      
+00001004  4280                      14      CLR.L D0
+00001006  7003                      15      MOVE.L  #3,D0
+00001008  4E4F                      16      TRAP #15
+0000100A                            17      
+0000100A                            18      
+0000100A  FFFF FFFF                 19      SIMHALT
+0000100E                            20  END
+Line 21 WARNING: END directive missing, starting address not set
+
+No errors detected
+1 warning generated
+
+
+SYMBOL TABLE INFORMATION
+Symbol-name         Value
+-------------------------
+END                 100E
+START               1000

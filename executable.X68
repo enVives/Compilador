@@ -6,10 +6,20 @@
 *-----------------------------------------------------------
           ORG    $1000
 
+
 START:
-	MOVE.L  #2147483647, D0  
-   	MOVE.L  #-2147483648, D1
-   	MULS.L  D1, D0
+	MOVE.W #100,D0
+	MOVE.W #-2,D1
+	
+	DIVS.W D1,D0
+    
+	CLR.L D0
+	MOVE.L  #3,D0
+	TRAP #15
+	
+	
+	SIMHALT
+END
 
 *~Font name~Courier New~
 *~Font size~10~

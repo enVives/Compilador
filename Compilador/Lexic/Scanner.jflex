@@ -55,8 +55,7 @@ digit10		= [0-9]
 suma         = \+
 resta        = \-
 mul          = \*
-div          = \/
-mod          = %
+
 sumahi       = \+=
 restahi      = \-=
 
@@ -190,8 +189,6 @@ endline      = ['\r'|'\n'|"\r\n"]+
 {suma}                    { return symbol(ParserSym.ADD,new Token());  }
 {resta}                   { return symbol(ParserSym.SUB,new Token());    }
 {mul}                     { return symbol(ParserSym.MULT,new Token());}
-{div}                     { return symbol(ParserSym.DIV,new Token());}
-{mod}                     { return symbol(ParserSym.MOD,new Token());}
 
 {sumahi}                  { return symbol(ParserSym.SUMAHI,new Token());}
 {restahi}                 { return symbol(ParserSym.RESTAHI,new Token());}
