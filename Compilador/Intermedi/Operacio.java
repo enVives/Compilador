@@ -20,14 +20,13 @@ public class Operacio {
     public static final int crida = 12;
     public static final int retorn = 13;
     public static final int param_simple = 14;
-    public static final int param_compost = 15; // per tuples
-    public static final int copia_valor = 16;
-    public static final int ind_param = 17;
-    public static final int pmb = 18;
-    public static final int console_read = 19;
-    public static final int console_write = 20;
-    public static final int ind_assign = 21;
-    public static final int espai_retorn = 22;
+    public static final int copia_valor = 15;
+    public static final int ind_param = 16;
+    public static final int pmb = 17;
+    public static final int console_read = 18;
+    public static final int console_write = 19;
+    public static final int ind_assign = 20;
+    public static final int espai_retorn = 21;
 
     public static final String[] mnemonic = new String[] {
             "copia",

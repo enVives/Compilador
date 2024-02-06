@@ -1,8 +1,7 @@
-metode ent a(ent b, ent c){
-    retorna 0;
-}
+car e = -entradaS(ent) + 4;
 
 metode main () {
-    ent c = a(0,0);
+    sortidaS(e);
 }
     
+

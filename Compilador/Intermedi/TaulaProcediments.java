@@ -23,7 +23,15 @@ public class TaulaProcediments {
     }
 
     public InfoProcediment get_procediment(Integer n) {
-        return llista.get(n);
+        Iterator<InfoProcediment> it = llista.iterator();
+        InfoProcediment procediment = null;
+        while (it.hasNext()) {
+            InfoProcediment p = (InfoProcediment) it.next();
+            if (p.getN() == n) {
+                procediment = p;
+            }
+        }
+        return procediment;
     }
 
     public Boolean conte_etiqueta(Integer etiqueta) {

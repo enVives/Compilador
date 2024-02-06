@@ -1,6 +1,6 @@
-00001000 Starting Address
+0000103A Starting Address
 Assembler used: EASy68K Editor/Assembler v5.16.01
-Created On: 05/02/2024 1:09:44
+Created On: 06/02/2024 2:03:27
 
 00000000                             1  *-----------------------------------------------------------
 00000000                             2  * Title      : Compilador
@@ -9,20 +9,44 @@ Created On: 05/02/2024 1:09:44
 00000000                             5  * Description: 
 00000000                             6  *-----------------------------------------------------------
 00001000                             7            ORG    $1000
-00001000                             8  
-00001000                             9  
-00001000                            10  START:
-00001000  72F6                      11      MOVE.L #-10,D1
-00001002  4481                      12      NEG.L D1
-00001004                            13      
-00001004  4280                      14      CLR.L D0
-00001006  7003                      15      MOVE.L  #3,D0
-00001008  4E4F                      16      TRAP #15
-0000100A                            17      
-0000100A                            18      
-0000100A  FFFF FFFF                 19      SIMHALT
-0000100E                            20  END
-Line 21 WARNING: END directive missing, starting address not set
+00001000= 00000000                   8  V0 DC.L 0
+00001004= 00000000                   9  V1 DC.L 0
+00001008= 00000000                  10  V2 DC.L 0
+0000100C= 00000000                  11  V3 DC.L 0
+00001010= 0000                      12  V4 DC.W 0
+00001012= 49 6E 74 72 6F 64 ...     13  ENTRADA DC.B 'Introdueix un valor: ',0
+00001028= 53 6F 72 74 69 64 ...     14  SORTIDA DC.B 'Sortida Teclat: ',0
+00001039                            15  START:
+0000103A  303C 000E                 16      MOVE #14,D0
+0000103E  43F8 1012                 17      LEA ENTRADA,A1
+00001042  4E4F                      18      TRAP #15
+00001044  303C 0004                 19      MOVE #4,D0
+00001048  4E4F                      20      TRAP #15
+0000104A  21C1 1000                 21       MOVE.L D1,V0
+0000104E  4281                      22      CLR.L D1
+00001050  4280                      23      CLR.L D0
+00001052  227C 00000000             24      MOVE.L #0, A1
+00001058  2038 1000                 25      MOVE.L V0,D0
+0000105C  4480                      26      NEG.L D0
+0000105E  21C0 1004                 27      MOVE.L D0,V1
+00001062  21FC 00000004 1008        28      MOVE.L #4,V2
+0000106A  2038 1004                 29      MOVE.L V1,D0
+0000106E  D0B8 1008                 30      ADD.L V2,D0
+00001072  21C0 100C                 31      MOVE.L D0,V3
+00001076  21F8 100C 1010            32      MOVE.L V3,V4
+0000107C                            33  M:
+0000107C  303C 000E                 34      MOVE #14,D0
+00001080  43F8 1028                 35      LEA SORTIDA,A1
+00001084  4E4F                      36      TRAP #15
+00001086  1238 1010                 37      MOVE.B V4,D1
+0000108A  303C 0006                 38      MOVE #6,D0
+0000108E  4E4F                      39      TRAP #15
+00001090  4281                      40      CLR.L D1
+00001092  4280                      41      CLR.L D0
+00001094  227C 00000000             42      MOVE.L #0, A1
+0000109A  FFFF FFFF                 43      SIMHALT
+Line 44 WARNING: Origin value is odd (Location counter set to next highest address)
+0000109E                            44       END START
 
 No errors detected
 1 warning generated
@@ -31,5 +55,12 @@ No errors detected
 SYMBOL TABLE INFORMATION
 Symbol-name         Value
 -------------------------
-END                 100E
-START               1000
+ENTRADA             1012
+M                   107C
+SORTIDA             1028
+START               1039
+V0                  1000
+V1                  1004
+V2                  1008
+V3                  100C
+V4                  1010

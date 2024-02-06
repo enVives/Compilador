@@ -29,7 +29,7 @@ public class Principal {
             Parser parser = new Parser(scanner, sf);
             parser.parse();
             parser.mostra_intermedi();
-            // parser.genera_ensablador();
+            parser.genera_ensablador();
         } catch (Exception e) {
             System.err.println("error: " + e);
             e.printStackTrace(System.err);

@@ -38,7 +38,8 @@ public class Prova {
     Integer a = 5 + prova();
 
     public static void main(String[] args) {
-        int a = 3;
+        Character a = 'a';
+        System.out.println((int) a);
         System.out.println(a);
     }
 }
