@@ -49,6 +49,19 @@ parser code {:
 
     String cEnsamblador = "";
 
+    public Integer num_camps(Integer nv){
+        Integer camps = 0;
+        ArrayList<Sentencia> llista_intermedi = taula_intermedi.get_Llista();
+        Iterator<Sentencia> it = llista_intermedi.iterator();
+        while(it.hasNext()){
+            Sentencia sent = (Sentencia) it.next();
+            if((sent.getOperacio() == Operacio.ind_assign)&&((Integer)sent.getDesti() == nv)){
+                camps++;
+            }
+        }
+        return camps;
+    }
+
     public void genera_ensablador(){
         if(taula_intermedi.size() > 0){ //si no hi ha hagut fallos
             ArrayList<Sentencia> llista_intermedi = taula_intermedi.get_Llista();
@@ -75,6 +88,9 @@ parser code {:
                     Entrada variable = (Entrada) it.next();
                     if(variable.getSubprograma() == null){
                         switch(variable.ocupacio()){
+                            case 0:
+                                cEnsamblador += "V"+n+" DS.L "+num_camps(n)+"\n";
+                                break;
                             case 1:
                                 cEnsamblador += "V"+n+" DC.B 0\n";
                                 break;
@@ -92,9 +108,10 @@ parser code {:
                     }
                     n++;
                 }
-
+                cEnsamblador += "CR EQU $0D\n"+
+                                "LF EQU $0A\n";
                 cEnsamblador += "ENTRADA DC.B 'Introdueix un valor: ',0\n"+
-                                "SORTIDA DC.B 'Sortida Teclat: ',0\n";
+                                "SORTIDA DC.B CR,LF,'Sortida Teclat: ',0\n";
                 cEnsamblador += "START:\n";
 
                 Iterator<Sentencia> it1 = llista_intermedi.iterator();
@@ -149,10 +166,36 @@ parser code {:
                             dins_procediment = false;
 
                             cEnsamblador += "\tSIMHALT\n";
-                            cEnsamblador += "\t END START\n";
                         }
                     }
                 }
+                
+                it1 = llista_intermedi.iterator();
+                dins_procediment = false;
+
+                while(it1.hasNext()){
+                    Sentencia sent = (Sentencia) it1.next();
+                    if(sent.getOperacio() == Operacio.skip){
+                        if((Integer)sent.getDesti() != -1){
+                            dins_procediment = true;
+                        }
+
+                        if(dins_procediment){
+                            creaSubCodi(sent);
+                        }
+
+                        if(sent.getOperacio() == Operacio.retorn){
+                            if((Integer)sent.getDesti() != -1){
+                                dins_procediment = false;
+                                cEnsamblador += "\tRTS\n";
+                            }
+                        }
+                    }
+                }
+                
+                
+                cEnsamblador += "\t END START\n";
+
 
                 //crear la resta de procediments
 
@@ -175,7 +218,7 @@ parser code {:
             case 4:
                 return 'L';
             default:
-                return null;
+                return 'L'; //per les tuples
         }
     }
 
@@ -205,19 +248,25 @@ parser code {:
                 
                 if(posicioOperand1!=null){ //variable local
                     if(posicioDesti!=null){ //variable local
-                        str += "\tMOVE."+llargOperand1+" "+posicioOperand1+"(A7),"+posicioDesti+"(A7)\n";
+                        str += "\tMOVE."+llargOperand1+" "+posicioOperand1+"(A7),D0\n";
+                        str += "\tMOVE."+llargDesti+" D0,"+posicioDesti+"(A7)\n";
                     }else{
-                        str += "\tMOVE."+llargOperand1+" "+posicioOperand1+"(A7),V"+(Integer)t3+"\n";
+                        str += "\tMOVE."+llargOperand1+" "+posicioOperand1+"(A7), D0\n";
+                        str += "\tMOVE."+llargDesti+" D0,V"+(Integer)t3+"\n";
                     }
                 }else{
                     if(posicioDesti!=null){ //variable local
                         //global local
-                        str += "\tMOVE."+llargOperand1+" "+"V"+(Integer)t1+","+posicioDesti+"(A7)\n";
+                        str += "\tMOVE."+llargOperand1+" V,"+(Integer)t1+",D0\n";
+                        str += "\tMOVE."+llargDesti+" "+" D0,"+posicioDesti+"(A7)\n";
+                        
                     }else{
                         //global global
-                        str += "\tMOVE."+llargOperand1+" "+"V"+(Integer)t1+",V"+(Integer)t3+"\n";
+                        str += "\tMOVE."+llargOperand1+" "+"V"+(Integer)t1+", D0\n";
+                        str += "\tMOVE."+llargDesti+" D0,V"+(Integer)t3+"\n";
                     }
                 }
+                str += "\tCLR.L D0\n";
                 break;
             //Suma -> suma,t1,t2,tdesti
             case 1:
@@ -993,7 +1042,34 @@ parser code {:
                 }
                 
                 break;
-            case 16:
+            case 16: //op,1,2,3 -> 3 = 1[2]
+                e1 = taula_variables.cerca_variable((Integer)t1);
+                e3 = taula_variables.cerca_variable((Integer)t3);
+                ocupacioDesti = e3.ocupacio();
+                ocupacioOperand1 = e1.ocupacio();
+                llargOperand1 = llargaria(ocupacioOperand1);
+                llargDesti = llargaria(ocupacioDesti);
+                posicioOperand1 = e1.getPosicio_pila();
+                posicioDesti = e3.getPosicio_pila();
+                if (posicioDesti != null) {
+                    if(posicioOperand1 != null){
+                        str += "\tMOVE.L "+(posicioOperand1+(Integer)t2*4)+"(A7),D0\n";
+                        str += "\tMOVE."+ocupacioDesti+" D0,"+posicioDesti+"(A7)\n";
+                    }else{
+                        str += "\tLEA V"+(Integer)t1+", A0\n";
+                        str += "\tMOVE.L "+(Integer)t2*4+"(A0),D0\n";
+                        str += "\tMOVE."+llargDesti+" D0,"+posicioDesti+"(A7)\n";
+                    }
+                } else {
+                    if (posicioOperand1 != null) { //global local
+                        str += "\tMOVE.L "+(posicioOperand1+(Integer)t2*4)+"(A7),D0\n";
+                        str += "\tMOVE."+ocupacioDesti+" D0,V"+(Integer)t3+"\n";
+                    } else { //global global
+                        str += "\tLEA V"+(Integer)t1+", A0\n";
+                        str += "\tMOVE.L "+(Integer)t2*4+"(A0),D0\n";
+                        str += "\tMOVE."+llargDesti+" D0,"+"V"+(Integer)t3+"\n";
+                    }
+                }
             break;
             case 17: //pmb np
                 Integer ocupacio_locals = taula_procediments.get_procediment((Integer)t3).getOcupacio();
@@ -1077,9 +1153,9 @@ parser code {:
 	                        "\tLEA SORTIDA,A1\n"+
 	                        "\tTRAP #15\n";
                     if(posicioDesti !=null){
-                        str += "\tMOVE.B "+posicioDesti+"(A7),D1\n";
+                        str += "\tMOVE.W "+posicioDesti+"(A7),D1\n";
                     }else{
-                        str += "\tMOVE.B V"+(Integer)t3+",D1\n";
+                        str += "\tMOVE.W V"+(Integer)t3+",D1\n";
                     }
                     str += "\tMOVE #6,D0\n";
                     str += "\tTRAP #15\n";
@@ -1102,7 +1178,28 @@ parser code {:
                 str += "\tCLR.L D0\n";
                 str += "\tMOVE.L #0, A1\n";
             break;
-            case 20:
+            case 20: //op,1,2,3 -> 3[2] = 1
+                e1 = taula_variables.cerca_variable((Integer)t1);
+                e3 = taula_variables.cerca_variable((Integer)t3);
+                ocupacioOperand1 = e1.ocupacio();
+                ocupacioDesti = e3.ocupacio();
+                llargOperand1 = llargaria(ocupacioOperand1);
+                llargDesti = llargaria(ocupacioDesti);
+                posicioOperand1 = e1.getPosicio_pila();
+                posicioDesti = e3.getPosicio_pila();
+                if (posicioDesti != null) {
+                    if(posicioOperand1 != null){
+                        str += "\tMOVE."+llargOperand1+" "+posicioOperand1+"(A7),D0\n";
+                        str += "\tMOVE.L D0,"+(posicioDesti+(Integer)t2*4)+"(A7)\n";
+                    }else{
+                        str += "\tMOVE."+llargOperand1+",D0\n";
+                        str += "\tMOVE.L D0,"+(posicioDesti+(Integer)t2*4)+"(A7)\n";
+                    }
+                } else {
+                    str += "\tLEA V"+(Integer)t3+",A0\n";
+                    str += "\tMOVE."+llargOperand1+" V"+(Integer)t1+",D0\n";
+                    str += "\tMOVE.L D0,"+4*(Integer)t2+"(A0)\n";
+                }
             break;
             case 21:
                 str += "\tSUBQ #4,A7\n";
@@ -1181,16 +1278,24 @@ parser code {:
         Iterator <Entrada> it = llista.iterator();
         Integer ocupacio =0;
         
+        Integer nv = 0;
+
         while(it.hasNext()){
             Entrada ent = (Entrada) it.next();
             if(ent.getSubprograma() == np){
                 if(ent.ocupacio()!=null){
                     if(!ent.getParametre()){
-                       ent.setPosicio_pila(ocupacio); //afegim a la posicio de la pila on es trobarà la variable local
-                        ocupacio += ent.ocupacio();   
+                        if(ent.ocupacio() == 0){ //tupla
+                            ent.setPosicio_pila(ocupacio); //afegim a la posicio de la pila on es trobarà la variable local
+                            ocupacio += num_camps(nv) * 4; //cada camp es un long
+                        }else{
+                            ent.setPosicio_pila(ocupacio); //afegim a la posicio de la pila on es trobarà la variable local
+                            ocupacio += ent.ocupacio();
+                        } 
                     } 
                 } 
             }
+            nv++;
         }
         return ocupacio;
     }
@@ -2319,13 +2424,13 @@ DECL_TUPLA ::= tupla ID:i LPAREN RPAREN ASSIGN LPAREN:r VALS_TUPLA:v RPAREN {:Sy
                     //Gestió
                     int n =0;
                     Stack<KeyValue> llista = v.getLlista();
-                    Integer nv = novavar(true,0); //per guardar els elements de la tupla
-                    Entrada ent = taula_variables.cerca_variable(nv);
 
+                    Integer nv = novavar(true,0); //per guardar els elements de la tupla
+                    //Entrada ent = taula_variables.cerca_variable(nv);
                     Boolean bol = taula_simbols.posar((String)i.valor,new Dconst("tupla",nv)); //mirar si posar es true o false
                     if(bol){
                         //*********Gestió Intermedi************
-                        //Integer nv = novavar(true,0); //per guardar els elements de la tupla
+                        
                         Integer n2 =0;
                         //*************************************
 
@@ -2337,7 +2442,7 @@ DECL_TUPLA ::= tupla ID:i LPAREN RPAREN ASSIGN LPAREN:r VALS_TUPLA:v RPAREN {:Sy
                                 nom = "Item"+n; //nom que li posam als camps que no tenen id
                             }
 
-                            ent.afegeixOcupacio(taula_variables.get_ocupacio(simbol.getR()));
+                            //ent.afegeixOcupacio(taula_variables.get_ocupacio(simbol.getR()));
                             if(simbol.getTsb()=="ts_record"){
 
                                 taula_intermedi.genera(Operacio.ind_assign,simbol.getR(),n,nv); //op,1,2,3 -> 3[2] = 1
@@ -2361,34 +2466,7 @@ DECL_TUPLA ::= tupla ID:i LPAREN RPAREN ASSIGN LPAREN:r VALS_TUPLA:v RPAREN {:Sy
                         errorSemantic = true;
                     }
                 }
-                :}
-                |tupla ID:i LPAREN RPAREN ASSIGN R:r{:System.out.println("REDEF_TUPLA");
-                if(!errorSemantic){
-                    if(r.getTsb()!="ts_record"){
-                        report_error_semantic("La referència no és una tupla", r.getEsquerre(),r.getDreta());
-                        errorSemantic = true;
-                    }else{
-                        String tupla = r.getIdb_dreta();
-                        Dada1 d1 = taula_simbols.consulta_tupla(tupla);
-                        if(d1!=null){
-                            Integer nv = novavar(true,0); //per guardar els elements de la tupla
-                            Boolean bol = taula_simbols.posar((String)i.valor,new Dconst("tupla",nv)); //mirar si posar es true o false
-
-                            if(!bol){
-                                report_error_semantic("La tupla \""+(String)i.valor+"\" ja existeix", i.esquerre,r.getDreta());
-                                errorSemantic = true;
-                            }else{
-                                Dada1 d2 = taula_simbols.consulta_tupla((String)i.valor);
-                                d2.set_first(d1.first());
-                                //Intermedi
-                                taula_intermedi.genera(Operacio.copia,r.getR(),null,nv);
-                            }
-
-                        }
-                    }
-                }
-        :};
-
+                :};
 
 E ::= T:t E_1:e {:System.out.println("E -> T E_1");
     if(errorSemantic){
@@ -2424,7 +2502,7 @@ E_1 ::= AND:op T:t E_1:e {:System.out.println("E_1 -> AND T E_1");
             RESULT = new SimbolEp();
         }else{
             if((e==null)||(e.getTsb() == "ts_nul")){ //venim de Ep -> @
-                if(t.getTsb() != "ts_boolea"){ //error, no podem operar amb valors que no son booleans
+                if((t.getTsb() != "ts_boolea")){ //error, no podem operar amb valors que no son booleans
                     report_error_semantic("L'operand ha de ser de tipus booleà per una operació AND", t.getEsquerre(),t.getDreta());
                     errorSemantic = true;
                     RESULT = new SimbolEp();
@@ -2500,45 +2578,51 @@ T ::= N:n T_1:t {:System.out.println("T -> N T_1");
         if((t==null)||(t.getTsb() == "ts_nul")){ //venim de Tp -> @
             RESULT = new SimbolT(n.getIdb(),n.getTsb(),n.getTipus(),n.getMode(),n.getEsquerre(),n.getDreta(),n.getR());
         }else{
-                //****************************Intermedi**************************************
-                Integer e1 = etiquetes;
-                etiquetes++;
-                Integer e2 = etiquetes;
-                etiquetes++;
-                Integer n1 = novavar(true,1);
+                if((n.getTsb()=="ts_record")){
+                   report_error_semantic("El terminal no té un tipus adequat", n.getEsquerre(),n.getDreta());
+                    errorSemantic = true;
+                    RESULT = new SimbolT(); 
+                }else{
+                    //****************************Intermedi**************************************
+                    Integer e1 = etiquetes;
+                    etiquetes++;
+                    Integer e2 = etiquetes;
+                    etiquetes++;
+                    Integer n1 = novavar(true,1);
 
-                switch(t.getOperacio()){
-                    case ParserSym.IGIG:
-                        if(n.getTsb()!=t.getTsb()){
-                            report_error_semantic("Els terminals no tenen el mateix tipus subjacent", n.getEsquerre(),t.getDreta()); //arreglar
-                            errorSemantic = true;
-                            RESULT = new SimbolT();
-                        }else{
-                           taula_intermedi.genera(Operacio.salt_condicional_igual,n.getR(),t.getR(),e1); 
-                        }
-                    break;
-                    case ParserSym.DIF:
-                        if(n.getTsb()!=t.getTsb()){
-                            report_error_semantic("Els terminals no tenen el mateix tipus subjacent", n.getEsquerre(),t.getDreta()); //arreglar
-                            errorSemantic = true;
-                            RESULT = new SimbolT();
-                        }else{
-                          taula_intermedi.genera(Operacio.salt_condicional_diferent,n.getR(),t.getR(),e1);  
-                        }
-                    break;
-                }
+                    switch(t.getOperacio()){
+                        case ParserSym.IGIG:
+                            if(n.getTsb()!=t.getTsb()){
+                                report_error_semantic("Els terminals no tenen el mateix tipus subjacent", n.getEsquerre(),t.getDreta()); //arreglar
+                                errorSemantic = true;
+                                RESULT = new SimbolT();
+                            }else{
+                            taula_intermedi.genera(Operacio.salt_condicional_igual,n.getR(),t.getR(),e1); 
+                            }
+                        break;
+                        case ParserSym.DIF:
+                            if(n.getTsb()!=t.getTsb()){
+                                report_error_semantic("Els terminals no tenen el mateix tipus subjacent", n.getEsquerre(),t.getDreta()); //arreglar
+                                errorSemantic = true;
+                                RESULT = new SimbolT();
+                            }else{
+                            taula_intermedi.genera(Operacio.salt_condicional_diferent,n.getR(),t.getR(),e1);  
+                            }
+                        break;
+                    }
 
-                if(!errorSemantic){
-                    taula_intermedi.genera(Operacio.copia_valor,0,null,n1);
-                    taula_intermedi.genera(Operacio.salt_incondicional,null,null,e2);
-                    taula_intermedi.genera(Operacio.skip,null,null,e1);
-                    taula_intermedi.genera(Operacio.copia_valor,-1,null,n1);
-                    taula_intermedi.genera(Operacio.skip,null,null,e2);
+                    if(!errorSemantic){
+                        taula_intermedi.genera(Operacio.copia_valor,0,null,n1);
+                        taula_intermedi.genera(Operacio.salt_incondicional,null,null,e2);
+                        taula_intermedi.genera(Operacio.skip,null,null,e1);
+                        taula_intermedi.genera(Operacio.copia_valor,-1,null,n1);
+                        taula_intermedi.genera(Operacio.skip,null,null,e2);
 
-                    //***************************************************************************
+                        //***************************************************************************
 
-                    RESULT = new SimbolT("ts_boolea","id_nula","moderesult",n.getEsquerre(),t.getDreta(),n1); 
-                }
+                        RESULT = new SimbolT("ts_boolea","id_nula","moderesult",n.getEsquerre(),t.getDreta(),n1); 
+                    }    
+                }   
         }
     }
 
@@ -2548,14 +2632,27 @@ T_1 ::= IGIG N:n {:System.out.println("T_1 -> IGIG N T_1");
     if(errorSemantic){
             RESULT = new SimbolTp();
         }else{
-                RESULT = new SimbolTp(n.getTsb(),n.getTipus(),ParserSym.IGIG,"moderesult",n.getDreta(),n.getR());
+                if((n.getTsb()=="ts_record")){
+                   report_error_semantic("El terminal no té un tipus adequat per l'operació ==", n.getEsquerre(),n.getDreta());
+                    errorSemantic = true;
+                    RESULT = new SimbolTp(); 
+                }else{
+                   RESULT = new SimbolTp(n.getTsb(),n.getTipus(),ParserSym.IGIG,"moderesult",n.getDreta(),n.getR()); 
+                }      
         }
     :} //hauriem de llevar tp, no volem repetició en aquest cas
     | DIF N:n {:System.out.println("T_1 -> DIF N ");
         if(errorSemantic){
             RESULT = new SimbolTp();
         }else{
-            RESULT = new SimbolTp(n.getTsb(),n.getTipus(),ParserSym.DIF,"moderesult",n.getDreta(),n.getR());
+            if((n.getTsb()=="ts_record")){
+                   report_error_semantic("El terminal no té un tipus adequat per l'operació !=", n.getEsquerre(),n.getDreta());
+                    errorSemantic = true;
+                    RESULT = new SimbolTp(); 
+                }else{
+                   RESULT = new SimbolTp(n.getTsb(),n.getTipus(),ParserSym.DIF,"moderesult",n.getDreta(),n.getR()); 
+                }
+            
         }
         :}
     | {:System.out.println("T_1 -> @");
@@ -2571,7 +2668,7 @@ N ::= M:m N_1:n {:System.out.println("N -> M N_1");
                 RESULT = new SimbolN(m.getIdb(),m.getTsb(),m.getTipus(),m.getMode(),m.getEsquerre(),m.getDreta(),m.getR()); //pot ser tupla
             }else{ //M_1 ha fet qualque operació, hem de passar el tsb de f
 
-                if((m.getTsb()=="ts_boolea")){
+                if((m.getTsb()=="ts_boolea")||(n.getTsb()=="ts_record")){
                    report_error_semantic("El terminal no té un tipus adequat", m.getEsquerre(),m.getDreta());
                     errorSemantic = true;
                     RESULT = new SimbolN(); 
@@ -2599,7 +2696,7 @@ N_1 ::= ADD M:m N_1:n {:System.out.println("N_1 -> ADD M N_1");
             RESULT = new SimbolNp();
         }else{
             if((n==null)||(n.getTsb()=="ts_nul")){ //vol dir que N_1 -> @
-                if((m.getTsb()=="ts_boolea")){
+                if((m.getTsb()=="ts_boolea")||(n.getTsb()=="ts_record")){
                     report_error_semantic("El terminal no té un tipus adequat per una operació de suma", m.getEsquerre(),m.getDreta());
                     errorSemantic = true;
                     RESULT = new SimbolNp();
@@ -2607,7 +2704,7 @@ N_1 ::= ADD M:m N_1:n {:System.out.println("N_1 -> ADD M N_1");
                     RESULT = new SimbolNp(m.getTsb(),m.getTipus(),ParserSym.ADD,"moderesult",m.getDreta(),m.getR());
                 }
             }else{ // N_1 té tsb i una operació associada
-                if((m.getTsb()=="ts_boolea")){
+                if((m.getTsb()=="ts_boolea")||(n.getTsb()=="ts_record")){
                         report_error_semantic("El terminal no té un tipus adequat per una operació de suma", m.getEsquerre(),m.getDreta());
                         errorSemantic = true;
                         RESULT = new SimbolNp();
@@ -2642,7 +2739,7 @@ N_1 ::= ADD M:m N_1:n {:System.out.println("N_1 -> ADD M N_1");
                     RESULT = new SimbolNp(m.getTsb(),m.getTipus(),ParserSym.SUB,"moderesult",m.getDreta(),m.getR());
                 }
             }else{ // N_1 té tsb i una operació associada
-                if((m.getTsb()=="ts_boolea")){
+                if((m.getTsb()=="ts_boolea")||(n.getTsb()=="ts_record")){
                         report_error_semantic("El terminal no té un tipus adequat per una operació de resta", m.getEsquerre(),m.getDreta());
                         errorSemantic = true;
                         RESULT = new SimbolNp();
@@ -2677,7 +2774,7 @@ M ::= F:f M_1:m {:System.out.println("M -> F M_1");
                 RESULT = new SimbolM(f.getIdb(),f.getTsb(),f.getTipus(),f.getMode(),f.getEsquerre(),f.getDreta(),f.getR()); //pot ser tupla
             }else{ //M_1 ha fet qualque operació, hem de passar el tsb de f
 
-                if((f.getTsb()=="ts_boolea")){
+                if((f.getTsb()=="ts_boolea")||(f.getTsb()=="ts_record")){
                     report_error_semantic("El terminal no te un tipus adequat per una operació de multiplicacio/divisio/modul", f.getEsquerre(),f.getDreta());
                     errorSemantic = true;
                     RESULT = new SimbolM();
@@ -2698,7 +2795,7 @@ M_1 ::= MULT:e F:f M_1:m {:System.out.println("M_1 -> MULT F M_1");
         }else{
             if((m==null)||(m.getTsb() == "ts_nul")){ //la producció M_1 -> @, comprovar el tipus de f
 
-                if((f.getTsb()=="ts_boolea")){ //es tracta d'un tsb que no volem per operacions, error
+                if((f.getTsb()=="ts_boolea")||(f.getTsb()=="ts_record")){ //es tracta d'un tsb que no volem per operacions, error
                     report_error_semantic("El terminal no té un tipus adequat per una operació de multiplicació", f.getEsquerre(),f.getDreta());
                     errorSemantic = true;
                     RESULT = new SimbolMp();
@@ -2707,7 +2804,7 @@ M_1 ::= MULT:e F:f M_1:m {:System.out.println("M_1 -> MULT F M_1");
                 }
             }else{ //M_1 té tipus subjacent i operació
 
-                if((f.getTsb()=="ts_boolea")){
+                if((f.getTsb()=="ts_boolea")||(f.getTsb()=="ts_record")){
                     report_error_semantic("El terminal no té un tipus adequat per una operació de multiplicació", f.getEsquerre(),f.getDreta());
                     errorSemantic = true;
                     RESULT = new SimbolMp();
@@ -2733,15 +2830,19 @@ F ::= LPAREN:l E:e RPAREN:r {:System.out.println("F -> LPAREN E RPAREN"); //pend
                 if(errorSemantic){
                     RESULT = new SimbolF();
                 }else{
-                    if(e.getTsb() == "ts_nul"){ //ho trob error
-                        report_error("(E) té tsb null", e);
+                    if(e.getTsb() == "ts_nul"){ //error
+                        report_error_semantic("(E) té tsb null",e.getEsquerre(),e.getDreta());
+                        errorSemantic = true;
+                        RESULT  = new SimbolF();
+                    }else if((e.getTsb() == "ts_record")){
+                        report_error_semantic("La referència dins (E) no és un tipus elemental, és una tupla",e.getEsquerre(),e.getDreta());
                         errorSemantic = true;
                         RESULT  = new SimbolF();
                     }else{
                         RESULT = new SimbolF(e.getTsb(),e.getTipus(),"moderesult",l.esquerre,l.dreta,e.getR()); //no tenc clar es mode
                     }   
                 } 
-                    :}
+                :}
 
     | venter:v {:System.out.println("F -> venter");
                 Integer n = novavar(true,4);
@@ -2821,10 +2922,6 @@ F ::= LPAREN:l E:e RPAREN:r {:System.out.println("F -> LPAREN E RPAREN"); //pend
                 }else{
                     if((r.getTsb() == "ts_nul")){ //error -> subprograma fora retorn 
                         report_error_semantic("La referència "+r.getIdb()+" te tipus subjacent nul",r.getEsquerre(),r.getDreta());
-                        errorSemantic = true;
-                        RESULT  = new SimbolF();
-                    }else if((r.getTsb() == "ts_record")){
-                        report_error_semantic("La referència "+r.getIdb()+" no és un tipus elemental, és una tupla",r.getEsquerre(),r.getDreta());
                         errorSemantic = true;
                         RESULT  = new SimbolF();
                     }else{
@@ -2990,21 +3087,31 @@ F ::= LPAREN:l E:e RPAREN:r {:System.out.println("F -> LPAREN E RPAREN"); //pend
                 if(errorSemantic){ //si s'ha comés un error Semantic a E
                    RESULT  = new SimbolF(); 
                 }else{
-                    Integer ocupacio = 0;
-                    switch(e.getTsb()){
-                        case "ts_enter":
-                        ocupacio = 4;
-                        break;
-                        case "ts_caracter":
-                        ocupacio = 2;
-                        break;
-                        case "ts_boolea":
-                        ocupacio = 1;
-                        break;
+                    if(e.getTsb() == "ts_nul"){ //error
+                        report_error_semantic("(E) té tsb null",e.getEsquerre(),e.getDreta());
+                        errorSemantic = true;
+                        RESULT  = new SimbolF();
+                    }else if((e.getTsb() == "ts_record")){
+                        report_error_semantic("La referència dins (E) no és un tipus elemental, és una tupla",e.getEsquerre(),e.getDreta());
+                        errorSemantic = true;
+                        RESULT  = new SimbolF();
+                    }else{
+                        Integer ocupacio = 0;
+                        switch(e.getTsb()){
+                            case "ts_enter":
+                            ocupacio = 4;
+                            break;
+                            case "ts_caracter":
+                            ocupacio = 2;
+                            break;
+                            case "ts_boolea":
+                            ocupacio = 1;
+                            break;
+                        }
+                        Integer n = novavar(true,ocupacio);
+                        taula_intermedi.genera(Operacio.menys,e.getR(),null,n);
+                        RESULT = new SimbolF(e.getTsb(),e.getTipus(),"moderesult",s.esquerre,r.dreta,n); 
                     }
-                    Integer n = novavar(true,ocupacio);
-                    taula_intermedi.genera(Operacio.menys,e.getR(),null,n);
-                    RESULT = new SimbolF(e.getTsb(),e.getTipus(),"moderesult",s.esquerre,r.dreta,n);   
                 }
                 :}
     | NOT:n vlogic:v {:System.out.println("F -> NOT vlogic");

@@ -51,7 +51,7 @@ public class Operacio {
             "console_read",
             "console_write",
             "ind_assign",
-            "espai_retorn"
+            "espai_retorn",
     };
 
 }

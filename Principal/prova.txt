@@ -1,7 +1,10 @@
-car e = -entradaS(ent) + 4;
+
+metode a(){
+    ent a = 3;
+}
 
 metode main () {
-    sortidaS(e);
+    ent c = 5;
 }
     
 
