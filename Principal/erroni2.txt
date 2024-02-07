@@ -1,0 +1,11 @@
+tupla a () = (1,2,3);
+tupla b () = (a,3,4);
+ent c = ·a· + 1;
+car d = 65;
+
+metode prova (ent a, ent b){
+}
+
+metode main(){
+    ent c = prova(0,0);
+}

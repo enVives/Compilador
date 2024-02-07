@@ -1,0 +1,37 @@
+Erroni1:
+    Ens donarà error perque intentam ficar el primer camp de la tupla 'a' a la declaració del booleà B
+Erroni2:
+    Ens dona error perque el subprograma no té cap tipus de retorn, per tant no es pot assignar a la variable c3a
+Erroni3:
+    Ens dona error perque la variable 'b' té tipus booleà i per tant no es pot sumar.
+
+Correcte1:
+    Instruccions: En executar la classe Principal.java es generarà un document en easy68k anomenat executable.X68
+    S'haurà de entrar a easy68k i executar-ho allà.
+
+    Aquesta prova és útil per provar que lo comprovació de tipus es correcte. S'hauria d'acceptar
+    la comparacio (c == d) ja que el nostre llenguatge permet comparar enters amb caracters.
+
+    També és útil per provar el correcte funcionament de les tuples i els seus camps.
+
+    El resultat hauria de ser una sortida per teclat del caràcter 'b', ja que la suma a+1.
+
+Correcte2:
+    El següent programa és per provar la correctesa dels bucles i de les crides dels subprogrames.
+    Per que funcioni correctament a l'entrada de teclat s'ha d'introduït un valor superior a 0, diguem 5.
+
+    c.Item0.Item0.Item0 fa referenia al primer element de la tupla 'a' o sigui 1.
+    Per tant el valor de 'e' s'incrementarà en 1 per cada iteració.
+
+    Si tot va bé a la sortida de pantalla hauria de sortir el mateix valor positiu que hem introduït.
+
+Correcte3:
+    El darrer programa es per provar la crida i retorn de un subprograma amb paràmetres. La idea es passar-li
+    una lletra en minuscula i la transformarà en majuscula.
+
+    La lletra que volem transformar la passarem per teclat.
+
+    Aquesta lletra s'imprimirà per teclat un cop s'hagi transformada.
+
+
+

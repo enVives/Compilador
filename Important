@@ -1,3 +1,0 @@
-java -jar "c:\\Users\\perej\\Desktop\\java-cup-11b.jar" Parser.cup
-jflex archiu.jflex
-java -jar "c:\\Users\\perej\\Desktop\\java-cup-11b.jar" -version

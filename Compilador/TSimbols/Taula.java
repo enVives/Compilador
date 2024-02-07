@@ -13,6 +13,7 @@ public class Taula {
     // posaindex,first,next,last,consulta.
 
     private int n;
+
     public int getN() {
         return n;
     }
@@ -55,26 +56,17 @@ public class Taula {
         if (n >= ta.size()) {
             ta.add(n, ta.get(n - 1));
         } else {
-            ta.set(n, ta.get(n - 1)); //sempre que posem un bloc serà a continuació del nivell anterior
+            ta.set(n, ta.get(n - 1)); // sempre que posem un bloc serà a continuació del nivell anterior
         }
 
     }
 
     public Descripcio consulta(String id) {
         Dada1 dada = td.get(id);
-        if(dada == null){
+        if (dada == null) {
             return null;
-        }else{
+        } else {
             return dada.td();
-        }
-    }
-
-    public Dada1 consulta_tupla(String id){
-        Dada1 dada = td.get(id);
-        if(dada == null){
-            return null;
-        }else{
-            return dada;
         }
     }
 
@@ -82,7 +74,8 @@ public class Taula {
 
         if (td.get(id) != null) { // si ja tenim una variable dins td amb el mateix id
             if (td.get(id).np() == n) {
-                //System.out.println("Error, ja hi ha un identificador amb el nom: '"+id+"' dins el mateix àmbit");
+                // System.out.println("Error, ja hi ha un identificador amb el nom: '"+id+"'
+                // dins el mateix àmbit");
                 return false;
             }
             idxe = ta.get(n);
@@ -114,7 +107,7 @@ public class Taula {
             if (descripcio2 instanceof Dtipus) {
                 Dtipus tipus = (Dtipus) descripcio2;
                 if (tipus.dt().tipus_subjacent() != "ts_record") {
-                    System.out.println("Error, l'identificador: '"+idr+"' no és una tupla");
+                    System.out.println("Error, l'identificador: '" + idr + "' no és una tupla");
                     return false;
                 }
             }
@@ -123,11 +116,12 @@ public class Taula {
         Dada2 i = td.get(idr).first();
 
         while ((i != null) && (!i.idcamp().equals(idc))) {
-            i = i.next();  
+            i = i.next();
         }
 
         if (i != null) {
-            //System.out.println("Error, el camp amb identificador: '"+idc+"' ja existeix");
+            // System.out.println("Error, el camp amb identificador: '"+idc+"' ja
+            // existeix");
             return false;
         }
 
@@ -159,7 +153,7 @@ public class Taula {
                     System.out.println("Error, idr no és una tupla");
                     return null;
                 }
-            }else{
+            } else {
                 System.out.println("No es dtipus");
             }
         } else {
@@ -167,10 +161,9 @@ public class Taula {
             return null;
         }
 
-
         Dada2 i = td.get(idr).first();
 
-        while ((i != null) && (i.idcamp().compareTo(idc)!=0)) {
+        while ((i != null) && (i.idcamp().compareTo(idc) != 0)) {
             i = i.next();
         }
 
@@ -212,7 +205,7 @@ public class Taula {
 
     }
 
-    public Dada2 primer_parametre(String subprograma){
+    public Dada2 primer_parametre(String subprograma) {
         return td.get(subprograma).first();
     }
 
@@ -220,7 +213,7 @@ public class Taula {
         Descripcio t = td.get(idpr).td();
 
         if (!(t instanceof Dproc)) {
-            System.out.println("Error : l'dentificador '"+idpr+"' no és un subprograma");
+            System.out.println("Error : l'dentificador '" + idpr + "' no és un subprograma");
             return false;
         }
         Dada2 dada = td.get(idpr).first();
@@ -246,25 +239,25 @@ public class Taula {
 
         String tipus = "";
 
-        if(d instanceof Darg){
+        if (d instanceof Darg) {
             Darg arg = (Darg) d;
             tipus = arg.tipus();
         }
 
         String nou_nom = idpr + "_" + tipus;
         Dada2 first = td.get(idpr).first();
-        Dproc proc = (Dproc) t; //suposam que no es null
+        Dproc proc = (Dproc) t; // suposam que no es null
 
         String type = proc.getTipus();
         Integer np = proc.np();
         td.remove(idpr);
-        
-        if(type == "id_nula"){
-            posar(nou_nom, new Dproc(true)); //creador que no puja el nombre np
-        }else{
-            posar(nou_nom, new Dproc(true,type)); //creador que no puja el nombre n
+
+        if (type == "id_nula") {
+            posar(nou_nom, new Dproc(true)); // creador que no puja el nombre np
+        } else {
+            posar(nou_nom, new Dproc(true, type)); // creador que no puja el nombre n
         }
-        
+
         td.get(nou_nom).set_first(first);
 
         if (idxe == null) {

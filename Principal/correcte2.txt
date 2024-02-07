@@ -1,0 +1,18 @@
+tupla a () = (1,2);
+tupla b () = (a,VER);
+tupla c () = (b,0);
+
+ent d = 0;
+ent e = 0;
+
+metode prova(){
+    mentres(d!=e) fer{
+        e = e + c.Item0.Item0.Item0;
+    }
+}
+
+metode main(){
+    d = entradaS(ent);
+    prova();
+    sortidaS(e);
+}

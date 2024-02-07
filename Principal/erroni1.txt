@@ -1,0 +1,7 @@
+tupla a () = (1:primer,2,3);
+tupla b() = (a,4,5);
+
+metode main(){
+    bool b = b.Item0.primer;
+    sortidaS(b);
+}

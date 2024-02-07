@@ -1,0 +1,10 @@
+
+metode car majuscula (car a){
+    retorna a - 32;
+}
+
+metode main(){
+    car b = entradaS(car);
+    car a = majuscula(b);
+    sortidaS(a);
+}

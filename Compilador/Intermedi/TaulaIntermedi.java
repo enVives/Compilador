@@ -69,12 +69,5 @@ public class TaulaIntermedi {
             this.op2 = op2;
             this.desti = desti;
         }
-
-        public Sentencia(Integer operacio, Object op1, Integer op2, String desti) {
-            this.operacio = operacio;
-            this.op1 = op1;
-            this.op2 = op2;
-            this.desti = desti;
-        }
     }
 }

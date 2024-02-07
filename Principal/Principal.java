@@ -22,13 +22,14 @@ public class Principal {
         Reader fitxer;
         int a;
         try {
-            fitxer = new FileReader("c:\\Users\\perej\\Documents\\GitHub\\Compilador\\Principal\\prova.txt");
+            // Per provar els fitxers de prova, canvia la direcció del FileReader.
+            fitxer = new FileReader("c:\\Users\\perej\\Documents\\GitHub\\Compilador\\Principal\\correcte3.txt");
             Scanner scanner = new Scanner(fitxer);
 
             SymbolFactory sf = new ComplexSymbolFactory();
             Parser parser = new Parser(scanner, sf);
             parser.parse();
-            parser.mostra_intermedi();
+            // parser.mostra_intermedi();
             parser.genera_ensablador();
         } catch (Exception e) {
             System.err.println("error: " + e);

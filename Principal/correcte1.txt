@@ -1,0 +1,14 @@
+tupla a() = (1,·a·);
+tupla b() = (a,2);
+
+ent c = 69;
+car d = ·E·;
+
+metode main(){
+    si((c == d)i VER){
+        car e = b.Item0.Item1 + a.Item0;
+        sortidaS(e);
+    }sino{
+        sortidaS(FALS);
+    }
+}

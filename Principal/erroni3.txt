@@ -1,0 +1,8 @@
+bool a = !(65 == ·a·) o VER;
+bool b = VER i VER;
+
+tupla c () = (VER,·a·,2);
+
+metode main(){
+    ent d = c.Item1 + b;
+}
