@@ -48,7 +48,6 @@ logic = [b][o][o][l]
 id		= [A-Za-z][A-Za-z0-9_]*
 constant = [c][o][n][s][t][a][n][t]
 
-//signe		= [+|-]?
 digit19		= [1-9]
 digit10		= [0-9]
 

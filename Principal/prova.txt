@@ -1,10 +1,10 @@
 
-metode a(){
-    ent a = 3;
+metode car majuscula(ent a, car b){
+    retorna b-a;
 }
-
 metode main () {
-    ent c = 5;
+    car a = majuscula(32,·a·);
+    sortidaS(a);
 }
     
 

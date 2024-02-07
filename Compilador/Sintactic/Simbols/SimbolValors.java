@@ -1,23 +1,24 @@
 package Compilador.Sintactic.Simbols;
 
 import java.util.ArrayList;
+import java.util.Stack;
 
 public class SimbolValors extends SimbolBase {
-    private ArrayList<SimbolE> llista;
+    private Stack<SimbolE> llista;
 
-    public SimbolValors(){
-        llista = new ArrayList<>();
+    public SimbolValors() {
+        llista = new Stack<>();
     }
 
-    public SimbolValors(ArrayList<SimbolE> llista){
+    public SimbolValors(Stack<SimbolE> llista) {
         this.llista = llista;
     }
 
-    public void afegirE(SimbolE id){
-        llista.add(id);
+    public void afegirE(SimbolE id) {
+        llista.push(id);
     }
 
-    public ArrayList<SimbolE> getLlista() {
+    public Stack<SimbolE> getLlista() {
         return llista;
     }
 

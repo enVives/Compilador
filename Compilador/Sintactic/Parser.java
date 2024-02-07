@@ -518,7 +518,7 @@ public class Parser extends java_cup.runtime.lr_parser {
     }
 
     public void genera_ensablador(){
-        if(taula_intermedi.size() > 0){ //si no hi ha hagut fallos
+        if((taula_intermedi.size() > 0)&&(!errorSemantic)&&(!errorSintactic)){ //si no hi ha hagut fallos
             ArrayList<Sentencia> llista_intermedi = taula_intermedi.get_Llista();
             ArrayList<Entrada> llista_variables = taula_variables.getFiles();
             ArrayList<InfoProcediment> llista_procediments = taula_procediments.getLlista();
@@ -545,9 +545,6 @@ public class Parser extends java_cup.runtime.lr_parser {
                         switch(variable.ocupacio()){
                             case 0:
                                 cEnsamblador += "V"+n+" DS.L "+num_camps(n)+"\n";
-                                break;
-                            case 1:
-                                cEnsamblador += "V"+n+" DC.B 0\n";
                                 break;
                             case  2:
                                 cEnsamblador += "V"+n+" DC.W 0\n";
@@ -630,22 +627,22 @@ public class Parser extends java_cup.runtime.lr_parser {
 
                 while(it1.hasNext()){
                     Sentencia sent = (Sentencia) it1.next();
-                    if(sent.getOperacio() == Operacio.skip){
-                        if((Integer)sent.getDesti() != -1){
+                    if(sent.getOperacio() == Operacio.skip) {
+                        if(((Integer)sent.getDesti() != -1)&&(taula_procediments.conte_etiqueta((Integer)sent.getDesti()))) {
                             dins_procediment = true;
                         }
-
-                        if(dins_procediment){
-                            creaSubCodi(sent);
-                        }
-
-                        if(sent.getOperacio() == Operacio.retorn){
-                            if((Integer)sent.getDesti() != -1){
-                                dins_procediment = false;
-                                cEnsamblador += "\tRTS\n";
-                            }
-                        }
                     }
+
+                    if(dins_procediment){
+                        creaSubCodi(sent);
+                    }
+
+                    if(sent.getOperacio() == Operacio.retorn){
+                        if((Integer)sent.getDesti() != -1){
+                            dins_procediment = false;
+                            cEnsamblador += "\tRTS\n";
+                        }
+                    }  
                 }
                 
                 
@@ -666,8 +663,6 @@ public class Parser extends java_cup.runtime.lr_parser {
 
     public Character llargaria(Integer ocupacio) {
         switch(ocupacio) {
-            case 1:
-                return 'B';
             case 2:
                 return 'W';
             case 4:
@@ -706,7 +701,7 @@ public class Parser extends java_cup.runtime.lr_parser {
                         str += "\tMOVE."+llargOperand1+" "+posicioOperand1+"(A7),D0\n";
                         str += "\tMOVE."+llargDesti+" D0,"+posicioDesti+"(A7)\n";
                     }else{
-                        str += "\tMOVE."+llargOperand1+" "+posicioOperand1+"(A7), D0\n";
+                        str += "\tMOVE."+llargOperand1+" "+posicioOperand1+"(A7),D0\n";
                         str += "\tMOVE."+llargDesti+" D0,V"+(Integer)t3+"\n";
                     }
                 }else{
@@ -717,7 +712,7 @@ public class Parser extends java_cup.runtime.lr_parser {
                         
                     }else{
                         //global global
-                        str += "\tMOVE."+llargOperand1+" "+"V"+(Integer)t1+", D0\n";
+                        str += "\tMOVE."+llargOperand1+" "+"V"+(Integer)t1+",D0\n";
                         str += "\tMOVE."+llargDesti+" D0,V"+(Integer)t3+"\n";
                     }
                 }
@@ -961,10 +956,10 @@ public class Parser extends java_cup.runtime.lr_parser {
                         }
                     }
                 }
-                str += "\t CLR.L D0\n";
-                str += "\t CLR.L D1\n";
-                str += "\t CLR.L D2\n";
-                str += "\t CLR.L D3\n";
+                str += "\tCLR.L D0\n";
+                str += "\tCLR.L D1\n";
+                str += "\tCLR.L D2\n";
+                str += "\tCLR.L D3\n";
                 break;
             
             case 4: //falta canviar signe
@@ -1019,45 +1014,45 @@ public class Parser extends java_cup.runtime.lr_parser {
                 if(posicioOperand1 != null) {
                     if(posicioOperand2 != null) {
                         if(posicioDesti != null){
-                            str += "\tMOVE.B "+posicioOperand1+"(A7),D0\n";
-                            str += "\tAND.B "+posicioOperand2+"(A7),D0\n";
-                            str += "\tMOVE.B D0,"+posicioDesti+"(A7)\n";
+                            str += "\tMOVE.L "+posicioOperand1+"(A7),D0\n";
+                            str += "\tAND.L "+posicioOperand2+"(A7),D0\n";
+                            str += "\tMOVE.L D0,"+posicioDesti+"(A7)\n";
                         }else{
-                            str += "\tMOVE.B "+posicioOperand1+"(A7),D0\n";
-                            str += "\tAND.B "+posicioOperand2+"(A7),D0\n";
-                            str += "\tMOVE.B D0,V"+(Integer)t3+"\n";
+                            str += "\tMOVE.L "+posicioOperand1+"(A7),D0\n";
+                            str += "\tAND.L "+posicioOperand2+"(A7),D0\n";
+                            str += "\tMOVE.L D0,V"+(Integer)t3+"\n";
                         }
                     } else {
                         if(posicioDesti != null){
-                            str += "\tMOVE.B "+posicioOperand1+"(A7),D0\n";
-                            str += "\tAND.B V"+(Integer)t2+",D0\n";
-                            str += "\tMOVE.B D0,"+posicioDesti+"(A7)\n";
+                            str += "\tMOVE.L "+posicioOperand1+"(A7),D0\n";
+                            str += "\tAND.L V"+(Integer)t2+",D0\n";
+                            str += "\tMOVE.L D0,"+posicioDesti+"(A7)\n";
                         }else{
-                            str += "\tMOVE.B "+posicioOperand1+"(A7),D0\n";
-                            str += "\tAND.B V"+(Integer)t2+",D0\n";
-                            str += "\tMOVE.B D0,V"+(Integer)t3+"\n";
+                            str += "\tMOVE.L "+posicioOperand1+"(A7),D0\n";
+                            str += "\tAND.L V"+(Integer)t2+",D0\n";
+                            str += "\tMOVE.L D0,V"+(Integer)t3+"\n";
                         }
                     }
                 } else {
                     if (posicioOperand2 != null) {
                         if(posicioDesti != null){
-                            str += "\tMOVE.B V"+(Integer)t1+",D0\n";
-                            str += "\tAND.B "+posicioOperand2+"(A7),D0\n";
-                            str += "\tMOVE.B D0,"+posicioDesti+"(A7)\n";
+                            str += "\tMOVE.L V"+(Integer)t1+",D0\n";
+                            str += "\tAND.L "+posicioOperand2+"(A7),D0\n";
+                            str += "\tMOVE.L D0,"+posicioDesti+"(A7)\n";
                         }else{
-                            str += "\tMOVE.B V"+(Integer)t1+",D0\n";
-                            str += "\tAND.B "+posicioOperand2+"(A7),D0\n";
-                            str += "\tMOVE.B D0,V"+(Integer)t3+"\n";
+                            str += "\tMOVE.L V"+(Integer)t1+",D0\n";
+                            str += "\tAND.L "+posicioOperand2+"(A7),D0\n";
+                            str += "\tMOVE.L D0,V"+(Integer)t3+"\n";
                         }
                     } else {
                         if(posicioDesti != null){
-                            str += "\tMOVE.B V"+(Integer)t1+",D0\n";
-                            str += "\tAND.B V"+(Integer)t2+",D0\n";
-                            str += "\tMOVE.B D0,"+posicioDesti+"(A7)\n";
+                            str += "\tMOVE.L V"+(Integer)t1+",D0\n";
+                            str += "\tAND.L V"+(Integer)t2+",D0\n";
+                            str += "\tMOVE.L D0,"+posicioDesti+"(A7)\n";
                         }else{
-                            str += "\tMOVE.B V"+(Integer)t1+",D0\n";
-                            str += "\tAND.B V"+(Integer)t2+",D0\n";
-                            str += "\tMOVE.B D0,V"+(Integer)t3+"\n";
+                            str += "\tMOVE.L V"+(Integer)t1+",D0\n";
+                            str += "\tAND.L V"+(Integer)t2+",D0\n";
+                            str += "\tMOVE.L D0,V"+(Integer)t3+"\n";
                         }
                     }
                 }
@@ -1081,45 +1076,45 @@ public class Parser extends java_cup.runtime.lr_parser {
                 if(posicioOperand1 != null) {
                     if(posicioOperand2 != null) {
                         if(posicioDesti != null){
-                            str += "\tMOVE.B "+posicioOperand1+"(A7),D0\n";
-                            str += "\tOR.B "+posicioOperand2+"(A7),D0\n";
-                            str += "\tMOVE.B D0,"+posicioDesti+"(A7)\n";
+                            str += "\tMOVE.L "+posicioOperand1+"(A7),D0\n";
+                            str += "\tOR.L "+posicioOperand2+"(A7),D0\n";
+                            str += "\tMOVE.L D0,"+posicioDesti+"(A7)\n";
                         }else{
-                            str += "\tMOVE.B "+posicioOperand1+"(A7),D0\n";
-                            str += "\tAND.B "+posicioOperand2+"(A7),D0\n";
-                            str += "\tMOVE.B D0,V"+(Integer)t3+"\n";
+                            str += "\tMOVE.L "+posicioOperand1+"(A7),D0\n";
+                            str += "\tAND.L "+posicioOperand2+"(A7),D0\n";
+                            str += "\tMOVE.L D0,V"+(Integer)t3+"\n";
                         }
                     } else {
                         if(posicioDesti != null){
-                            str += "\tMOVE.B "+posicioOperand1+"(A7),D0\n";
-                            str += "\tOR.B V"+(Integer)t2+",D0\n";
-                            str += "\tMOVE.B D0,"+posicioDesti+"(A7)\n";
+                            str += "\tMOVE.L "+posicioOperand1+"(A7),D0\n";
+                            str += "\tOR.L V"+(Integer)t2+",D0\n";
+                            str += "\tMOVE.L D0,"+posicioDesti+"(A7)\n";
                         }else{
-                            str += "\tMOVE.B "+posicioOperand1+"(A7),D0\n";
-                            str += "\tOR.B V"+(Integer)t2+",D0\n";
-                            str += "\tMOVE.B D0,V"+(Integer)t3+"\n";
+                            str += "\tMOVE.L "+posicioOperand1+"(A7),D0\n";
+                            str += "\tOR.L V"+(Integer)t2+",D0\n";
+                            str += "\tMOVE.L D0,V"+(Integer)t3+"\n";
                         }
                     }
                 } else {
                     if (posicioOperand2 != null) {
                         if(posicioDesti != null){
-                            str += "\tMOVE.B V"+(Integer)t1+",D0\n";
-                            str += "\tOR.B "+posicioOperand2+"(A7),D0\n";
-                            str += "\tMOVE.B D0,"+posicioDesti+"(A7)\n";
+                            str += "\tMOVE.L V"+(Integer)t1+",D0\n";
+                            str += "\tOR.L "+posicioOperand2+"(A7),D0\n";
+                            str += "\tMOVE.L D0,"+posicioDesti+"(A7)\n";
                         }else{
-                            str += "\tMOVE.B V"+(Integer)t1+",D0\n";
-                            str += "\tOR.B "+posicioOperand2+"(A7),D0\n";
-                            str += "\tMOVE.B D0,V"+(Integer)t3+"\n";
+                            str += "\tMOVE.L V"+(Integer)t1+",D0\n";
+                            str += "\tOR.L "+posicioOperand2+"(A7),D0\n";
+                            str += "\tMOVE.L D0,V"+(Integer)t3+"\n";
                         }
                     } else {
                         if(posicioDesti != null){
-                            str += "\tMOVE.B V"+(Integer)t1+",D0\n";
-                            str += "\tOR.B V"+(Integer)t2+",D0\n";
-                            str += "\tMOVE.B D0,"+posicioDesti+"(A7)\n";
+                            str += "\tMOVE.L V"+(Integer)t1+",D0\n";
+                            str += "\tOR.L V"+(Integer)t2+",D0\n";
+                            str += "\tMOVE.L D0,"+posicioDesti+"(A7)\n";
                         }else{
-                            str += "\tMOVE.B V"+(Integer)t1+",D0\n";
-                            str += "\tOR.B V"+(Integer)t2+",D0\n";
-                            str += "\tMOVE.B D0,V"+(Integer)t3+"\n";
+                            str += "\tMOVE.L V"+(Integer)t1+",D0\n";
+                            str += "\tOR.L V"+(Integer)t2+",D0\n";
+                            str += "\tMOVE.L D0,V"+(Integer)t3+"\n";
                         }
                     }
                 }
@@ -1139,23 +1134,23 @@ public class Parser extends java_cup.runtime.lr_parser {
                 if(posicioOperand1!=null){ //variable local
                     if(posicioDesti!=null){ //variable local
                         str += "\tMOVE."+llargOperand1+" "+posicioOperand1+"(A7),D0";
-                        str += "\tNOT.B D0\n";
+                        str += "\tNOT.L D0\n";
                         str += "\tMOVE."+llargOperand1+" D0,"+posicioDesti+"(A7)\n";
                     }else{
                         str += "\tMOVE."+llargOperand1+" "+posicioOperand1+"(A7),D0\n";
-                        str += "\tNOT.B D0\n";
+                        str += "\tNOT.L D0\n";
                         str += "\tMOVE."+llargOperand1+" D0,V"+(Integer)t3+"\n";
                     }
                 }else{
                     if(posicioDesti!=null){ //variable local
                         //global local
                         str += "\tMOVE."+llargOperand1+" "+"V"+(Integer)t1+",D0\n";
-                        str += "\tNOT.B D0\n";
+                        str += "\tNOT.L D0\n";
                         str += "\tMOVE."+llargOperand1+" D0,"+(Integer)t3+"(A7)\n";
                     }else{
                         //global global
                         str += "\tMOVE."+llargOperand1+" "+"V"+(Integer)t1+",D0\n";
-                        str += "\tNOT.B D0\n";
+                        str += "\tNOT.L D0\n";
                         str += "\tMOVE."+llargOperand1+" D0,V"+(Integer)t3+"\n";
                     }
                 }
@@ -1171,7 +1166,7 @@ public class Parser extends java_cup.runtime.lr_parser {
             break;
             //salt_incondicional
             case 9:
-                str += "\tJPM E"+(Integer)t3+"\n";
+                str += "\tJMP E"+(Integer)t3+"\n";
             break;
             //salt_condicional_igual
             case 10:
@@ -1184,107 +1179,108 @@ public class Parser extends java_cup.runtime.lr_parser {
                 llargOperand1 = llargaria(ocupacioOperand1);
                 llargOperand2 = llargaria(ocupacioOperand2);
 
-                if(llargOperand1 == 'B'){
-                    if(llargOperand2 == 'B'){ //tots dos bytes
+                if(llargOperand1 == 'W'){
+                    if(llargOperand2 == 'W'){ //car car
                         if(posicioOperand1 != null){
                             if(posicioOperand2 != null){
-                                str += "\tCMP.B "+posicioOperand1+"(A7),"+posicioOperand2+"(A7)\n";
+                                str += "\tMOVE.W "+posicioOperand1+"(A7),D0\n";
+                                str += "\tCMP.W D"+posicioOperand2+"(A7),D0\n";
                                 str += "\t BEQ E"+(Integer)t3+"\n";
                             }else{
-                                str += "\tCMP.B "+posicioOperand1+"(A7),V"+(Integer)t2+"\n";
+                                str += "\tMOVE.W "+posicioOperand1+"(A7),D0\n";
+                                str += "\tCMP.W V"+(Integer)t2+",D0\n";
                                 str += "\t BEQ E"+(Integer)t3+"\n";
                             }
                         }else{
                             if(posicioOperand2 != null){
-                                str += "\tCMP.B V"+(Integer)t1+","+posicioOperand2+"(A7)\n";
+                                str += "\tMOVE.W V"+(Integer)t1+",D0\n";
+                                str += "\tCMP.W "+posicioOperand2+"(A7),D0\n";
                                 str += "\t BEQ E"+(Integer)t3+"\n";
                             }else{
-                                str += "\tCMP.B V"+(Integer)t1+",V"+(Integer)t2+"\n";
+                                str += "\tMOVE.W V"+(Integer)t1+",D0\n";
+                                str += "\tCMP.W V"+(Integer)t2+",D0\n";
                                 str += "\t BEQ E"+(Integer)t3+"\n";
                             }
                         }
-                    }else{ // Operand2 -> byte long
+                    }else{ //car int
                         if(posicioOperand1 != null){
                             if(posicioOperand2 != null){
-                                str += "\tMOVE.B "+posicioOperand1+"(A7),D0\n";
-                                str += "\tEXT.W D0\n";
+                                str += "\tMOVE.W "+posicioOperand1+"(A7),D0\n";
                                 str += "\tEXT.L D0\n";
-                                str += "\tCMP.L D0,"+posicioOperand2+"(A7)\n";
+                                str += "\tCMP.L "+posicioOperand2+"(A7),D0\n";
                                 str += "\t BEQ E"+(Integer)t3+"\n";
                             }else{
-                                str += "\tMOVE.B "+posicioOperand1+"(A7),D0\n";
-                                str += "\tEXT.W D0\n";
+                                str += "\tMOVE.W "+posicioOperand1+"(A7),D0\n";
                                 str += "\tEXT.L D0\n";
-                                str += "\tCMP.B D0,V"+(Integer)t2+"\n";
+                                str += "\tCMP.L V"+(Integer)t2+",D0\n";
                                 str += "\t BEQ E"+(Integer)t3+"\n";
                             }
                         }else{
                             if(posicioOperand2 != null){
-                                str += "\tMOVE.B V"+(Integer)t1+",D0\n";
-                                str += "\tEXT.W D0\n";
+                                str += "\tMOVE.W V"+(Integer)t1+",D0\n";
                                 str += "\tEXT.L D0\n";
-                                str += "\tCMP.L D0,"+posicioOperand2+"(A7)\n";
+                                str += "\tCMP.L "+posicioOperand2+"(A7),D0\n";
                                 str += "\t BEQ E"+(Integer)t3+"\n";
                             }else{
-                                str += "\tMOVE.B V"+(Integer)t1+",D0\n";
-                                str += "\tEXT.W D0\n";
+                                str += "\tMOVE.W V"+(Integer)t1+",D0\n";
                                 str += "\tEXT.L D0\n";
-                                str += "\tCMP.L D0,V"+(Integer)t2+"\n";
+                                str += "\tCMP.L V"+(Integer)t2+",D0\n";
                                 str += "\t BEQ E"+(Integer)t3+"\n";
                             }
                         }
                     }
-                }else{ 
-                    if(llargOperand2 == 'B'){ //long byte
+                }else{
+                    if(llargOperand2 == 'W'){ // int car
                         if(posicioOperand1 !=null){
                             if(posicioOperand2 != null){
-                                str += "\tMOVE.B "+posicioOperand2+"(A7),D0\n";
-                                str += "\tEXT.W D0\n";
+                                str += "\tMOVE.W "+posicioOperand2+"(A7),D0\n";
                                 str += "\tEXT.L D0\n";
-                                str += "\tCMP.L D0,"+posicioOperand1+"(A7)\n";
+                                str += "\tCMP.L "+posicioOperand1+"(A7),D0\n";
                                 str += "\t BEQ E"+(Integer)t3+"\n";
                             }else{
-                                str += "\tMOVE.B "+posicioOperand2+"(A7),D0\n";
-                                str += "\tEXT.W D0\n";
+                                str += "\tMOVE.W "+posicioOperand2+"(A7),D0\n";
                                 str += "\tEXT.L D0\n";
-                                str += "\tCMP.B D0,V"+(Integer)t1+"\n";
+                                str += "\tCMP.L V"+(Integer)t1+",D0\n";
                                 str += "\t BEQ E"+(Integer)t3+"\n";
                             }
                         }else{
                             if(posicioOperand2 != null){
-                                str += "\tMOVE.B V"+(Integer)t2+",D0\n";
-                                str += "\tEXT.W D0\n";
+                                str += "\tMOVE.W V"+(Integer)t2+",D0\n";
                                 str += "\tEXT.L D0\n";
-                                str += "\tCMP.L D0,"+posicioOperand1+"(A7)\n";
+                                str += "\tCMP.L "+posicioOperand1+"(A7),D0\n";
                                 str += "\t BEQ E"+(Integer)t3+"\n";
                             }else{
-                                str += "\tMOVE.B V"+(Integer)t2+",D0\n";
-                                str += "\tEXT.W D0\n";
+                                str += "\tMOVE.W V"+(Integer)t2+",D0\n";
                                 str += "\tEXT.L D0\n";
-                                str += "\tCMP.L D0,V"+(Integer)t1+"\n";
+                                str += "\tCMP.L V"+(Integer)t1+",D0\n";
                                 str += "\t BEQ E"+(Integer)t3+"\n";
                             }
                         }
-                    }else{ //long long
+                    }else{ //int int o bool bool
                         if(posicioOperand1 != null){
                             if(posicioOperand2 != null){
-                                str += "\tCMP.L "+posicioOperand1+"(A7),"+posicioOperand2+"(A7)\n";
+                                str += "\tMOVE.L "+posicioOperand1+"(A7),D0\n";
+                                str += "\tCMP.L "+posicioOperand2+"(A7),D0\n";
                                 str += "\t BEQ E"+(Integer)t3+"\n";
                             }else{
-                                str += "\tCMP.L "+posicioOperand1+"(A7),V"+(Integer)t2+"\n";
+                                str += "\tMOVE.L "+posicioOperand1+"(A7),D0\n";
+                                str += "\tCMP.L V"+(Integer)t2+",D0\n";
                                 str += "\t BEQ E"+(Integer)t3+"\n";
                             }
                         }else{
                             if(posicioOperand2 != null){
-                                str += "\tCMP.L V"+(Integer)t1+","+posicioOperand2+"(A7)\n";
+                                str += "\tMOVE.L V"+(Integer)t1+",D0\n";
+                                str += "\tCMP.L "+posicioOperand2+"(A7),D0\n";
                                 str += "\t BEQ E"+(Integer)t3+"\n";
                             }else{
-                                str += "\tCMP.L V"+(Integer)t1+",V"+(Integer)t2+"\n";
+                                str += "\tMOVE.L V"+(Integer)t1+",D0\n";
+                                str += "\tCMP.L V"+(Integer)t2+",D0\n";
                                 str += "\t BEQ E"+(Integer)t3+"\n";
                             }
                         }
                     }
                 }
+                
             break;
             //salt_condicional_diferent
             case 11:
@@ -1297,102 +1293,102 @@ public class Parser extends java_cup.runtime.lr_parser {
                 llargOperand1 = llargaria(ocupacioOperand1);
                 llargOperand2 = llargaria(ocupacioOperand2);
 
-                if(llargOperand1 == 'B'){
-                    if(llargOperand2 == 'B'){ //tots dos bytes
+                if(llargOperand1 == 'W'){
+                    if(llargOperand2 == 'W'){ //car car
                         if(posicioOperand1 != null){
                             if(posicioOperand2 != null){
-                                str += "\tCMP.B "+posicioOperand1+"(A7),"+posicioOperand2+"(A7)\n";
+                                str += "\tMOVE.W "+posicioOperand1+"(A7),D0\n";
+                                str += "\tCMP.W D"+posicioOperand2+"(A7),D0\n";
                                 str += "\t BNE E"+(Integer)t3+"\n";
                             }else{
-                                str += "\tCMP.B "+posicioOperand1+"(A7),V"+(Integer)t2+"\n";
+                                str += "\tMOVE.W "+posicioOperand1+"(A7),D0\n";
+                                str += "\tCMP.W V"+(Integer)t2+",D0\n";
                                 str += "\t BNE E"+(Integer)t3+"\n";
                             }
                         }else{
                             if(posicioOperand2 != null){
-                                str += "\tCMP.B V"+(Integer)t1+","+posicioOperand2+"(A7)\n";
+                                str += "\tMOVE.W V"+(Integer)t1+",D0\n";
+                                str += "\tCMP.W "+posicioOperand2+"(A7),D0\n";
                                 str += "\t BNE E"+(Integer)t3+"\n";
                             }else{
-                                str += "\tCMP.B V"+(Integer)t1+",V"+(Integer)t2+"\n";
+                                str += "\tMOVE.W V"+(Integer)t1+",D0\n";
+                                str += "\tCMP.W V"+(Integer)t2+",D0\n";
                                 str += "\t BNE E"+(Integer)t3+"\n";
                             }
                         }
-                    }else{ // Operand2 -> byte long
+                    }else{ //car int
                         if(posicioOperand1 != null){
                             if(posicioOperand2 != null){
-                                str += "\tMOVE.B "+posicioOperand1+"(A7),D0\n";
-                                str += "\tEXT.W D0\n";
+                                str += "\tMOVE.W "+posicioOperand1+"(A7),D0\n";
                                 str += "\tEXT.L D0\n";
-                                str += "\tCMP.L D0,"+posicioOperand2+"(A7)\n";
+                                str += "\tCMP.L "+posicioOperand2+"(A7),D0\n";
                                 str += "\t BNE E"+(Integer)t3+"\n";
                             }else{
-                                str += "\tMOVE.B "+posicioOperand1+"(A7),D0\n";
-                                str += "\tEXT.W D0\n";
+                                str += "\tMOVE.W "+posicioOperand1+"(A7),D0\n";
                                 str += "\tEXT.L D0\n";
-                                str += "\tCMP.B D0,V"+(Integer)t2+"\n";
+                                str += "\tCMP.L V"+(Integer)t2+",D0\n";
                                 str += "\t BNE E"+(Integer)t3+"\n";
                             }
                         }else{
                             if(posicioOperand2 != null){
-                                str += "\tMOVE.B V"+(Integer)t1+",D0\n";
-                                str += "\tEXT.W D0\n";
+                                str += "\tMOVE.W V"+(Integer)t1+",D0\n";
                                 str += "\tEXT.L D0\n";
-                                str += "\tCMP.L D0,"+posicioOperand2+"(A7)\n";
+                                str += "\tCMP.L "+posicioOperand2+"(A7),D0\n";
                                 str += "\t BNE E"+(Integer)t3+"\n";
                             }else{
-                                str += "\tMOVE.B V"+(Integer)t1+",D0\n";
-                                str += "\tEXT.W D0\n";
+                                str += "\tMOVE.W V"+(Integer)t1+",D0\n";
                                 str += "\tEXT.L D0\n";
-                                str += "\tCMP.L D0,V"+(Integer)t2+"\n";
+                                str += "\tCMP.L V"+(Integer)t2+",D0\n";
                                 str += "\t BNE E"+(Integer)t3+"\n";
                             }
                         }
                     }
-                }else{ 
-                    if(llargOperand2 == 'B'){ //long byte
+                }else{
+                    if(llargOperand2 == 'W'){ // int car
                         if(posicioOperand1 !=null){
                             if(posicioOperand2 != null){
-                                str += "\tMOVE.B "+posicioOperand2+"(A7),D0\n";
-                                str += "\tEXT.W D0\n";
+                                str += "\tMOVE.W "+posicioOperand2+"(A7),D0\n";
                                 str += "\tEXT.L D0\n";
-                                str += "\tCMP.L D0,"+posicioOperand1+"(A7)\n";
+                                str += "\tCMP.L "+posicioOperand1+"(A7),D0\n";
                                 str += "\t BNE E"+(Integer)t3+"\n";
                             }else{
-                                str += "\tMOVE.B "+posicioOperand2+"(A7),D0\n";
-                                str += "\tEXT.W D0\n";
+                                str += "\tMOVE.W "+posicioOperand2+"(A7),D0\n";
                                 str += "\tEXT.L D0\n";
-                                str += "\tCMP.B D0,V"+(Integer)t1+"\n";
+                                str += "\tCMP.L V"+(Integer)t1+",D0\n";
                                 str += "\t BNE E"+(Integer)t3+"\n";
                             }
                         }else{
                             if(posicioOperand2 != null){
-                                str += "\tMOVE.B V"+(Integer)t2+",D0\n";
-                                str += "\tEXT.W D0\n";
+                                str += "\tMOVE.W V"+(Integer)t2+",D0\n";
                                 str += "\tEXT.L D0\n";
-                                str += "\tCMP.L D0,"+posicioOperand1+"(A7)\n";
+                                str += "\tCMP.L "+posicioOperand1+"(A7),D0\n";
                                 str += "\t BNE E"+(Integer)t3+"\n";
                             }else{
-                                str += "\tMOVE.B V"+(Integer)t2+",D0\n";
-                                str += "\tEXT.W D0\n";
+                                str += "\tMOVE.W V"+(Integer)t2+",D0\n";
                                 str += "\tEXT.L D0\n";
-                                str += "\tCMP.L D0,V"+(Integer)t1+"\n";
+                                str += "\tCMP.L V"+(Integer)t1+",D0\n";
                                 str += "\t BNE E"+(Integer)t3+"\n";
                             }
                         }
-                    }else{ //long long
+                    }else{ //int int o bool bool
                         if(posicioOperand1 != null){
                             if(posicioOperand2 != null){
-                                str += "\tCMP.L "+posicioOperand1+"(A7),"+posicioOperand2+"(A7)\n";
+                                str += "\tMOVE.L "+posicioOperand1+"(A7),D0\n";
+                                str += "\tCMP.L "+posicioOperand2+"(A7),D0\n";
                                 str += "\t BNE E"+(Integer)t3+"\n";
                             }else{
-                                str += "\tCMP.L "+posicioOperand1+"(A7),V"+(Integer)t2+"\n";
+                                str += "\tMOVE.L "+posicioOperand1+"(A7),D0\n";
+                                str += "\tCMP.L V"+(Integer)t2+",D0\n";
                                 str += "\t BNE E"+(Integer)t3+"\n";
                             }
                         }else{
                             if(posicioOperand2 != null){
-                                str += "\tCMP.L V"+(Integer)t1+","+posicioOperand2+"(A7)\n";
+                                str += "\tMOVE.L V"+(Integer)t1+",D0\n";
+                                str += "\tCMP.L "+posicioOperand2+"(A7),D0\n";
                                 str += "\t BNE E"+(Integer)t3+"\n";
                             }else{
-                                str += "\tCMP.L V"+(Integer)t1+",V"+(Integer)t2+"\n";
+                                str += "\tMOVE.L V"+(Integer)t1+",D0\n";
+                                str += "\tCMP.L V"+(Integer)t2+",D0\n";
                                 str += "\t BNE E"+(Integer)t3+"\n";
                             }
                         }
@@ -1402,11 +1398,13 @@ public class Parser extends java_cup.runtime.lr_parser {
             //crida
             case 12:
                 e1 = taula_variables.cerca_variable((Integer)t1);
-        
-                str += "\t JSR E"+(Integer)t3;
+                afegeix_pila =0;
+                str += "\t JSR E"+(Integer)t3+"\n";
             
                 Integer ocupacio_parametres = taula_procediments.get_procediment((Integer)t3).getParametres();
-                str += "\tADDQ.L #"+ocupacio_parametres+", A7\n";
+                if (ocupacio_parametres > 0) {
+                    str += "\tADD.L #"+ocupacio_parametres+", A7\n";
+                }
             
                 //return TENIM A PILA VALOR A RETORNAR COM A LONG
                 if(e1!=null){
@@ -1420,6 +1418,8 @@ public class Parser extends java_cup.runtime.lr_parser {
                         str += "\tMOVE."+llargOperand1+" D0,V"+(Integer)t1+"\n";
                     }
                     str += "\t CLR.L D0\n";
+                }else{
+                    str += "\tADD.L #4, A7\n";
                 }
             break;
             //retorn
@@ -1458,11 +1458,11 @@ public class Parser extends java_cup.runtime.lr_parser {
                 llargOperand1 = llargaria(ocupacioOperand1);
 
                 if(posicioOperand1!=null){
-                    str += "\tMOVE."+llargOperand1+" "+posicioOperand1+"(A7)"+",-(A7)\n";
+                    str += "\tMOVE."+llargOperand1+" "+(posicioOperand1+afegeix_pila)+"(A7)"+",-(A7)\n";
                 } else {
                     str += "\tMOVE."+llargOperand1+" V"+(Integer)t1+",-(A7)\n";
                 }
-                canvia_posicio_relativa(ocupacioOperand1);
+                afegeix_pila += ocupacioOperand1;
 
             break;
             case 15: //-> copia_valor, #t1, null, tdesti -> copia_valor,objecte,null,objecte
@@ -1528,7 +1528,8 @@ public class Parser extends java_cup.runtime.lr_parser {
             break;
             case 17: //pmb np
                 Integer ocupacio_locals = taula_procediments.get_procediment((Integer)t3).getOcupacio();
-                str += "\tSUBQ #"+ocupacio_locals+",A7\n";
+                str += "\tSUB #"+ocupacio_locals+",A7\n";  
+                    
             break;
             case 18: //console read, null,null,variable
                 e3 = taula_variables.cerca_variable((Integer)t3);
@@ -1545,9 +1546,9 @@ public class Parser extends java_cup.runtime.lr_parser {
 	                        "\tTRAP #15\n";
 
                     if(posicioDesti!=null){
-                        str += "\t MOVE.B D1,"+posicioDesti+"(A7)\n";
+                        str += "\t MOVE.L D1,"+posicioDesti+"(A7)\n";
                     }else{
-                        str += "\t MOVE.B D1,V"+(Integer)t3+"\n";
+                        str += "\t MOVE.L D1,V"+(Integer)t3+"\n";
                     }
                     break;
                     case 2:
@@ -1586,23 +1587,6 @@ public class Parser extends java_cup.runtime.lr_parser {
                 ocupacioDesti = e3.ocupacio();
                 llargDesti = llargaria(ocupacioDesti);
                 switch(ocupacioDesti){
-                    case 1:
-                    str +=  "\tMOVE #14,D0\n"+
-	                        "\tLEA SORTIDA,A1\n"+
-	                        "\tTRAP #15\n";
-                    if(posicioDesti !=null){
-                        str += "\tMOVE.B "+posicioDesti+"(A7),D1\n";
-                        str += "\t EXT.W D1\n";
-                        str += "\t EXT.L D1\n";
-                        str += "\tMOVE #3,D0\n";
-                    }else{
-                        str += "\tMOVE.B V"+(Integer)t3+",D1\n";
-                        str += "\t EXT.W D1\n";
-                        str += "\t EXT.L D1\n";
-                        str += "\tMOVE #3,D0\n";
-                    }
-                    str += "\tTRAP #15\n";
-                    break;
                     case 2:
                     str +=  "\tMOVE #14,D0\n"+
 	                        "\tLEA SORTIDA,A1\n"+
@@ -1658,6 +1642,7 @@ public class Parser extends java_cup.runtime.lr_parser {
             break;
             case 21:
                 str += "\tSUBQ #4,A7\n";
+                afegeix_pila += 4;
             break;
         }
         cEnsamblador += str;
@@ -1708,22 +1693,20 @@ public class Parser extends java_cup.runtime.lr_parser {
         return taula_variables.n(); //darrer n
     }
 
-    public void canvia_posicio_relativa(Integer ocupacio){
-        ArrayList<Entrada> llista = taula_variables.getFiles();
-        Iterator <Entrada> it = llista.iterator();
-        while(it.hasNext()){
-            Entrada ent = (Entrada) it.next();
-            if(ent.getSubprograma() != null){
-                ent.setPosicio_pila(ent.getPosicio_pila()+ocupacio);
-            }
-        }
-    }
+    Integer afegeix_pila = 0;
+
+    //crida -> afegeix_pila = 0
+    //b
+    //a -> afegeix_pila + 4
+    //retorn -> afegeix_pila+4
+    //a
+    //b
 
     public void nouproc(Integer nivell, Integer parametres, Integer etiqueta, Integer np,Integer lloc_retorn){
         Integer ocupacio1 = ocupacio_locals(np);
         Integer ocupacio2 = ocupacio_parametres(ocupacio1,np);
         if(lloc_retorn!=null){
-            lloc_retorn = ocupacio1+ocupacio2;
+            lloc_retorn = ocupacio1+ocupacio2+4;
         }
         taula_procediments.afegeix_procediment(np,etiqueta,ocupacio1,ocupacio2,lloc_retorn);
     }
@@ -1765,8 +1748,21 @@ public class Parser extends java_cup.runtime.lr_parser {
             if(ent.getSubprograma() == np){
                 if(ent.ocupacio()!=null){
                     if(ent.getParametre()){
-                        ent.setPosicio_pila(ocupacio+4+ocupacio_parametres);
+                        //ent.setPosicio_pila(ocupacio+4+ocupacio_parametres);
                         ocupacio_parametres += ent.ocupacio();
+                    }
+                }
+            }
+        }
+        it = llista.iterator();
+        Integer n = 0;
+        while(it.hasNext()){
+            Entrada ent = (Entrada) it.next();
+            if(ent.getSubprograma() == np){
+                if(ent.ocupacio()!=null){
+                    if(ent.getParametre()){
+                        n += ent.ocupacio();
+                        ent.setPosicio_pila(ocupacio+4+ocupacio_parametres-n);
                     }
                 }
             }
@@ -1807,6 +1803,7 @@ public class Parser extends java_cup.runtime.lr_parser {
      **********************************************************************/
 
     private boolean errorSemantic = false;
+    private boolean errorSintactic = false;
 
     @Override
     public void unrecovered_syntax_error(Symbol cur_token) throws Exception {
@@ -1817,6 +1814,7 @@ public class Parser extends java_cup.runtime.lr_parser {
     @Override
     public void syntax_error(Symbol cur_token) {
         report_error("de sintaxis", cur_token);
+        errorSintactic = true;
     }
 
     @Override
@@ -1935,7 +1933,7 @@ class CUP$Parser$actions {
               Object RESULT =null;
 		System.out.println("Inicialització");
         taula_simbols.posar("ent", new Dtipus(new Escalar("ts_enter", Integer.MIN_VALUE, Integer.MAX_VALUE,4)));
-        taula_simbols.posar("bool", new Dtipus(new Escalar("ts_boolea", -1, 0,1)));
+        taula_simbols.posar("bool", new Dtipus(new Escalar("ts_boolea", -1, 0,4)));
         taula_simbols.posar("car", new Dtipus(new Escalar("ts_caracter", 0, 255,2)));
         taula_simbols.posar("tupla", new Dtipus(new Tupla()));
         taula_simbols.posar("VER", new Dconst(-1,"boolea"));
@@ -2110,6 +2108,8 @@ class CUP$Parser$actions {
 
                             taula_simbols.entra_bloc();
 
+                            pila_procediments.push(procediment.np());
+
                             Dada2 dada = taula_simbols.primer_parametre(nom);
                             while(dada!=null){
                                 String idparam = dada.idcamp();
@@ -2122,7 +2122,7 @@ class CUP$Parser$actions {
                                     ocupacio = 4;
                                     break;
                                     case "car":
-                                    ocupacio = 1;
+                                    ocupacio = 2;
                                     break;
                                     case "bool":
                                     ocupacio = 1;
@@ -2136,7 +2136,6 @@ class CUP$Parser$actions {
                                 dada = dada.next();
                             }
                             taula_intermedi.genera(Operacio.pmb,null,null,procediment.np());
-                            pila_procediments.push(procediment.np());
                         }
                     }   
 
@@ -2194,6 +2193,7 @@ class CUP$Parser$actions {
 
                                 taula_simbols.entra_bloc();
 
+                                pila_procediments.push(procediment.np());
                                 Dada2 dada = taula_simbols.primer_parametre(nom);
                                 while(dada!=null){
                                     String idparam = dada.idcamp();
@@ -2206,7 +2206,7 @@ class CUP$Parser$actions {
                                         ocupacio = 4;
                                         break;
                                         case "car":
-                                        ocupacio = 1;
+                                        ocupacio = 2;
                                         break;
                                         case "bool":
                                         ocupacio = 1;
@@ -2219,7 +2219,7 @@ class CUP$Parser$actions {
                                     dada = dada.next();
                                 }
                                 taula_intermedi.genera(Operacio.pmb,null,null,procediment.np());
-                                pila_procediments.push(procediment.np());
+                                
                                 RESULT = new SimbolProcediment2(t.getTipus(),nivell,etiqueta,par,procediment.np());    
                             }   
                         }
@@ -2490,7 +2490,7 @@ class CUP$Parser$actions {
                 Integer nostra = etiquetes++;
                 Integer fin = etiquetes++;
                 taula_intermedi.afegeix_Llista(c.getLlista());
-                Integer n = novavar(true,1);
+                Integer n = novavar(true,4);
                 taula_intermedi.genera(Operacio.copia_valor,0,null,n);
                 taula_intermedi.genera(Operacio.salt_condicional_igual,n,c.getR(),fin);
                 taula_intermedi.afegeix_Llista(r.getLlista());
@@ -2539,7 +2539,7 @@ class CUP$Parser$actions {
                             taula_intermedi.clear();
 
                             taula_intermedi.set_Llista(llista1);
-                            Integer n = novavar(true,1);
+                            Integer n = novavar(true,4);
                             taula_intermedi.genera(Operacio.copia_valor,0,null,n);
                             taula_intermedi.genera(Operacio.salt_condicional_igual,n,c.getR(),nostra);
                             taula_intermedi.afegeix_Llista(llista2);
@@ -2555,7 +2555,7 @@ class CUP$Parser$actions {
                             taula_intermedi.clear();
 
                             taula_intermedi.set_Llista(llista1);
-                            Integer n = novavar(true,1);
+                            Integer n = novavar(true,4);
                             taula_intermedi.genera(Operacio.copia_valor,0,null,n);
                             taula_intermedi.genera(Operacio.salt_condicional_igual,n,c.getR(),nostra);
                             taula_intermedi.afegeix_Llista(llista2);
@@ -2576,13 +2576,15 @@ class CUP$Parser$actions {
 		SimbolE e = (SimbolE)((java_cup.runtime.Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-1)).value;
 		
         System.out.println("CONDICIO");
-        if(e.getTsb()!="ts_boolea"){
-            report_error_semantic("La expresió ha de ser de tipus booleà", e.getEsquerre(),e.getDreta());
-            errorSemantic = true;
-        }else{ 
-            RESULT = new SimbolCondicio(taula_intermedi.get_Llista(),e.getR());
-            taula_intermedi.clear();
-        }
+        if(!errorSemantic){
+            if(e.getTsb()!="ts_boolea"){
+                report_error_semantic("La expresió ha de ser de tipus booleà", e.getEsquerre(),e.getDreta());
+                errorSemantic = true;
+            }else{ 
+                RESULT = new SimbolCondicio(taula_intermedi.get_Llista(),e.getR());
+                taula_intermedi.clear();
+            }  
+        }  
     
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("CONDICIO",32, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
@@ -2627,7 +2629,7 @@ class CUP$Parser$actions {
                             taula_intermedi.clear();
 
                             taula_intermedi.afegeix_Llista(llista2);
-                            Integer n = novavar(true,1);
+                            Integer n = novavar(true,4);
                             taula_intermedi.genera(Operacio.copia_valor,0,null,n);
 
                             taula_intermedi.genera(Operacio.salt_condicional_igual,n,c.getR(),nostra);
@@ -2643,7 +2645,7 @@ class CUP$Parser$actions {
                             taula_intermedi.clear();
 
                             taula_intermedi.afegeix_Llista(llista2);
-                            Integer n = novavar(true,1);
+                            Integer n = novavar(true,4);
                             taula_intermedi.genera(Operacio.copia_valor,0,null,n);
 
                             taula_intermedi.genera(Operacio.salt_condicional_igual,n,c.getR(),nostra);
@@ -2695,7 +2697,7 @@ class CUP$Parser$actions {
                 Integer nostra = etiquetes++;
                 taula_intermedi.afegeix_Llista(r.getLlista());
                 taula_intermedi.afegeix_Llista(c.getLlista());
-                Integer n = novavar(true,1);
+                Integer n = novavar(true,4);
                 taula_intermedi.genera(Operacio.copia_valor,-1,null,n);
                 taula_intermedi.genera(Operacio.salt_condicional_igual,n,c.getR(),nostra);
                 taula_intermedi.canvia_etiqueta(nostra,pila_pendents.pop());
@@ -3115,19 +3117,17 @@ class CUP$Parser$actions {
                 report_error_semantic("Undefined id \""+d.valor+"\"", d.esquerre,d.dreta);
                 errorSemantic = true;
                 RESULT  = new SimbolR();
-            }else{ //no hem considerat els DargIns
-                if(descripcio instanceof Dvar){ //variable
+            }else{ 
+                if(descripcio instanceof Dvar){ 
                     Dvar var = (Dvar) descripcio;
                     Dtipus tipus = (Dtipus) taula_simbols.consulta(var.tipus()); //ALERTA EN NO TROBAR
                     RESULT = new SimbolR((String)d.valor,(String)d.valor,tipus.dt().tipus_subjacent(),var.tipus(),"var",var.getMy_nv(),-1,var.tipus(),d.esquerre,d.dreta);
-                }else if(descripcio instanceof Dconst){ //variable o tupla
+                }else if(descripcio instanceof Dconst){ 
                     Dconst c = (Dconst) descripcio;
                     Dtipus tipus = (Dtipus) taula_simbols.consulta(c.tipus()); //ALERTA EN NO TROBAR
 
                     RESULT = new SimbolR((String)d.valor,(String)d.valor,tipus.dt().tipus_subjacent(),c.tipus(),"const",c.getTemporal(),-1,c.tipus(),d.esquerre,d.dreta);
-                    //el tipus pot ser tupla També
-                    //això es per quan ens interessa ficar una tupla dins una tupla o un subprograma
-                    //id(a) on 'a' és una tupla.
+
                 }else if(descripcio instanceof Dargin){
                     Dargin var = (Dargin) descripcio;
                     Dtipus tipus = (Dtipus) taula_simbols.consulta(var.tipus()); //ALERTA EN NO TROBAR
@@ -3163,12 +3163,12 @@ class CUP$Parser$actions {
             RESULT  = new SimbolR();
         }else{
             if(v == null){ //crida a un subprograma fora paràmetres
-            Descripcio descripcio = taula_simbols.consulta((String)id.valor);
-            taula_intermedi.genera(Operacio.espai_retorn,null,null,null);
-            if(descripcio == null){
-                report_error_semantic("Undefined id \""+id.valor+"\"", id.esquerre,id.dreta);
-                errorSemantic = true;
-                RESULT  = new SimbolR();
+                taula_intermedi.genera(Operacio.espai_retorn,null,null,null);
+                Descripcio descripcio = taula_simbols.consulta((String)id.valor);
+                if(descripcio == null){
+                    report_error_semantic("El subprograma "+id.valor+" no existeix", id.esquerre,id.dreta);
+                    errorSemantic = true;
+                    RESULT  = new SimbolR();
                 }else{
                     if(descripcio instanceof Dproc){
                         Dproc proc = (Dproc) descripcio;
@@ -3191,7 +3191,7 @@ class CUP$Parser$actions {
                                     ocupacio = 2;
                                     break;
                                     case "bool":
-                                    ocupacio = 1;
+                                    ocupacio = 4;
                                     break;
                                 }
                                 Integer nova = novavar(true,ocupacio);
@@ -3213,11 +3213,12 @@ class CUP$Parser$actions {
                     }
                 } 
             }else{
-                ArrayList<SimbolE> llista = v.getLlista(); //llista amb els paràmetres
-                Iterator <SimbolE> it = llista.iterator();
+                Stack<SimbolE> llista = v.getLlista(); //llista amb els paràmetres
+                taula_intermedi.genera(Operacio.espai_retorn,null,null,null);
                 String nom = (String)id.valor;
-                while(it.hasNext()){
-                    SimbolE e = it.next();
+
+                while(!llista.isEmpty()){
+                    SimbolE e = llista.pop();
                     if((e.getTsb() == "ts_nul")||(e.getTsb() == "ts_record")){
                         report_error_semantic("El paràmetre no té el tipus adecuat per un subprograma", e.getEsquerre(),e.getDreta());
                         errorSemantic = true;
@@ -3237,9 +3238,10 @@ class CUP$Parser$actions {
                         taula_intermedi.genera(Operacio.param_simple,e.getR(),null,null);
                     }
                 }
+
                 Descripcio descripcio = taula_simbols.consulta(nom);
                 if(descripcio == null){
-                    report_error_semantic("El subprograma amb aquests paràmetres no existeix", id.esquerre,r.dreta);
+                    report_error_semantic("El subprograma no existeix", id.esquerre,r.dreta);
                     errorSemantic = true;
                     RESULT  = new SimbolR();
                 }else{
@@ -3260,7 +3262,7 @@ class CUP$Parser$actions {
                                     ocupacio = 2;
                                     break;
                                     case "bool":
-                                    ocupacio = 1;
+                                    ocupacio = 4;
                                     break;
                                 }
                                 Integer nova = novavar(true,ocupacio);
@@ -3636,7 +3638,7 @@ class CUP$Parser$actions {
                 RESULT = new SimbolE();
             }else{
                 //*********************Intermedi*********************************
-                    Integer n1 = novavar(true,1);
+                    Integer n1 = novavar(true,4);
                     switch(e.getOperacio()){
                         case ParserSym.AND:
                             taula_intermedi.genera(Operacio.and,t.getR(),e.getR(),n1);
@@ -3688,7 +3690,7 @@ class CUP$Parser$actions {
                 }else{ 
 
                     //*********************Intermedi*********************************
-                    Integer n1 = novavar(true,1);
+                    Integer n1 = novavar(true,4);
                     switch(e.getOperacio()){
                         case ParserSym.AND:
                             taula_intermedi.genera(Operacio.and,t.getR(),e.getR(),n1);
@@ -3739,7 +3741,7 @@ class CUP$Parser$actions {
                     RESULT = new SimbolEp();
                 }else{ 
                     //*********************Intermedi*********************************
-                    Integer n1 = novavar(true,1);
+                    Integer n1 = novavar(true,4);
                     switch(e.getOperacio()){
                         case ParserSym.AND:
                             taula_intermedi.genera(Operacio.and,t.getR(),e.getR(),n1);
@@ -3796,25 +3798,31 @@ class CUP$Parser$actions {
                     etiquetes++;
                     Integer e2 = etiquetes;
                     etiquetes++;
-                    Integer n1 = novavar(true,1);
+                    Integer n1 = novavar(true,4);
 
                     switch(t.getOperacio()){
                         case ParserSym.IGIG:
                             if(n.getTsb()!=t.getTsb()){
-                                report_error_semantic("Els terminals no tenen el mateix tipus subjacent", n.getEsquerre(),t.getDreta()); //arreglar
-                                errorSemantic = true;
-                                RESULT = new SimbolT();
-                            }else{
-                            taula_intermedi.genera(Operacio.salt_condicional_igual,n.getR(),t.getR(),e1); 
+                                if(((n.getTsb() == "ts_enter")&&(t.getTsb()!="ts_caracter"))||((n.getTsb() == "ts_caracter")&&(t.getTsb()!="ts_enter"))){
+                                    report_error_semantic("Els terminals no tenen el mateix tipus subjacent", n.getEsquerre(),t.getDreta()); //arreglar
+                                    errorSemantic = true;
+                                    RESULT = new SimbolT();
+                                }
+                            }
+                            if(!errorSemantic){
+                              taula_intermedi.genera(Operacio.salt_condicional_igual,n.getR(),t.getR(),e1);  
                             }
                         break;
                         case ParserSym.DIF:
                             if(n.getTsb()!=t.getTsb()){
-                                report_error_semantic("Els terminals no tenen el mateix tipus subjacent", n.getEsquerre(),t.getDreta()); //arreglar
-                                errorSemantic = true;
-                                RESULT = new SimbolT();
-                            }else{
-                            taula_intermedi.genera(Operacio.salt_condicional_diferent,n.getR(),t.getR(),e1);  
+                                if(((n.getTsb() == "ts_enter")&&(t.getTsb()!="ts_caracter"))||((n.getTsb() == "ts_caracter")&&(t.getTsb()!="ts_enter"))){
+                                    report_error_semantic("Els terminals no tenen el mateix tipus subjacent", n.getEsquerre(),t.getDreta()); //arreglar
+                                    errorSemantic = true;
+                                    RESULT = new SimbolT();
+                                }
+                            }
+                            if(!errorSemantic){
+                              taula_intermedi.genera(Operacio.salt_condicional_diferent,n.getR(),t.getR(),e1);   
                             }
                         break;
                     }
@@ -3958,7 +3966,7 @@ class CUP$Parser$actions {
             RESULT = new SimbolNp();
         }else{
             if((n==null)||(n.getTsb()=="ts_nul")){ //vol dir que N_1 -> @
-                if((m.getTsb()=="ts_boolea")||(n.getTsb()=="ts_record")){
+                if((m.getTsb()=="ts_boolea")||(m.getTsb()=="ts_record")){
                     report_error_semantic("El terminal no té un tipus adequat per una operació de suma", m.getEsquerre(),m.getDreta());
                     errorSemantic = true;
                     RESULT = new SimbolNp();
@@ -3966,7 +3974,7 @@ class CUP$Parser$actions {
                     RESULT = new SimbolNp(m.getTsb(),m.getTipus(),ParserSym.ADD,"moderesult",m.getDreta(),m.getR());
                 }
             }else{ // N_1 té tsb i una operació associada
-                if((m.getTsb()=="ts_boolea")||(n.getTsb()=="ts_record")){
+                if((m.getTsb()=="ts_boolea")||(m.getTsb()=="ts_record")){
                         report_error_semantic("El terminal no té un tipus adequat per una operació de suma", m.getEsquerre(),m.getDreta());
                         errorSemantic = true;
                         RESULT = new SimbolNp();
@@ -4007,7 +4015,7 @@ class CUP$Parser$actions {
             RESULT = new SimbolNp();
         }else{
             if((n==null)||(n.getTsb()=="ts_nul")){ //vol dir que N_1 -> @
-                if((m.getTsb()=="ts_boolea")){
+                if((m.getTsb()=="ts_boolea")||(m.getTsb()=="ts_record")){
                     report_error_semantic("El terminal no té un tipus adequat per una operació de resta", m.getDreta(),m.getEsquerre());
                     errorSemantic = true;
                     RESULT = new SimbolNp();
@@ -4015,7 +4023,7 @@ class CUP$Parser$actions {
                     RESULT = new SimbolNp(m.getTsb(),m.getTipus(),ParserSym.SUB,"moderesult",m.getDreta(),m.getR());
                 }
             }else{ // N_1 té tsb i una operació associada
-                if((m.getTsb()=="ts_boolea")||(n.getTsb()=="ts_record")){
+                if((m.getTsb()=="ts_boolea")||(m.getTsb()=="ts_record")){
                         report_error_semantic("El terminal no té un tipus adequat per una operació de resta", m.getEsquerre(),m.getDreta());
                         errorSemantic = true;
                         RESULT = new SimbolNp();
@@ -4225,7 +4233,7 @@ class CUP$Parser$actions {
             RESULT  = new SimbolF();
         }else{
             taula_intermedi.genera(Operacio.console_read,null,null,s.getR());
-            Integer n2 = novavar(true,1);
+            Integer n2 = novavar(true,4);
             taula_intermedi.genera(Operacio.not,s.getR(),null,n2);
             RESULT = new SimbolF(s.getTsb(),s.getTipus(),"modeconst",s.getEsquerre(),s.getDreta(),n2);
         }
@@ -4574,7 +4582,7 @@ class CUP$Parser$actions {
 		int vright = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		Token v = (Token)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		System.out.println("F -> vlogic");
-                Integer n = novavar(true,1);
+                Integer n = novavar(true,4);
                 switch((String)v.valor){
                     case "FALS":
                         taula_intermedi.genera(Operacio.copia_valor,false,null,n); //revisar si passar a decimal o enter
@@ -4648,7 +4656,7 @@ class CUP$Parser$actions {
 		int vright = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		Token v = (Token)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		System.out.println("F -> NOT vlogic");
-                Integer ni = novavar(true,1);
+                Integer ni = novavar(true,4);
                 switch((String)v.valor){
                     case "FALS":
                         taula_intermedi.genera(Operacio.copia_valor,true,null,ni); //revisar si passar a decimal o enter
@@ -4704,7 +4712,7 @@ class CUP$Parser$actions {
                                 }else{
                                     n1 = r.getR();
                                 }
-                                Integer n2 = novavar(true,1);
+                                Integer n2 = novavar(true,4);
                                 taula_intermedi.genera(Operacio.not,n1,null,n2);
                                 RESULT = new SimbolF(r.getTsb(),r.getTipus(),"modevar",r.getEsquerre(),r.getDreta(),n2);  
                         }else if(r.getMvp() == "const"){
@@ -4715,7 +4723,7 @@ class CUP$Parser$actions {
                                 }else{
                                     n1 = r.getR();
                                 }
-                                Integer n2 = novavar(true,1);
+                                Integer n2 = novavar(true,4);
                                 taula_intermedi.genera(Operacio.not,n1,null,n2);
 
                                 RESULT = new SimbolF(r.getTsb(),r.getTipus(),"modeconst",r.getEsquerre(),r.getDreta(),n2);  

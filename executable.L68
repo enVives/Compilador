@@ -1,6 +1,6 @@
 0000102A Starting Address
 Assembler used: EASy68K Editor/Assembler v5.16.01
-Created On: 06/02/2024 16:23:33
+Created On: 06/02/2024 23:15:18
 
 00000000                             1  *-----------------------------------------------------------
 00000000                             2  * Title      : Compilador
@@ -15,20 +15,45 @@ Created On: 06/02/2024 16:23:33
 00001016= 0D 0A 53 6F 72 74 ...     11  SORTIDA DC.B CR,LF,'Sortida Teclat: ',0
 00001029                            12  START:
 0000102A  514F                      13      SUBQ #8,A7
-0000102C                            14  M:
-0000102C  2F7C 00000005 0000        15      MOVE.L #5,0(A7)
-00001034  202F 0000                 16      MOVE.L 0(A7),D0
-00001038  2F40 0004                 17      MOVE.L D0,4(A7)
-0000103C  4280                      18      CLR.L D0
-0000103E  504F                      19      ADDQ #8, A7
-00001040  FFFF FFFF                 20      SIMHALT
-00001044                            21  E0:
-Line 22 ERROR: Symbol defined more than once
-00001044                            22  M:
-Line 23 WARNING: Origin value is odd (Location counter set to next highest address)
-00001044                            23       END START
+0000102C  554F                      14      SUBQ #2, A7
+0000102E                            15  M:
+0000102E  2F7C 00000020 0000        16      MOVE.L #32,0(A7)
+00001036  3F7C 0061 0004            17      MOVE.W #97,4(A7)
+0000103C  594F                      18      SUBQ #4,A7
+0000103E  2F2F 0004                 19      MOVE.L 4(A7),-(A7)
+00001042  3F2F 000C                 20      MOVE.W 12(A7),-(A7)
+00001046  4EB9 00001086             21       JSR E0
+0000104C  5C8F                      22      ADD.L #6, A7
+0000104E  201F                      23      MOVE.L (A7)+, D0
+00001050  3F40 0006                 24      MOVE.W D0,6(A7)
+00001054  4280                      25       CLR.L D0
+00001056  302F 0006                 26      MOVE.W 6(A7),D0
+0000105A  3F40 0008                 27      MOVE.W D0,8(A7)
+0000105E  4280                      28      CLR.L D0
+00001060  303C 000E                 29      MOVE #14,D0
+00001064  43F8 1016                 30      LEA SORTIDA,A1
+00001068  4E4F                      31      TRAP #15
+0000106A  322F 0008                 32      MOVE.W 8(A7),D1
+0000106E  303C 0006                 33      MOVE #6,D0
+00001072  4E4F                      34      TRAP #15
+00001074  4281                      35      CLR.L D1
+00001076  4280                      36      CLR.L D0
+00001078  227C 00000000             37      MOVE.L #0, A1
+0000107E  504F                      38      ADDQ #8, A7
+00001080  544F                      39      ADDQ #2, A7
+00001082  FFFF FFFF                 40      SIMHALT
+00001086                            41  E0:
+00001086  594F                      42      SUB #4,A7
+00001088  302F 0008                 43      MOVE.W 8(A7),D0
+0000108C  90AF 000A                 44      SUB.L 10(A7),D0
+00001090  2F40 0000                 45      MOVE.L D0,0(A7)
+00001094  2F6F 0000 000E            46      MOVE.L 0(A7),14(A7)
+0000109A  584F                      47      ADDQ #4, A7
+0000109C  4E75                      48      RTS
+Line 49 WARNING: Origin value is odd (Location counter set to next highest address)
+0000109E                            49       END START
 
-1 error detected
+No errors detected
 1 warning generated
 
 
@@ -36,9 +61,9 @@ SYMBOL TABLE INFORMATION
 Symbol-name         Value
 -------------------------
 CR                  D
-E0                  1044
+E0                  1086
 ENTRADA             1000
 LF                  A
-M                   102C
+M                   102E
 SORTIDA             1016
 START               1029
