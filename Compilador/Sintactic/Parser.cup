@@ -2130,6 +2130,10 @@ MODIF_TIPUS ::= R:r I_1:i {://System.out.println("MODIF_TIPUS -> R I_1");
                                 report_error_semantic("El tipus de la referència i la expresió no coincideixen amb l'operacio: =", r.getEsquerre(),i.getDreta());
                                 errorSemantic = true;
                                 RESULT = new SimbolModifTipus();
+                            }else if((r.getTsb().equals("ts_boolea"))){
+                                report_error_semantic("El tipus de la referència i la expresió no coincideixen amb l'operacio: =", r.getEsquerre(),i.getDreta());
+                                errorSemantic = true;
+                                RESULT = new SimbolModifTipus();
                             }
                         }
 
@@ -2363,14 +2367,26 @@ I_1 ::= SUMAHI:s E:e {://System.out.println("I_1 -> SUMAHI E");
         if(errorSemantic){
         RESULT = new SimbolI();
         }else{
-        RESULT = new SimbolI("si",e.getTipus(),e.getTsb(),s.esquerre,e.getDreta(),e.getR());   
+            if((e.getTsb()!="ts_caracter")&&(e.getTsb()!="ts_enter")){
+                report_error_semantic("Tipus subjacent incorrecte per l'operació RESTAHI", e.getEsquerre(),e.getDreta());
+                errorSemantic = true;
+                RESULT = new SimbolI();
+            }else{
+              RESULT = new SimbolI("si",e.getTipus(),e.getTsb(),s.esquerre,e.getDreta(),e.getR());  
+            } 
         }
     :}
     | RESTAHI:r E:e {://System.out.println("I_1 -> RESTAHI E");
         if(errorSemantic){
             RESULT = new SimbolI();
         }else{
-            RESULT = new SimbolI("ri",e.getTipus(),e.getTsb(),r.esquerre,e.getDreta(),e.getR());   
+            if((e.getTsb()!="ts_caracter")&&(e.getTsb()!="ts_enter")){
+                report_error_semantic("Tipus subjacent incorrecte per l'operació RESTAHI", e.getEsquerre(),e.getDreta());
+                errorSemantic = true;
+                RESULT = new SimbolI();
+            }else{
+               RESULT = new SimbolI("ri",e.getTipus(),e.getTsb(),r.esquerre,e.getDreta(),e.getR());  
+            }  
         }
     :}
     | ASSIGN:a E:e  {:System.out.println("I_1 -> ASSIGN E");

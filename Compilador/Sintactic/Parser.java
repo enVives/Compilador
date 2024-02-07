@@ -3072,6 +3072,10 @@ class CUP$Parser$actions {
                                 report_error_semantic("El tipus de la referència i la expresió no coincideixen amb l'operacio: =", r.getEsquerre(),i.getDreta());
                                 errorSemantic = true;
                                 RESULT = new SimbolModifTipus();
+                            }else if((r.getTsb().equals("ts_boolea"))){
+                                report_error_semantic("El tipus de la referència i la expresió no coincideixen amb l'operacio: =", r.getEsquerre(),i.getDreta());
+                                errorSemantic = true;
+                                RESULT = new SimbolModifTipus();
                             }
                         }
 
@@ -3369,7 +3373,13 @@ class CUP$Parser$actions {
         if(errorSemantic){
         RESULT = new SimbolI();
         }else{
-        RESULT = new SimbolI("si",e.getTipus(),e.getTsb(),s.esquerre,e.getDreta(),e.getR());   
+            if((e.getTsb()!="ts_caracter")&&(e.getTsb()!="ts_enter")){
+                report_error_semantic("Tipus subjacent incorrecte per l'operació RESTAHI", e.getEsquerre(),e.getDreta());
+                errorSemantic = true;
+                RESULT = new SimbolI();
+            }else{
+              RESULT = new SimbolI("si",e.getTipus(),e.getTsb(),s.esquerre,e.getDreta(),e.getR());  
+            } 
         }
     
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("I_1",35, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
@@ -3390,7 +3400,13 @@ class CUP$Parser$actions {
         if(errorSemantic){
             RESULT = new SimbolI();
         }else{
-            RESULT = new SimbolI("ri",e.getTipus(),e.getTsb(),r.esquerre,e.getDreta(),e.getR());   
+            if((e.getTsb()!="ts_caracter")&&(e.getTsb()!="ts_enter")){
+                report_error_semantic("Tipus subjacent incorrecte per l'operació RESTAHI", e.getEsquerre(),e.getDreta());
+                errorSemantic = true;
+                RESULT = new SimbolI();
+            }else{
+               RESULT = new SimbolI("ri",e.getTipus(),e.getTsb(),r.esquerre,e.getDreta(),e.getR());  
+            }  
         }
     
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("I_1",35, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
